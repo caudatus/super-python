@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>파일 입출력 — 브론즈 | 슈퍼파이썬</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#111111; --bg-nav:#0A0A0A; --bg-side:#0E0E0E; --bg-card:#181818;
+      --bg-code:#1A1A1A; --bg-tip:#131A13; --bg-warn:#1A1410; --bg-info:#101520;
+      --accent:#00CC70; --accent-dim:#007A42; --accent-bg:rgba(0,204,112,0.07);
+      --accent2:#C8A000;
+      --text:#D8D8D8; --text-head:#EFEFEF; --text2:#888888; --text3:#444444;
+      --border:#222222; --border2:#2E2E2E;
+      --sy-kw:#C792EA; --sy-fn:#82AAFF; --sy-str:#C3E88D;
+      --sy-cm:#546E7A; --sy-num:#F78C6C; --sy-pn:#89DDFF; --sy-ln-t:#555555;
+      --sidebar-w:248px; --content-max:720px; --header-h:48px;
+      font-variant-ligatures: none;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Noto Sans KR', sans-serif; font-size: 15px; line-height: 1.8; overflow-x: hidden; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent-dim); }
+
+    /* ── HEADER ── */
+    .top-header { position: fixed; top:0; left:0; right:0; z-index:200; height:var(--header-h); background:var(--bg-nav); border-bottom:1px solid var(--border); display:flex; align-items:center; padding:0 16px; }
+    .header-open-btn { display:none; align-items:center; justify-content:center; width:28px; height:28px; flex-shrink:0; margin-right:12px; background:var(--bg-card); border:1px solid var(--border2); border-radius:4px; cursor:pointer; color:var(--text2); font-size:12px; transition:background .15s,color .15s,border-color .15s; }
+    .header-open-btn:hover { background:var(--accent-bg); color:var(--accent); border-color:var(--accent); }
+    body.sidebar-closed .header-open-btn { display:flex; }
+    .header-left { display:flex; align-items:center; gap:10px; flex:1; min-width:0; font-family:'JetBrains Mono',monospace; font-size:12px; overflow:hidden; }
+    .header-logo  { color:var(--accent); text-decoration:none; font-weight:700; white-space:nowrap; }
+    .header-sep   { color:var(--text3); flex-shrink:0; }
+    .header-grade { color:var(--text2); white-space:nowrap; }
+    .header-chap  { color:var(--text-head); font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .header-center { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text3); display:flex; align-items:center; gap:8px; flex-shrink:0; padding:0 16px; }
+    .progress-mini { width:80px; height:3px; background:var(--border2); border-radius:2px; overflow:hidden; }
+    .progress-mini-fill { height:100%; background:var(--accent); border-radius:2px; }
+    .header-right { display:flex; align-items:center; gap:6px; flex-shrink:0; }
+    .nav-btn { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text2); background:transparent; border:1px solid var(--border2); padding:4px 12px; text-decoration:none; transition:border-color .15s,color .15s; white-space:nowrap; }
+    .nav-btn:hover { border-color:var(--accent); color:var(--accent); }
+    .nav-btn.primary { color:var(--bg-nav); background:var(--accent); border-color:var(--accent); font-weight:700; }
+    .nav-btn.primary:hover { filter:brightness(1.1); }
+
+    /* ── LAYOUT ── */
+    .layout { display:flex; padding-top:var(--header-h); min-height:100vh; }
+
+    /* ── SIDEBAR ── */
+    .sidebar { width:var(--sidebar-w); flex-shrink:0; position:fixed; top:var(--header-h); bottom:0; left:0; background:var(--bg-side); border-right:1px solid var(--border); overflow-y:auto; overflow-x:hidden; transition:transform .22s ease; z-index:150; padding-top:8px; }
+    body.sidebar-closed .sidebar { transform:translateX(calc(-1 * var(--sidebar-w))); }
+    body.sidebar-closed .content { margin-left:0; }
+    .sidebar-overlay { display:none; position:fixed; inset:0; top:var(--header-h); z-index:140; background:rgba(0,0,0,.65); }
+    .sidebar-toggle { position:absolute; top:10px; right:10px; width:28px; height:28px; display:flex; align-items:center; justify-content:center; background:var(--bg-card); border:1px solid var(--border2); border-radius:4px; cursor:pointer; color:var(--text2); font-size:12px; z-index:10; transition:background .15s,color .15s; }
+    .sidebar-toggle:hover { background:var(--accent-bg); color:var(--accent); border-color:var(--accent); }
+    body.sidebar-closed .sidebar-toggle { display:none; }
+    .sidebar-progress { margin:44px 12px 12px; padding:12px 14px; background:var(--bg-card); border:1px solid var(--border); }
+    .sp-label { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text3); margin-bottom:6px; letter-spacing:.08em; }
+    .sp-bar   { height:4px; background:var(--border2); border-radius:2px; overflow:hidden; margin-bottom:5px; }
+    .sp-fill  { height:100%; background:var(--accent); border-radius:2px; }
+    .sp-text  { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text2); }
+    .sp-text span { color:var(--accent); }
+    .sb-group { border-bottom:1px solid var(--border); }
+    .sb-group-header { display:flex; align-items:center; justify-content:space-between; padding:9px 14px 9px 12px; cursor:pointer; user-select:none; transition:background .12s; gap:8px; }
+    .sb-group-header:hover { background:rgba(255,255,255,.03); }
+    .sb-group-title { font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:700; letter-spacing:.06em; color:var(--text2); text-transform:uppercase; flex:1; }
+    .sb-group.current .sb-group-title { color:var(--accent); }
+    .sb-group-arrow { font-size:9px; color:var(--text3); transition:transform .2s; flex-shrink:0; }
+    .sb-group.open .sb-group-arrow { transform:rotate(90deg); color:var(--accent); }
+    .sb-items { overflow:hidden; max-height:0; transition:max-height .28s ease; }
+    .sb-group.open .sb-items { max-height:1200px; }
+    .sb-item { display:flex; align-items:baseline; gap:8px; padding:6px 14px 6px 20px; font-size:13px; color:var(--text2); text-decoration:none; border-left:2px solid transparent; transition:background .1s,color .1s,border-color .1s; line-height:1.45; }
+    .sb-item:hover  { background:rgba(255,255,255,.03); color:var(--text); }
+    .sb-item.active { color:var(--accent); border-left-color:var(--accent); background:var(--accent-bg); font-weight:500; }
+    .sb-item.done   { color:var(--text3); }
+    .sb-icon { font-size:9px; flex-shrink:0; font-family:'JetBrains Mono',monospace; width:10px; text-align:center; color:var(--text3); }
+    .sb-item.active .sb-icon { color:var(--accent); }
+    .sb-item.done   .sb-icon { color:var(--accent-dim); }
+    .sb-num { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text3); flex-shrink:0; min-width:22px; }
+
+    /* ── CONTENT ── */
+    .content { margin-left:var(--sidebar-w); flex:1; min-width:0; padding:48px 52px 96px; transition:margin-left .22s ease; }
+    .content-inner { max-width:var(--content-max); margin:0 auto; }
+
+    /* ── 챕터 헤더 ── */
+    .chap-meta { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text3); margin-bottom:8px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .badge { font-size:10px; padding:2px 8px; background:var(--accent-bg); color:var(--accent); border:1px solid rgba(0,204,112,.25); letter-spacing:.06em; }
+    .chap-title { font-family:'JetBrains Mono',monospace; font-size:clamp(22px,3.5vw,30px); font-weight:700; color:var(--text-head); line-height:1.25; margin-bottom:8px; }
+    .chap-title .hl { color:var(--accent); }
+    .chap-subtitle { font-size:15px; color:var(--text2); margin-bottom:32px; line-height:1.65; }
+
+    /* ── 학습 목표 ── */
+    .goal-box { border:1px solid var(--border2); border-left:3px solid var(--accent); background:var(--bg-card); padding:16px 20px; margin-bottom:44px; }
+    .goal-label { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--accent); letter-spacing:.1em; margin-bottom:12px; }
+    .goal-list { list-style:none; display:flex; flex-direction:column; gap:7px; }
+    .goal-list li { font-size:14px; color:var(--text2); display:flex; align-items:baseline; gap:10px; line-height:1.65; }
+    .goal-list li::before { content:'▸'; color:var(--accent); font-size:10px; flex-shrink:0; font-family:'JetBrains Mono',monospace; }
+
+    /* ── 공통 콘텐츠 ── */
+    .section-divider { height:1px; background:var(--border); margin:44px 0; }
+    h2 { font-family:'JetBrains Mono',monospace; font-size:17px; font-weight:700; color:var(--text-head); margin:44px 0 16px; padding-bottom:10px; border-bottom:1px solid var(--border); }
+    h2:first-child { margin-top:0; }
+    h2 .n { color:var(--text3); font-weight:400; margin-right:6px; }
+    h3 { font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; color:var(--accent); margin:28px 0 10px; }
+    p    { color:var(--text); margin-bottom:16px; line-height:1.9; font-size:15px; }
+    p:last-child { margin-bottom:0; }
+    code { font-family:'JetBrains Mono',monospace; font-size:13px; background:var(--bg-code); color:var(--accent); padding:1px 6px; border:1px solid var(--border2); border-radius:2px; }
+    strong { color:var(--text-head); font-weight:700; }
+    em     { color:var(--accent); font-style:normal; font-weight:500; }
+
+    /* ── 코드 블록 ── */
+    .code-block { background:var(--bg-code); border:1px solid var(--border2); margin:16px 0; overflow:hidden; }
+    .code-block-header { display:flex; align-items:center; justify-content:space-between; padding:7px 14px; background:#141414; border-bottom:1px solid var(--border); }
+    .cb-lang { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text3); }
+    .cb-copy { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text3); background:transparent; border:none; cursor:pointer; transition:color .15s; padding:0; }
+    .cb-copy:hover { color:var(--accent); }
+    .code-block-body { display:flex; overflow-x:auto; padding:12px 0; }
+    .ln-col { min-width:40px; padding:0 10px; text-align:right; border-right:1px solid var(--border); user-select:none; flex-shrink:0; }
+    .ln-col span { display:block; font-family:'JetBrains Mono',monospace; font-size:13px; line-height:1.7; color:var(--sy-ln-t); }
+    .code-pre-col { padding:0 18px; flex:1; }
+    .code-pre-col pre { font-family:'JetBrains Mono',monospace; font-size:13px; line-height:1.7; color:var(--text); white-space:pre; margin:0; }
+    .kw  { color:var(--sy-kw); } .fn  { color:var(--sy-fn); } .str { color:var(--sy-str); }
+    .cm  { color:var(--sy-cm); } .num { color:var(--sy-num); } .pn  { color:var(--sy-pn); }
+
+    /* ── 출력 / 오류 ── */
+    .output-block { background:#0D0D0D; border:1px solid var(--border); border-top:none; padding:10px 18px; }
+    .out-label { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text3); letter-spacing:.08em; margin-bottom:6px; }
+    .output-block pre { font-family:'JetBrains Mono',monospace; font-size:13px; color:#AAAAAA; line-height:1.7; margin:0; white-space:pre; }
+    .out-g { color:var(--accent); }
+    .error-block { background:#160A0A; border:1px solid #3A1A1A; border-left:3px solid #FF4444; margin:16px 0; padding:12px 18px; }
+    .error-label { font-family:'JetBrains Mono',monospace; font-size:10px; color:#FF4444; letter-spacing:.08em; margin-bottom:6px; }
+    .error-block pre { font-family:'JetBrains Mono',monospace; font-size:12px; color:#FF8080; line-height:1.7; margin:0; white-space:pre-wrap; }
+
+    /* ── 콜아웃 박스 ── */
+    .tip-box, .warn-box, .info-box { padding:14px 18px; margin:20px 0; border-left:3px solid; }
+    .tip-box  { background:var(--bg-tip);  border-color:var(--accent);  }
+    .warn-box { background:var(--bg-warn); border-color:var(--accent2); }
+    .info-box { background:var(--bg-info); border-color:#4FC3F7; }
+    .box-label { font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.1em; margin-bottom:8px; font-weight:700; }
+    .tip-box  .box-label { color:var(--accent);  }
+    .warn-box .box-label { color:var(--accent2); }
+    .info-box .box-label { color:#4FC3F7; }
+    .tip-box p, .warn-box p, .info-box p { font-size:14px; color:var(--text2); margin-bottom:0; line-height:1.8; }
+
+    /* ── 따라하기 ── */
+    .try-section { border:1px solid var(--border2); background:var(--bg-card); margin:36px 0; }
+    .try-header  { padding:11px 18px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:8px; }
+    .try-title   { font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:700; color:var(--accent); }
+    .try-body    { padding:18px 20px; }
+    .try-body > p { font-size:14px; margin-bottom:16px; color:var(--text2); }
+    .try-step    { display:flex; gap:12px; margin-bottom:10px; align-items:baseline; }
+    .try-step-n  { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--accent); flex-shrink:0; min-width:26px; }
+    .try-step-t  { font-size:14px; color:var(--text2); line-height:1.75; }
+
+    /* ── 파라미터 테이블 ── */
+    .param-table { width:100%; border-collapse:collapse; margin:16px 0; font-size:14px; }
+    .param-table th { font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; letter-spacing:.06em; color:var(--text3); text-align:left; padding:8px 14px; border-bottom:1px solid var(--border); background:var(--bg-card); }
+    .param-table td { padding:10px 14px; border-bottom:1px solid var(--border); color:var(--text2); line-height:1.6; vertical-align:top; }
+    .param-table td:first-child { font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--accent); white-space:nowrap; }
+    .param-table tr:last-child td { border-bottom:none; }
+    .param-table tr:hover td { background:rgba(255,255,255,.015); }
+
+    /* ── with 구조 시각화 ── */
+    .with-visual { background:var(--bg-card); border:1px solid var(--border2); padding:22px 28px; margin:20px 0; }
+    .wv-line { font-family:'JetBrains Mono',monospace; font-size:14px; line-height:2; }
+    .wv-ann  { display:inline-block; font-size:11px; color:var(--text3); margin-left:12px; font-family:'Noto Sans KR',sans-serif; vertical-align:middle; }
+    .wv-indent { margin-left:28px; }
+    .wv-bracket { color:var(--text3); }
+
+    /* ── 핵심 요약 ── */
+    .summary-box { border:1px solid var(--border2); border-top:2px solid var(--accent); background:var(--bg-card); padding:20px 22px; margin:44px 0 32px; }
+    .summary-label { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--accent); letter-spacing:.1em; margin-bottom:16px; }
+    .summary-grid  { display:grid; grid-template-columns:170px 1fr; gap:10px 18px; }
+    .sg-key { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text3); padding-top:2px; }
+    .sg-val { font-size:14px; color:var(--text2); line-height:1.65; }
+
+    /* ── 격려 ── */
+    .cheer-box { border:1px solid var(--border); background:var(--bg); padding:18px 22px; margin-bottom:44px; display:flex; gap:14px; align-items:flex-start; }
+    .cheer-icon { font-size:18px; flex-shrink:0; line-height:1.5; }
+    .cheer-text { font-size:14px; color:var(--text2); line-height:1.85; }
+    .cheer-text strong { color:var(--text-head); }
+
+    /* ── 챕터 네비게이션 ── */
+    .chap-nav { display:flex; justify-content:space-between; padding-top:32px; border-top:1px solid var(--border); gap:12px; flex-wrap:wrap; }
+    .chap-nav-btn { display:flex; flex-direction:column; gap:4px; text-decoration:none; padding:14px 18px; border:1px solid var(--border2); background:var(--bg-card); flex:1; max-width:300px; transition:border-color .15s; }
+    .chap-nav-btn:hover { border-color:var(--accent); }
+    .chap-nav-btn.next { text-align:right; }
+    .cnb-dir   { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text3); letter-spacing:.07em; }
+    .cnb-title { font-size:13px; color:var(--text2); line-height:1.45; }
+    .cnb-title span { color:var(--accent); font-family:'JetBrains Mono',monospace; }
+
+    /* ── 반응형 ── */
+    @media (max-width:720px) {
+      .sidebar-overlay.visible { display:block; }
+      .content { margin-left:0; padding:28px 20px 72px; }
+      .header-center { display:none; }
+      .summary-grid { grid-template-columns:1fr; gap:6px; }
+    }
+    @media (max-width:480px) {
+      .header-grade { display:none; }
+      .chap-nav-btn { max-width:100%; }
+      .header-right .nav-btn:not(.primary) { display:none; }
+    }
+    @media (prefers-reduced-motion:reduce) { *, *::before, *::after { transition:none !important; } }
+  </style>
+</head>
+<body>
+
+<!-- TOP HEADER -->
+<header class="top-header">
+  <button class="header-open-btn" onclick="toggleSidebar()" title="사이드바 열기">▶</button>
+  <div class="header-left">
+    <a href="../index.html" class="header-logo">🐍 SuperPython</a>
+    <span class="header-sep">/</span>
+    <span class="header-grade">🟤 브론즈</span>
+    <span class="header-sep">/</span>
+    <span class="header-chap">42. 파일 입출력</span>
+  </div>
+  <div class="header-center">
+    <span>42 / 48</span>
+    <div class="progress-mini"><div class="progress-mini-fill" style="width:87.5%"></div></div>
+    <span>87.5%</span>
+  </div>
+  <div class="header-right">
+    <a href="41-mini-project-07.html" class="nav-btn">← 이전</a>
+    <a href="43-quiz-file-io.html"    class="nav-btn primary">다음 →</a>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <button class="sidebar-toggle" onclick="toggleSidebar()" title="사이드바 닫기">◀</button>
+    <div class="sidebar-progress">
+      <div class="sp-label">BRONZE 진행률</div>
+      <div class="sp-bar"><div class="sp-fill" style="width:87.5%"></div></div>
+      <div class="sp-text"><span>41</span> / 48 챕터 완료</div>
+    </div>
+
+    <div class="sb-group" id="grp-env">
+      <div class="sb-group-header" onclick="toggleGroup('grp-env')"><span class="sb-group-title">환경 설정</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="01-what-is-python.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">01</span>파이썬이란?</a>
+        <a href="02-setup.html"          class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">02</span>개발환경 설치</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-basic1">
+      <div class="sb-group-header" onclick="toggleGroup('grp-basic1')"><span class="sb-group-title">기초 문법 1</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="03-print.html"                    class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">03</span>print()란?</a>
+        <a href="04-quiz-print.html"               class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">04</span>연습문제</a>
+        <a href="05-variables.html"                class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">05</span>변수와 데이터 타입</a>
+        <a href="06-operators.html"                class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">06</span>연산자</a>
+        <a href="07-quiz-variables-operators.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">07</span>연습문제</a>
+        <a href="08-string.html"                   class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">08</span>문자열 String</a>
+        <a href="09-quiz-string.html"              class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">09</span>연습문제</a>
+        <a href="10-fstring.html"                  class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">10</span>f-string 완전정리</a>
+        <a href="11-quiz-fstring.html"             class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">11</span>연습문제</a>
+        <a href="12-mini-project-01.html"          class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">12</span>🎮 미니 프로젝트 ①</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-basic2">
+      <div class="sb-group-header" onclick="toggleGroup('grp-basic2')"><span class="sb-group-title">기초 문법 2</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="13-list.html"            class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">13</span>리스트</a>
+        <a href="14-quiz-list.html"       class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">14</span>연습문제</a>
+        <a href="15-input.html"           class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">15</span>input() 함수</a>
+        <a href="16-quiz-input.html"      class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">16</span>연습문제</a>
+        <a href="17-mini-project-02.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">17</span>🎮 미니 프로젝트 ②</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-flow">
+      <div class="sb-group-header" onclick="toggleGroup('grp-flow')"><span class="sb-group-title">흐름 제어</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="18-if.html"              class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">18</span>조건문 (if)</a>
+        <a href="19-quiz-if.html"         class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">19</span>연습문제</a>
+        <a href="20-mini-project-03.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">20</span>🎮 미니 프로젝트 ③</a>
+        <a href="21-for-range.html"       class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">21</span>for문과 range()</a>
+        <a href="22-quiz-for.html"        class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">22</span>연습문제</a>
+        <a href="23-while.html"           class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">23</span>while문</a>
+        <a href="24-quiz-while.html"      class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">24</span>연습문제</a>
+        <a href="25-mini-project-04.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">25</span>🎮 미니 프로젝트 ④</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-error">
+      <div class="sb-group-header" onclick="toggleGroup('grp-error')"><span class="sb-group-title">에러 &amp; 디버깅</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="26-error-types.html"    class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">26</span>에러 읽는 법</a>
+        <a href="27-debugging.html"      class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">27</span>기초 디버깅 실습</a>
+        <a href="28-quiz-debugging.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">28</span>연습문제</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-func">
+      <div class="sb-group-header" onclick="toggleGroup('grp-func')"><span class="sb-group-title">함수</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="29-function-basic.html"         class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">29</span>함수 기초</a>
+        <a href="30-quiz-function-basic.html"    class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">30</span>연습문제</a>
+        <a href="31-mini-project-05.html"        class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">31</span>🎮 미니 프로젝트 ⑤</a>
+        <a href="32-function-advanced.html"      class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">32</span>함수 심화</a>
+        <a href="33-quiz-function-advanced.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">33</span>연습문제</a>
+        <a href="34-module.html"                 class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">34</span>모듈</a>
+        <a href="35-quiz-module.html"            class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">35</span>연습문제</a>
+        <a href="36-mini-project-06.html"        class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">36</span>🎮 미니 프로젝트 ⑥</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-ds">
+      <div class="sb-group-header" onclick="toggleGroup('grp-ds')"><span class="sb-group-title">자료구조</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="37-dictionary.html"      class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">37</span>딕셔너리</a>
+        <a href="38-quiz-dictionary.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">38</span>연습문제</a>
+        <a href="39-tuple-set.html"       class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">39</span>튜플과 셋</a>
+        <a href="40-quiz-tuple-set.html"  class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">40</span>연습문제</a>
+        <a href="41-mini-project-07.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">41</span>🎮 미니 프로젝트 ⑦</a>
+      </div>
+    </div>
+    <div class="sb-group open current" id="grp-file">
+      <div class="sb-group-header" onclick="toggleGroup('grp-file')"><span class="sb-group-title">파일 &amp; 예외처리</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="42-file-io.html"         class="sb-item active"><span class="sb-icon">→</span><span class="sb-num">42</span>파일 입출력</a>
+        <a href="43-quiz-file-io.html"    class="sb-item"><span class="sb-icon"> </span><span class="sb-num">43</span>연습문제</a>
+        <a href="44-exception-basic.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">44</span>예외처리 기초</a>
+        <a href="45-quiz-exception.html"  class="sb-item"><span class="sb-icon"> </span><span class="sb-num">45</span>연습문제</a>
+        <a href="46-mini-project-08.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">46</span>🎮 미니 프로젝트 ⑧</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-end">
+      <div class="sb-group-header" onclick="toggleGroup('grp-end')"><span class="sb-group-title">마무리</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="47-final-project.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">47</span>★ 최종 프로젝트</a>
+        <a href="48-next-step.html"     class="sb-item"><span class="sb-icon"> </span><span class="sb-num">48</span>다음 단계 미리보기</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="content" id="mainContent">
+    <div class="content-inner">
+
+      <div class="chap-meta">
+        <span class="badge">LESSON</span>
+        <span>파일 &amp; 예외처리</span>
+        <span style="color:var(--text3)">·</span>
+        <span>챕터 42 / 48</span>
+      </div>
+      <h1 class="chap-title"><span class="hl">파일 입출력</span> — 데이터를 영구적으로 저장하기</h1>
+      <p class="chap-subtitle">지금까지 만든 모든 데이터는 프로그램이 끝나면 사라졌습니다. 파일을 사용하면 데이터를 디스크에 저장해 다음에도 다시 불러올 수 있습니다.</p>
+
+      <div class="goal-box">
+        <div class="goal-label">▸ 학습 목표</div>
+        <ul class="goal-list">
+          <li><code>open()</code>으로 파일을 열고 닫는 원리를 이해한다</li>
+          <li><code>with</code> 문으로 파일을 안전하게 다루는 방법을 익힌다</li>
+          <li>텍스트 파일을 읽고(r), 쓰고(w), 추가하는(a) 세 가지 모드를 구별한다</li>
+          <li>여러 줄 파일을 줄 단위로 처리하는 패턴을 손에 익힌다</li>
+        </ul>
+      </div>
+
+      <!-- ═══════════════════════════════════
+           1. 왜 파일이 필요한가
+      ═══════════════════════════════════ -->
+      <h2><span class="n">1.</span>왜 파일이 필요한가?</h2>
+
+      <p>파이썬 프로그램이 실행되는 동안 모든 데이터는 <strong>메모리(RAM)</strong>에 올라갑니다. 프로그램이 종료되는 순간 메모리의 내용은 전부 지워집니다. 사용자가 입력한 이름도, 계산한 점수도, 저장한 메모도 — 모두 사라집니다.</p>
+      <p>반면 <strong>파일(File)</strong>은 디스크(SSD/HDD)에 저장됩니다. 프로그램이 꺼져도 내용이 그대로 남아있죠. 일기장에 글을 써두면 다음날 꺼내 읽을 수 있는 것처럼, 파일에 데이터를 쓰면 나중에 다시 읽을 수 있습니다.</p>
+
+      <div class="info-box">
+        <div class="box-label">ℹ 메모리 vs 파일</div>
+        <p><strong>메모리:</strong> 빠르지만 임시 저장. 전원이 꺼지면 사라짐.<br>
+        <strong>파일:</strong> 느리지만 영구 저장. 프로그램이 꺼져도 남아있음.</p>
+      </div>
+
+      <p>이번 챕터에서는 <strong>텍스트 파일(.txt)</strong>을 다루는 방법을 배웁니다. CSV, JSON 같은 포맷도 원리는 동일하므로 텍스트 파일을 완전히 이해하면 나머지는 응용에 불과합니다.</p>
+
+      <!-- ═══════════════════════════════════
+           2. 파일 열기 — open()
+      ═══════════════════════════════════ -->
+      <h2><span class="n">2.</span>파일 열기 — <code>open()</code></h2>
+
+      <p>파일을 다루는 첫 단계는 <strong>파일을 여는 것</strong>입니다. 현실에서 책을 읽으려면 먼저 책을 펴야 하는 것처럼, 파이썬도 파일을 읽거나 쓰기 전에 반드시 <code>open()</code>으로 파일을 열어야 합니다.</p>
+
+      <div class="code-block">
+        <div class="code-block-header"><span class="cb-lang">python</span><button class="cb-copy" onclick="copyCode(this)">복사</button></div>
+        <div class="code-block-body">
+          <div class="ln-col"><span>1</span></div>
+          <div class="code-pre-col"><pre>파일객체 = <span class="fn">open</span>(<span class="str">"파일이름.txt"</span>, <span class="str">"모드"</span>, encoding=<span class="str">"utf-8"</span>)</pre></div>
+        </div>
+      </div>
+
+      <p><code>open()</code>은 세 가지 정보를 받습니다.</p>
+
+      <table class="param-table">
+        <thead><tr><th>매개변수</th><th>역할</th><th>예시</th></tr></thead>
+        <tbody>
+          <tr><td>"파일이름.txt"</td><td>열 파일의 이름(경로)</td><td>"diary.txt", "data/scores.txt"</td></tr>
+          <tr><td>"모드"</td><td>파일을 어떻게 열지 결정</td><td>"r", "w", "a" 등</td></tr>
+          <tr><td>encoding</td><td>텍스트 인코딩 방식</td><td>한글 파일이면 반드시 "utf-8"</td></tr>
+        </tbody>
+      </table>
+
+      <h3>파일 모드 3가지</h3>
+      <p>모드는 파일을 어떤 목적으로 여는지를 나타냅니다. 가장 중요한 세 가지를 익혀두세요.</p>
+
+      <table class="param-table">
+        <thead><tr><th>모드</th><th>이름</th><th>설명</th></tr></thead>
+        <tbody>
+          <tr><td>"r"</td><td>읽기 (read)</td><td>파일을 읽습니다. 파일이 없으면 오류 발생. 기본값.</td></tr>
+          <tr><td>"w"</td><td>쓰기 (write)</td><td>파일에 새로 씁니다. 파일이 있으면 <strong>내용을 완전히 덮어씁니다.</strong></td></tr>
+          <tr><td>"a"</td><td>추가 (append)</td><td>파일 끝에 내용을 이어씁니다. 파일이 없으면 새로 만듭니다.</td></tr>
+        </tbody>
+      </table>
+
+      <div class="warn-box">
+        <div class="box-label">⚠ 주의 — "w" 모드</div>
+        <p><code>"w"</code> 모드로 열면 기존 파일의 내용이 <strong>전부 지워집니다.</strong> 기존 내용을 보존하면서 새 내용을 추가하려면 반드시 <code>"a"</code> 모드를 사용하세요.</p>
+      </div>
+
+      <!-- ═══════════════════════════════════
+           3. with 문 — 안전한 파일 처리
+      ═══════════════════════════════════ -->
+      <h2><span class="n">3.</span>with 문 — 파일을 안전하게 닫는 법</h2>
+
+      <p>파일을 열면 반드시 <strong>닫아야 합니다.</strong> 파일을 열어두면 메모리를 낭비하고, 다른 프로그램이 그 파일을 사용하지 못할 수 있습니다. <code>open()</code> 후 <code>close()</code>를 수동으로 호출해도 되지만, 실수로 빠뜨리면 문제가 생깁니다.</p>
+
+      <p>파이썬은 이 문제를 <code>with</code> 문으로 우아하게 해결합니다. <code>with</code> 블록이 끝나면 파일이 <strong>자동으로 닫힙니다.</strong> 오류가 발생해도 마찬가지입니다.</p>
+
+      <div class="code-block">
+        <div class="code-block-header"><span class="cb-lang">python</span><button class="cb-copy" onclick="copyCode(this)">복사</button></div>
+        <div class="code-block-body">
+          <div class="ln-col"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span></div>
+          <div class="code-pre-col"><pre><span class="cm"># ❌ 수동 방식 — close()를 깜빡할 수 있음</span>
+f = <span class="fn">open</span>(<span class="str">"note.txt"</span>, <span class="str">"r"</span>, encoding=<span class="str">"utf-8"</span>)
+content = f.<span class="fn">read</span>()
+f.<span class="fn">close</span>()  <span class="cm"># 잊으면 안 됨!</span>
+
+<span class="cm"># ✅ with 방식 — 블록 끝에서 자동으로 닫힘</span>
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"note.txt"</span>, <span class="str">"r"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    content = f.<span class="fn">read</span>()</pre></div>
+        </div>
+      </div>
+
+      <div class="with-visual">
+        <div class="wv-line"><span class="kw">with</span> <span class="fn" style="color:var(--sy-fn)">open</span><span class="pn">(</span><span class="str">"note.txt"</span>, <span class="str">"r"</span><span class="pn">)</span> <span class="kw">as</span> <span style="color:var(--sy-fn)">f</span> <span class="pn">:</span><span class="wv-ann">← 파일을 열고 f 라는 이름으로 사용</span></div>
+        <div class="wv-line wv-indent">content = f.<span class="fn">read</span><span class="pn">()</span><span class="wv-ann">← 파일 내용을 읽어 content에 저장</span></div>
+        <div class="wv-line" style="color:var(--text3); font-size:12px; margin-top:8px;">
+          ↑ 들여쓰기가 끝나는 순간 파일이 자동으로 닫힙니다.
+        </div>
+      </div>
+
+      <div class="tip-box">
+        <div class="box-label">💡 TIP — with 문은 습관처럼</div>
+        <p>파일을 다룰 때는 <strong>항상 <code>with</code> 문을 사용하세요.</strong> 실무 파이썬 코드의 99%는 <code>with open(...) as f:</code> 형태를 사용합니다. 처음부터 이 패턴에 익숙해지는 게 좋습니다.</p>
+      </div>
+
+      <!-- ═══════════════════════════════════
+           4. 파일 쓰기 (w, a)
+      ═══════════════════════════════════ -->
+      <h2><span class="n">4.</span>파일에 쓰기 — <code>"w"</code>와 <code>"a"</code></h2>
+
+      <h3>"w" 모드 — 새로 쓰기</h3>
+      <p>파일에 내용을 새로 쓸 때는 <code>"w"</code> 모드를 사용합니다. <code>write()</code> 메서드에 문자열을 전달하면 됩니다.</p>
+
+      <div class="code-block">
+        <div class="code-block-header"><span class="cb-lang">python</span><button class="cb-copy" onclick="copyCode(this)">복사</button></div>
+        <div class="code-block-body">
+          <div class="ln-col"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span></div>
+          <div class="code-pre-col"><pre><span class="cm"># greeting.txt 파일에 내용 쓰기</span>
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"greeting.txt"</span>, <span class="str">"w"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    f.<span class="fn">write</span>(<span class="str">"안녕하세요!\n"</span>)
+    f.<span class="fn">write</span>(<span class="str">"파이썬 파일 입출력을 배우고 있습니다.\n"</span>)
+
+<span class="fn">print</span>(<span class="str">"파일 작성 완료!"</span>)</pre></div>
+        </div>
+      </div>
+      <div class="output-block">
+        <div class="out-label">실행 결과 (콘솔)</div>
+        <pre><span class="out-g">파일 작성 완료!</span></pre>
+      </div>
+
+      <p>이 코드를 실행하면 같은 폴더에 <code>greeting.txt</code> 파일이 생성됩니다. 파일 안에는 아래와 같이 저장됩니다.</p>
+
+      <div class="output-block">
+        <div class="out-label">greeting.txt 파일 내용</div>
+        <pre>안녕하세요!
+파이썬 파일 입출력을 배우고 있습니다.</pre>
+      </div>
+
+      <div class="warn-box">
+        <div class="box-label">⚠ write()는 줄바꿈을 자동으로 넣지 않음</div>
+        <p><code>print()</code>와 달리 <code>write()</code>는 줄 끝에 <code>\n</code>을 자동으로 추가하지 않습니다. 줄을 바꾸려면 직접 <code>\n</code>을 써주세요.</p>
+      </div>
+
+      <h3>여러 줄 한 번에 쓰기 — <code>writelines()</code></h3>
+      <p>리스트의 각 줄을 파일에 한 번에 쓰고 싶을 때는 <code>writelines()</code>를 사용합니다. 단, 줄바꿈 문자는 역시 직접 포함시켜야 합니다.</p>
+
+      <div class="code-block">
+        <div class="code-block-header"><span class="cb-lang">python</span><button class="cb-copy" onclick="copyCode(this)">복사</button></div>
+        <div class="code-block-body">
+          <div class="ln-col"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span></div>
+          <div class="code-pre-col"><pre>lines = [
+    <span class="str">"첫 번째 줄\n"</span>,
+    <span class="str">"두 번째 줄\n"</span>,
+    <span class="str">"세 번째 줄\n"</span>,
+]
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"lines.txt"</span>, <span class="str">"w"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    f.<span class="fn">writelines</span>(lines)  <span class="cm"># 리스트의 모든 문자열을 한 번에 씀</span></pre></div>
+        </div>
+      </div>
+
+      <h3>"a" 모드 — 이어쓰기 (append)</h3>
+      <p>기존 파일의 내용을 지우지 않고 <strong>끝에 추가</strong>하려면 <code>"a"</code> 모드를 사용합니다. 일기장에 날마다 새 내용을 덧붙이는 것과 같습니다.</p>
+
+      <div class="code-block">
+        <div class="code-block-header"><span class="cb-lang">python</span><button class="cb-copy" onclick="copyCode(this)">복사</button></div>
+        <div class="code-block-body">
+          <div class="ln-col"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span></div>
+          <div class="code-pre-col"><pre><span class="cm"># 첫 실행: 파일 생성 후 내용 작성</span>
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"log.txt"</span>, <span class="str">"w"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    f.<span class="fn">write</span>(<span class="str">"[1일차] 파이썬 시작!\n"</span>)
+
+<span class="cm"># 두 번째 실행: 기존 내용 유지하며 끝에 추가</span>
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"log.txt"</span>, <span class="str">"a"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    f.<span class="fn">write</span>(<span class="str">"[2일차] 파일 입출력 배움!\n"</span>)
+
+<span class="cm"># 세 번째 실행: 또 추가</span>
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"log.txt"</span>, <span class="str">"a"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    f.<span class="fn">write</span>(<span class="str">"[3일차] 예외처리도 배울 예정!\n"</span>)</pre></div>
+        </div>
+      </div>
+      <div class="output-block">
+        <div class="out-label">log.txt 최종 내용</div>
+        <pre>[1일차] 파이썬 시작!
+[2일차] 파일 입출력 배움!
+[3일차] 예외처리도 배울 예정!</pre>
+      </div>
+
+      <!-- ═══════════════════════════════════
+           5. 파일 읽기 (r)
+      ═══════════════════════════════════ -->
+      <h2><span class="n">5.</span>파일 읽기 — <code>read()</code>, <code>readline()</code>, <code>readlines()</code></h2>
+
+      <p>파일을 읽는 방법은 세 가지가 있습니다. 파일의 크기와 사용 목적에 따라 골라 씁니다.</p>
+
+      <h3>① read() — 전체를 문자열로</h3>
+      <p>파일 전체 내용을 하나의 문자열로 읽어옵니다. 파일이 작을 때 간편합니다.</p>
+
+      <div class="code-block">
+        <div class="code-block-header"><span class="cb-lang">python</span><button class="cb-copy" onclick="copyCode(this)">복사</button></div>
+        <div class="code-block-body">
+          <div class="ln-col"><span>1</span><span>2</span><span>3</span><span>4</span></div>
+          <div class="code-pre-col"><pre><span class="kw">with</span> <span class="fn">open</span>(<span class="str">"greeting.txt"</span>, <span class="str">"r"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    content = f.<span class="fn">read</span>()  <span class="cm"># 파일 전체를 하나의 문자열로</span>
+
+<span class="fn">print</span>(content)</pre></div>
+        </div>
+      </div>
+      <div class="output-block">
+        <div class="out-label">실행 결과</div>
+        <pre><span class="out-g">안녕하세요!
+파이썬 파일 입출력을 배우고 있습니다.</span></pre>
+      </div>
+
+      <h3>② readlines() — 줄별 리스트로</h3>
+      <p>파일의 각 줄을 원소로 하는 리스트를 반환합니다. 각 줄 끝에 <code>\n</code>이 포함되어 있으니 주의하세요.</p>
+
+      <div class="code-block">
+        <div class="code-block-header"><span class="cb-lang">python</span><button class="cb-copy" onclick="copyCode(this)">복사</button></div>
+        <div class="code-block-body">
+          <div class="ln-col"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span></div>
+          <div class="code-pre-col"><pre><span class="kw">with</span> <span class="fn">open</span>(<span class="str">"greeting.txt"</span>, <span class="str">"r"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    lines = f.<span class="fn">readlines</span>()  <span class="cm"># ['안녕하세요!\n', '파이썬 ...']</span>
+
+<span class="fn">print</span>(lines)
+<span class="fn">print</span>(<span class="str">f"총 {len(lines)}줄"</span>)
+
+<span class="cm"># strip()으로 줄 끝 \n 제거</span>
+<span class="kw">for</span> line <span class="kw">in</span> lines:
+    <span class="fn">print</span>(line.<span class="fn">strip</span>())</pre></div>
+        </div>
+      </div>
+      <div class="output-block">
+        <div class="out-label">실행 결과</div>
+        <pre>['안녕하세요!\n', '파이썬 파일 입출력을 배우고 있습니다.\n']
+총 2줄
+안녕하세요!
+파이썬 파일 입출력을 배우고 있습니다.</pre>
+      </div>
+
+      <h3>③ for 루프로 직접 순회 — 가장 실전적인 방법</h3>
+      <p>파일 객체는 그 자체로 반복 가능합니다. <code>readlines()</code>를 쓰지 않고 <code>for</code> 루프로 바로 줄을 읽으면 메모리를 훨씬 절약할 수 있습니다. 파일이 클수록 이 방법이 유리합니다.</p>
+
+      <div class="code-block">
+        <div class="code-block-header"><span class="cb-lang">python</span><button class="cb-copy" onclick="copyCode(this)">복사</button></div>
+        <div class="code-block-body">
+          <div class="ln-col"><span>1</span><span>2</span><span>3</span><span>4</span></div>
+          <div class="code-pre-col"><pre><span class="kw">with</span> <span class="fn">open</span>(<span class="str">"log.txt"</span>, <span class="str">"r"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    <span class="kw">for</span> line <span class="kw">in</span> f:             <span class="cm"># 파일을 한 줄씩 직접 순회</span>
+        line = line.<span class="fn">strip</span>()  <span class="cm"># 양쪽 공백 및 \n 제거</span>
+        <span class="fn">print</span>(line)</pre></div>
+        </div>
+      </div>
+      <div class="output-block">
+        <div class="out-label">실행 결과</div>
+        <pre><span class="out-g">[1일차] 파이썬 시작!
+[2일차] 파일 입출력 배움!
+[3일차] 예외처리도 배울 예정!</span></pre>
+      </div>
+
+      <div class="tip-box">
+        <div class="box-label">💡 strip() vs rstrip()</div>
+        <p><code>strip()</code>은 양쪽 공백과 줄바꿈을 모두 제거합니다. 줄 끝 <code>\n</code>만 제거하고 싶다면 <code>rstrip()</code>을 사용하세요. 파일을 줄 단위로 읽을 때 습관처럼 <code>.strip()</code>을 붙여두면 편합니다.</p>
+      </div>
+
+      <!-- ═══════════════════════════════════
+           6. 파일이 없을 때 — 오류 처리
+      ═══════════════════════════════════ -->
+      <h2><span class="n">6.</span>파일이 없을 때 — <code>FileNotFoundError</code></h2>
+
+      <p>존재하지 않는 파일을 <code>"r"</code> 모드로 열려고 하면 <code>FileNotFoundError</code>가 발생합니다.</p>
+
+      <div class="code-block">
+        <div class="code-block-header"><span class="cb-lang">python</span><button class="cb-copy" onclick="copyCode(this)">복사</button></div>
+        <div class="code-block-body">
+          <div class="ln-col"><span>1</span><span>2</span></div>
+          <div class="code-pre-col"><pre><span class="kw">with</span> <span class="fn">open</span>(<span class="str">"없는파일.txt"</span>, <span class="str">"r"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    content = f.<span class="fn">read</span>()</pre></div>
+        </div>
+      </div>
+      <div class="error-block">
+        <div class="error-label">오류 메시지</div>
+        <pre>FileNotFoundError: [Errno 2] No such file or directory: '없는파일.txt'</pre>
+      </div>
+
+      <p>이 오류는 다음 챕터에서 배우는 <code>try / except</code>로 처리할 수 있습니다. 지금은 오류가 발생하는 상황과 오류 이름만 기억해두세요.</p>
+
+      <div class="code-block">
+        <div class="code-block-header"><span class="cb-lang">python</span><button class="cb-copy" onclick="copyCode(this)">복사</button></div>
+        <div class="code-block-body">
+          <div class="ln-col"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span></div>
+          <div class="code-pre-col"><pre><span class="cm"># try/except로 파일이 없는 경우를 처리 (맛보기)</span>
+<span class="kw">try</span>:
+    <span class="kw">with</span> <span class="fn">open</span>(<span class="str">"없는파일.txt"</span>, <span class="str">"r"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+        content = f.<span class="fn">read</span>()
+<span class="kw">except</span> <span class="fn">FileNotFoundError</span>:
+    <span class="fn">print</span>(<span class="str">"파일을 찾을 수 없습니다."</span>)</pre></div>
+        </div>
+      </div>
+      <div class="output-block">
+        <div class="out-label">실행 결과</div>
+        <pre><span class="out-g">파일을 찾을 수 없습니다.</span></pre>
+      </div>
+
+      <!-- ═══════════════════════════════════
+           7. 인코딩 이야기
+      ═══════════════════════════════════ -->
+      <h2><span class="n">7.</span>인코딩 — 한글 파일을 다룰 때 필수</h2>
+
+      <p>컴퓨터는 모든 것을 숫자로 저장합니다. 문자를 숫자로 대응시키는 약속이 <strong>인코딩(encoding)</strong>입니다. 한글을 포함하는 파일은 반드시 올바른 인코딩을 지정해야 글자가 깨지지 않습니다.</p>
+
+      <table class="param-table">
+        <thead><tr><th>인코딩</th><th>설명</th><th>언제 쓰나</th></tr></thead>
+        <tbody>
+          <tr><td>"utf-8"</td><td>세계 표준. 한글·영어·이모지 모두 표현</td><td>새 파일 만들 때 항상 사용 권장</td></tr>
+          <tr><td>"cp949"</td><td>윈도우 한글 인코딩 (EUC-KR 계열)</td><td>윈도우에서 만든 오래된 한글 파일 열 때</td></tr>
+        </tbody>
+      </table>
+
+      <div class="tip-box">
+        <div class="box-label">💡 TIP — 항상 encoding="utf-8"</div>
+        <p>새로운 파일을 만들 때는 <strong>항상 <code>encoding="utf-8"</code></strong>을 명시하세요. 지정하지 않으면 운영체제의 기본값이 사용되는데, 윈도우에서는 <code>cp949</code>가 기본값이라 한글이 깨질 수 있습니다.</p>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- ═══════════════════════════════════
+           따라하기
+      ═══════════════════════════════════ -->
+      <div class="try-section">
+        <div class="try-header">
+          <span style="font-size:14px">⌨</span>
+          <span class="try-title">직접 해보기 — 나만의 메모장 만들기</span>
+        </div>
+        <div class="try-body">
+          <p>아래 단계를 순서대로 따라하며 파일 입출력 전체 흐름을 직접 손에 익혀보세요.</p>
+          <div class="try-step">
+            <span class="try-step-n">01.</span>
+            <span class="try-step-t"><code>"w"</code> 모드로 <code>memo.txt</code>를 만들고 3줄을 씁니다. 각 줄 끝에 <code>\n</code>을 잊지 마세요.</span>
+          </div>
+          <div class="try-step">
+            <span class="try-step-n">02.</span>
+            <span class="try-step-t"><code>"r"</code> 모드로 같은 파일을 열어 <code>for</code> 루프로 줄 번호와 내용을 함께 출력합니다: <code>1: 첫 줄 내용</code></span>
+          </div>
+          <div class="try-step">
+            <span class="try-step-n">03.</span>
+            <span class="try-step-t"><code>"a"</code> 모드로 파일 끝에 한 줄 더 추가한 뒤, 파일 전체를 다시 읽어 총 줄 수를 출력합니다.</span>
+          </div>
+          <div class="try-step">
+            <span class="try-step-n">도전.</span>
+            <span class="try-step-t">사용자에게 <code>input()</code>으로 메모를 입력받아 파일에 저장하는 프로그램을 만들어보세요. 프로그램을 실행할 때마다 새 메모가 파일 끝에 추가되어야 합니다.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════
+           핵심 요약
+      ═══════════════════════════════════ -->
+      <div class="summary-box">
+        <div class="summary-label">▸ 핵심 요약</div>
+        <div class="summary-grid">
+          <span class="sg-key">open(파일, 모드)</span>
+          <span class="sg-val">파일을 열어 파일 객체를 반환. 반드시 <code>encoding="utf-8"</code>을 명시.</span>
+
+          <span class="sg-key">with … as f</span>
+          <span class="sg-val">파일을 안전하게 열고, 블록이 끝나면 자동으로 닫음. 실무 표준 패턴.</span>
+
+          <span class="sg-key">"r" / "w" / "a"</span>
+          <span class="sg-val">읽기 / 새로쓰기(덮어씀) / 이어쓰기. <code>"w"</code>는 기존 내용을 모두 지움에 주의.</span>
+
+          <span class="sg-key">f.write(문자열)</span>
+          <span class="sg-val">파일에 문자열 씀. 줄바꿈은 자동이 아니므로 <code>\n</code>을 직접 포함해야 함.</span>
+
+          <span class="sg-key">f.read()</span>
+          <span class="sg-val">파일 전체를 하나의 문자열로 반환.</span>
+
+          <span class="sg-key">for line in f</span>
+          <span class="sg-val">파일을 한 줄씩 순회. 대용량 파일에서 메모리 효율적. <code>.strip()</code>으로 <code>\n</code> 제거.</span>
+
+          <span class="sg-key">FileNotFoundError</span>
+          <span class="sg-val">존재하지 않는 파일을 읽으려 할 때 발생. <code>try/except</code>로 처리(다음 챕터).</span>
+        </div>
+      </div>
+
+      <!-- 격려 메시지 -->
+      <div class="cheer-box">
+        <span class="cheer-icon">🗂️</span>
+        <div class="cheer-text">
+          <strong>데이터를 파일로 저장할 수 있게 됐습니다!</strong><br>
+          이제 프로그램을 꺼도 데이터가 살아남습니다. 지금까지 배운 변수, 리스트, 딕셔너리, 함수 — 모든 개념이 파일 입출력과 결합되면 진짜 실용적인 프로그램이 됩니다. 다음 챕터에서는 파일을 다루다 발생하는 오류를 안전하게 처리하는 <strong>예외처리(try/except)</strong>를 배웁니다.
+        </div>
+      </div>
+
+      <!-- 챕터 네비게이션 -->
+      <div class="chap-nav">
+        <a href="41-mini-project-07.html" class="chap-nav-btn">
+          <span class="cnb-dir">← 이전 챕터</span>
+          <span class="cnb-title"><span>41.</span> 🎮 미니 프로젝트 ⑦</span>
+        </a>
+        <a href="43-quiz-file-io.html" class="chap-nav-btn next">
+          <span class="cnb-dir">다음 챕터 →</span>
+          <span class="cnb-title"><span>43.</span> 연습문제 — 파일 입출력</span>
+        </a>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+  const isMobile = () => window.innerWidth <= 720;
+  const overlay  = document.getElementById('sidebarOverlay');
+  function toggleSidebar() {
+    document.body.classList.toggle('sidebar-closed');
+    if (isMobile()) overlay.classList.toggle('visible', !document.body.classList.contains('sidebar-closed'));
+    localStorage.setItem('sp-sidebar', document.body.classList.contains('sidebar-closed') ? 'closed' : 'open');
+  }
+  function closeSidebar() {
+    document.body.classList.add('sidebar-closed');
+    overlay.classList.remove('visible');
+    localStorage.setItem('sp-sidebar', 'closed');
+  }
+  function toggleGroup(id) { document.getElementById(id).classList.toggle('open'); }
+  function copyCode(btn) {
+    const text = btn.closest('.code-block').querySelector('pre').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '복사됨 ✓';
+      btn.style.color = 'var(--accent)';
+      setTimeout(() => { btn.textContent = '복사'; btn.style.color = ''; }, 2000);
+    });
+  }
+  window.addEventListener('DOMContentLoaded', () => {
+    if (isMobile()) document.body.classList.add('sidebar-closed');
+    else if (localStorage.getItem('sp-sidebar') === 'closed') document.body.classList.add('sidebar-closed');
+  });
+  window.addEventListener('resize', () => {
+    if (!isMobile()) overlay.classList.remove('visible');
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>25. 미니 프로젝트 ④ — 브론즈 | 슈퍼파이썬</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#111111;--bg-nav:#0A0A0A;--bg-side:#0E0E0E;--bg-card:#181818;
+      --bg-code:#1A1A1A;--bg-tip:#131A13;--bg-warn:#1A1410;--bg-info:#101520;
+      --accent:#00CC70;--accent-dim:#007A42;--accent-bg:rgba(0,204,112,0.07);
+      --accent2:#C8A000;--text:#D8D8D8;--text-head:#EFEFEF;
+      --text2:#888888;--text3:#444444;--border:#222222;--border2:#2E2E2E;
+      --sy-kw:#C792EA;--sy-fn:#82AAFF;--sy-str:#C3E88D;
+      --sy-cm:#546E7A;--sy-num:#F78C6C;--sy-pn:#89DDFF;
+      --proj:#BB88FF;--proj-bg:rgba(170,100,255,.08);--proj-border:rgba(170,100,255,.22);
+      --sidebar-w:248px;--content-max:740px;--header-h:48px;
+      font-variant-ligatures: none;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:15px;line-height:1.8;overflow-x:hidden}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}
+    ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+    ::-webkit-scrollbar-thumb:hover{background:var(--accent-dim)}
+    .top-header{position:fixed;top:0;left:0;right:0;z-index:200;height:var(--header-h);background:var(--bg-nav);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px}
+    .header-open-btn{display:none;align-items:center;justify-content:center;width:28px;height:28px;flex-shrink:0;margin-right:12px;background:var(--bg-card);border:1px solid var(--border2);border-radius:4px;cursor:pointer;color:var(--text2);font-size:12px;transition:background .15s,color .15s}
+    .header-open-btn:hover{background:var(--accent-bg);color:var(--accent)}
+    body.sidebar-closed .header-open-btn{display:flex}
+    .header-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0;font-family:'JetBrains Mono',monospace;font-size:12px;overflow:hidden}
+    .header-logo{color:var(--accent);text-decoration:none;font-weight:700;white-space:nowrap}
+    .header-sep{color:var(--text3);flex-shrink:0}
+    .header-grade{color:var(--text2);white-space:nowrap}
+    .header-chap{color:var(--text-head);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .header-center{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);display:flex;align-items:center;gap:8px;flex-shrink:0;padding:0 16px}
+    .progress-mini{width:80px;height:3px;background:var(--border2);border-radius:2px;overflow:hidden}
+    .progress-mini-fill{height:100%;background:var(--accent);border-radius:2px}
+    .header-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+    .nav-btn{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);background:transparent;border:1px solid var(--border2);padding:4px 12px;text-decoration:none;transition:border-color .15s,color .15s;white-space:nowrap}
+    .nav-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .nav-btn.primary{color:var(--bg-nav);background:var(--accent);border-color:var(--accent);font-weight:700}
+    .nav-btn.primary:hover{filter:brightness(1.1)}
+    .layout{display:flex;padding-top:var(--header-h);min-height:100vh}
+    .sidebar{width:var(--sidebar-w);flex-shrink:0;position:fixed;top:var(--header-h);bottom:0;left:0;background:var(--bg-side);border-right:1px solid var(--border);overflow-y:auto;overflow-x:hidden;transition:transform .22s ease;z-index:150;padding-top:8px}
+    body.sidebar-closed .sidebar{transform:translateX(calc(-1 * var(--sidebar-w)))}
+    body.sidebar-closed .content{margin-left:0}
+    .sidebar-toggle{position:absolute;top:10px;right:10px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:var(--bg-card);border:1px solid var(--border2);border-radius:4px;cursor:pointer;color:var(--text2);font-size:12px;z-index:10;transition:background .15s,color .15s}
+    .sidebar-toggle:hover{background:var(--accent-bg);color:var(--accent);border-color:var(--accent)}
+    body.sidebar-closed .sidebar-toggle{display:none}
+    .sidebar-progress{margin:44px 12px 12px;padding:12px 14px;background:var(--bg-card);border:1px solid var(--border)}
+    .sp-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);margin-bottom:6px;letter-spacing:.08em}
+    .sp-bar{height:4px;background:var(--border2);border-radius:2px;overflow:hidden;margin-bottom:5px}
+    .sp-fill{height:100%;background:var(--accent);border-radius:2px}
+    .sp-text{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2)}
+    .sp-text span{color:var(--accent)}
+    .sb-group{border-bottom:1px solid var(--border)}
+    .sb-group-header{display:flex;align-items:center;justify-content:space-between;padding:9px 14px 9px 12px;cursor:pointer;user-select:none;transition:background .12s;gap:8px}
+    .sb-group-header:hover{background:rgba(255,255,255,.03)}
+    .sb-group-title{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--text2);text-transform:uppercase;flex:1}
+    .sb-group.current .sb-group-title{color:var(--accent)}
+    .sb-group-arrow{font-size:9px;color:var(--text3);transition:transform .2s;flex-shrink:0}
+    .sb-group.open .sb-group-arrow{transform:rotate(90deg);color:var(--accent)}
+    .sb-items{overflow:hidden;max-height:0;transition:max-height .28s ease}
+    .sb-group.open .sb-items{max-height:1200px}
+    .sb-item{display:flex;align-items:baseline;gap:8px;padding:6px 14px 6px 20px;font-size:13px;color:var(--text2);text-decoration:none;border-left:2px solid transparent;transition:background .1s,color .1s,border-color .1s;line-height:1.45}
+    .sb-item:hover{background:rgba(255,255,255,.03);color:var(--text)}
+    .sb-item.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-bg);font-weight:500}
+    .sb-item.done{color:var(--text3)}
+    .sb-icon{font-size:9px;flex-shrink:0;font-family:'JetBrains Mono',monospace;width:10px;text-align:center;color:var(--text3)}
+    .sb-item.active .sb-icon{color:var(--accent)}
+    .sb-item.done .sb-icon{color:var(--accent-dim)}
+    .sb-num{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);flex-shrink:0;min-width:22px}
+    .content{margin-left:var(--sidebar-w);flex:1;min-width:0;padding:48px 52px 96px;transition:margin-left .22s ease}
+    .content-inner{max-width:var(--content-max);margin:0 auto}
+    .chap-meta{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .badge{font-size:10px;padding:2px 8px;letter-spacing:.06em;border:1px solid}
+    .badge.project{background:var(--proj-bg);color:var(--proj);border-color:var(--proj-border)}
+    .chap-title{font-family:'JetBrains Mono',monospace;font-size:clamp(20px,3.5vw,28px);font-weight:700;color:var(--text-head);line-height:1.25;margin-bottom:8px}
+    .chap-title .hl{color:var(--accent)}
+    .chap-subtitle{font-size:15px;color:var(--text2);margin-bottom:40px;line-height:1.65}
+    h2{font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:700;color:var(--text-head);margin:48px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+    h2 .n{color:var(--accent);font-size:13px}
+    h3{font-size:15px;font-weight:700;color:var(--text-head);margin:24px 0 10px}
+    p{color:var(--text);margin-bottom:16px;line-height:1.9;font-size:15px}
+    code{font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--bg-code);color:var(--accent);padding:1px 6px;border:1px solid var(--border2);border-radius:2px}
+    strong{color:var(--text-head);font-weight:700}
+    ul,ol{padding-left:20px;margin-bottom:16px}
+    li{color:var(--text);line-height:1.85;margin-bottom:4px;font-size:15px}
+    .project-banner{background:linear-gradient(135deg,rgba(170,100,255,.06) 0%,rgba(0,204,112,.04) 100%);border:1px solid var(--proj-border);padding:24px 28px;margin-bottom:40px;position:relative;overflow:hidden}
+    .project-banner::before{content:'⚾';position:absolute;right:24px;top:50%;transform:translateY(-50%);font-size:52px;opacity:.18}
+    .pb-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--proj);letter-spacing:.1em;margin-bottom:8px}
+    .pb-title{font-size:20px;font-weight:700;color:var(--text-head);margin-bottom:6px;line-height:1.3}
+    .pb-desc{font-size:14px;color:var(--text2);line-height:1.7}
+    .pb-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .pb-tag{font-family:'JetBrains Mono',monospace;font-size:11px;padding:3px 10px;background:var(--bg-card);border:1px solid var(--border2);color:var(--text3)}
+    .learn-guide{background:var(--bg-card);border:1px solid var(--border2);border-left:3px solid var(--proj);padding:16px 20px;margin-bottom:32px}
+    .lg-title{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--proj);letter-spacing:.1em;margin-bottom:8px}
+    .lg-steps{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .lg-step{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);background:var(--bg-code);border:1px solid var(--border2);padding:5px 12px;display:flex;align-items:center;gap:6px}
+    .lg-step .lg-n{color:var(--accent);font-weight:700}
+    .lg-arrow{color:var(--text3);font-size:12px}
+    .output-demo{background:#0A0A0A;border:1px solid var(--border);margin:16px 0 24px;overflow:hidden}
+    .od-header{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);padding:7px 16px;border-bottom:1px solid var(--border);letter-spacing:.08em;display:flex;align-items:center;gap:8px}
+    .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+    .dot-r{background:#FF5F57}.dot-y{background:#FFBD2E}.dot-g{background:#28C840}
+    .od-body{padding:16px 20px}
+    .od-body pre{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text);line-height:1.85;white-space:pre-wrap}
+    .od-input{color:var(--accent2)}.od-output{color:var(--accent)}
+    .od-prompt{color:var(--text2)}.od-warn{color:#FF7070}.od-dim{color:var(--text3)}
+    .spec-table{width:100%;border-collapse:collapse;margin:16px 0 24px;font-size:14px}
+    .spec-table th{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--text3);text-align:left;padding:8px 14px;border-bottom:2px solid var(--border2);background:var(--bg-card)}
+    .spec-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text2);line-height:1.6;vertical-align:top}
+    .spec-table td:first-child{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);white-space:nowrap}
+    .spec-table tr:last-child td{border-bottom:none}
+    .rules-table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}
+    .rules-table th{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--text3);text-align:center;padding:8px 14px;border-bottom:2px solid var(--border2);background:var(--bg-card);letter-spacing:.06em}
+    .rules-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text2);text-align:center;font-family:'JetBrains Mono',monospace;font-size:13px}
+    .rules-table tr:last-child td{border-bottom:none}
+    .rules-table .hit{color:var(--accent)}.rules-table .blow{color:var(--accent2)}.rules-table .out{color:#FF7070}
+    .step-list{display:flex;flex-direction:column;gap:12px;margin-bottom:32px}
+    .step-card{background:var(--bg-card);border:1px solid var(--border2);overflow:hidden}
+    .step-header{display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:1px solid var(--border)}
+    .step-num{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--bg-nav);background:var(--accent);padding:2px 8px;flex-shrink:0}
+    .step-title{font-size:14px;font-weight:700;color:var(--text-head);flex:1}
+    .step-concept{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);flex-shrink:0}
+    .step-body{padding:14px 18px}
+    .step-body p{font-size:14px;margin-bottom:10px}
+    .step-body p:last-child{margin-bottom:0}
+    .code-block{background:var(--bg-code);border:1px solid var(--border2);margin:12px 0;overflow:hidden}
+    .code-block-header{display:flex;align-items:center;padding:7px 16px;background:var(--bg-card);border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.06em}
+    .code-block pre{padding:14px 18px;line-height:1.75;overflow-x:auto}
+    .code-block code{background:none;border:none;padding:0;font-size:13px;color:var(--text)}
+    .kw{color:#C792EA}.fn{color:#82AAFF}.str{color:#C3E88D}
+    .cm{color:#546E7A}.num{color:#F78C6C}.pn{color:#89DDFF}
+    .hint-list{display:flex;flex-direction:column;gap:8px;margin-bottom:32px}
+    .hint-item{background:var(--bg-card);border:1px solid var(--border2);overflow:hidden}
+    .hint-toggle{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;user-select:none;transition:background .12s}
+    .hint-toggle:hover{background:rgba(255,255,255,.03)}
+    .hint-toggle-label{font-size:14px;color:var(--text2)}
+    .hint-arrow{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);transition:transform .2s}
+    .hint-item.open .hint-arrow{transform:rotate(180deg);color:var(--accent)}
+    .hint-body{max-height:0;overflow:hidden;transition:max-height .3s ease}
+    .hint-item.open .hint-body{max-height:900px}
+    .hint-content{padding:14px 18px;border-top:1px solid var(--border);font-size:14px;color:var(--text2);line-height:1.8}
+    .hint-content code{font-size:12px}
+    .answer-toggle-btn{display:flex;align-items:center;justify-content:space-between;width:100%;padding:14px 20px;background:var(--bg-card);border:1px solid var(--border2);cursor:pointer;transition:border-color .15s}
+    .answer-toggle-btn:hover{border-color:var(--accent)}
+    .answer-toggle-btn span{font-size:14px;color:var(--text2)}
+    .answer-toggle-btn .atb-icon{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3)}
+    .answer-body{display:none;background:var(--bg-code);border:1px solid var(--border2);border-top:none}
+    .answer-body.visible{display:block}
+    .answer-body pre{padding:20px 24px;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.75;color:var(--text);overflow-x:auto}
+    .challenge-box{background:linear-gradient(135deg,rgba(200,160,0,.06) 0%,rgba(200,160,0,.02) 100%);border:1px solid rgba(200,160,0,.2);padding:22px 26px;margin:32px 0}
+    .challenge-title{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent2);letter-spacing:.1em;margin-bottom:12px}
+    .challenge-list{list-style:none;padding:0;margin:0}
+    .challenge-list li{font-size:14px;color:var(--text2);padding:6px 0;display:flex;align-items:baseline;gap:10px;border-bottom:1px solid rgba(200,160,0,.08)}
+    .challenge-list li:last-child{border-bottom:none}
+    .challenge-list li::before{content:"★";color:var(--accent2);font-size:10px;flex-shrink:0}
+    .tip-box{background:var(--bg-tip);border:1px solid rgba(0,204,112,.2);border-left:3px solid var(--accent);padding:14px 18px;margin:16px 0}
+    .tip-box .box-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:.08em;margin-bottom:6px}
+    .warn-box{background:var(--bg-warn);border:1px solid rgba(200,160,0,.2);border-left:3px solid var(--accent2);padding:14px 18px;margin:16px 0}
+    .warn-box .box-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent2);letter-spacing:.08em;margin-bottom:6px}
+    .tip-box p,.warn-box p{margin:0;font-size:14px;line-height:1.75}
+    .tip-box p+p,.warn-box p+p{margin-top:8px}
+    .review-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:10px;margin:16px 0 32px}
+    .review-card{background:var(--bg-card);border:1px solid var(--border2);padding:12px 16px}
+    .rc-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.07em;margin-bottom:5px}
+    .rc-code{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);line-height:1.6}
+    .rc-desc{font-size:12px;color:var(--text2);margin-top:3px;line-height:1.5}
+    .section-divider{height:1px;background:var(--border);margin:48px 0}
+    .cheer-box{border:1px solid var(--border);background:var(--bg);padding:18px 22px;margin-bottom:44px;display:flex;gap:14px;align-items:flex-start}
+    .cheer-icon{font-size:18px;flex-shrink:0;line-height:1.5}
+    .cheer-text{font-size:14px;color:var(--text2);line-height:1.85}
+    .cheer-text strong{color:var(--text-head)}
+    .chap-nav{display:flex;justify-content:space-between;padding-top:32px;border-top:1px solid var(--border);gap:12px;flex-wrap:wrap}
+    .chap-nav-btn{display:flex;flex-direction:column;gap:4px;text-decoration:none;padding:14px 18px;border:1px solid var(--border2);background:var(--bg-card);flex:1;max-width:300px;transition:border-color .15s}
+    .chap-nav-btn:hover{border-color:var(--accent)}
+    .chap-nav-btn.next{text-align:right}
+    .cnb-dir{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.07em}
+    .cnb-title{font-size:13px;color:var(--text2);line-height:1.45}
+    .cnb-title span{color:var(--accent);font-family:'JetBrains Mono',monospace}
+    .sidebar-overlay{display:none;position:fixed;inset:0;top:var(--header-h);z-index:140;background:rgba(0,0,0,.65)}
+    @media(max-width:720px){.sidebar-overlay.visible{display:block}.content{margin-left:0;padding:28px 20px 72px}.header-center{display:none}.review-grid{grid-template-columns:1fr 1fr}}
+    @media(max-width:480px){.header-grade{display:none}.chap-nav-btn{max-width:100%}.header-right .nav-btn:not(.primary){display:none}.lg-steps{flex-direction:column}.review-grid{grid-template-columns:1fr}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important}}
+  </style>
+</head>
+<body>
+
+<header class="top-header">
+  <button class="header-open-btn" onclick="toggleSidebar()">▶</button>
+  <div class="header-left">
+    <a href="../index.html" class="header-logo">SUPERPYTHON</a>
+    <span class="header-sep">/</span>
+    <span class="header-grade">🟤 BRONZE</span>
+    <span class="header-sep">/</span>
+    <span class="header-chap">25. 미니 프로젝트 ④</span>
+  </div>
+  <div class="header-center">
+    <span>25 / 48</span>
+    <div class="progress-mini"><div class="progress-mini-fill" style="width:52.08%"></div></div>
+    <span>52%</span>
+  </div>
+  <div class="header-right">
+    <a href="24-quiz-while.html" class="nav-btn">← 이전</a>
+    <a href="26-error-types.html" class="nav-btn primary">다음 →</a>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<div class="layout">
+
+<aside class="sidebar" id="sidebar">
+  <button class="sidebar-toggle" onclick="toggleSidebar()">◀</button>
+  <div class="sidebar-progress">
+    <div class="sp-label">BRONZE 진행률</div>
+    <div class="sp-bar"><div class="sp-fill" style="width:52.08%"></div></div>
+    <div class="sp-text"><span>25</span> / 48 챕터 완료</div>
+  </div>
+  <div class="sb-group" id="grp-env">
+    <div class="sb-group-header" onclick="toggleGroup('grp-env')"><span class="sb-group-title">환경 설정</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="01-what-is-python.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">01</span>파이썬이란?</a>
+      <a href="02-setup.html"          class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">02</span>개발환경 설치</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-basic1">
+    <div class="sb-group-header" onclick="toggleGroup('grp-basic1')"><span class="sb-group-title">기초 문법 1</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="03-print.html"                    class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">03</span>print()란?</a>
+      <a href="04-quiz-print.html"               class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">04</span>연습문제</a>
+      <a href="05-variables.html"                class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">05</span>변수와 데이터 타입</a>
+      <a href="06-operators.html"                class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">06</span>연산자</a>
+      <a href="07-quiz-variables-operators.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">07</span>연습문제</a>
+      <a href="08-string.html"                   class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">08</span>문자열 String</a>
+      <a href="09-quiz-string.html"              class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">09</span>연습문제</a>
+      <a href="10-fstring.html"                  class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">10</span>f-string 완전정리</a>
+      <a href="11-quiz-fstring.html"             class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">11</span>연습문제</a>
+      <a href="12-mini-project-01.html"          class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">12</span>🎮 미니 프로젝트 ①</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-basic2">
+    <div class="sb-group-header" onclick="toggleGroup('grp-basic2')"><span class="sb-group-title">기초 문법 2</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="13-list.html"            class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">13</span>리스트</a>
+      <a href="14-quiz-list.html"       class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">14</span>연습문제</a>
+      <a href="15-input.html"           class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">15</span>input() 함수</a>
+      <a href="16-quiz-input.html"      class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">16</span>연습문제</a>
+      <a href="17-mini-project-02.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">17</span>🎮 미니 프로젝트 ②</a>
+    </div>
+  </div>
+  <div class="sb-group current open" id="grp-flow">
+    <div class="sb-group-header" onclick="toggleGroup('grp-flow')"><span class="sb-group-title">흐름 제어</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="18-if.html"              class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">18</span>조건문 (if)</a>
+      <a href="19-quiz-if.html"         class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">19</span>연습문제</a>
+      <a href="20-mini-project-03.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">20</span>🎮 미니 프로젝트 ③</a>
+      <a href="21-for-range.html"       class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">21</span>for문과 range()</a>
+      <a href="22-quiz-for.html"        class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">22</span>연습문제</a>
+      <a href="23-while.html"           class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">23</span>while문, break, continue</a>
+      <a href="24-quiz-while.html"      class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">24</span>연습문제</a>
+      <a href="25-mini-project-04.html" class="sb-item active"><span class="sb-icon">▶</span><span class="sb-num">25</span>🎮 미니 프로젝트 ④</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-error">
+    <div class="sb-group-header" onclick="toggleGroup('grp-error')"><span class="sb-group-title">에러 &amp; 디버깅</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="26-error-types.html"    class="sb-item"><span class="sb-icon"> </span><span class="sb-num">26</span>에러 읽는 법</a>
+      <a href="27-debugging.html"      class="sb-item"><span class="sb-icon"> </span><span class="sb-num">27</span>기초 디버깅 실습</a>
+      <a href="28-quiz-debugging.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">28</span>연습문제</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-func">
+    <div class="sb-group-header" onclick="toggleGroup('grp-func')"><span class="sb-group-title">함수</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="29-function-basic.html"         class="sb-item"><span class="sb-icon"> </span><span class="sb-num">29</span>함수 기초</a>
+      <a href="30-quiz-function-basic.html"    class="sb-item"><span class="sb-icon"> </span><span class="sb-num">30</span>연습문제</a>
+      <a href="31-mini-project-05.html"        class="sb-item"><span class="sb-icon"> </span><span class="sb-num">31</span>🎮 미니 프로젝트 ⑤</a>
+      <a href="32-function-advanced.html"      class="sb-item"><span class="sb-icon"> </span><span class="sb-num">32</span>함수 심화</a>
+      <a href="33-quiz-function-advanced.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">33</span>연습문제</a>
+      <a href="34-module.html"                 class="sb-item"><span class="sb-icon"> </span><span class="sb-num">34</span>모듈</a>
+      <a href="35-quiz-module.html"            class="sb-item"><span class="sb-icon"> </span><span class="sb-num">35</span>연습문제</a>
+      <a href="36-mini-project-06.html"        class="sb-item"><span class="sb-icon"> </span><span class="sb-num">36</span>🎮 미니 프로젝트 ⑥</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-ds">
+    <div class="sb-group-header" onclick="toggleGroup('grp-ds')"><span class="sb-group-title">자료구조</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="37-dictionary.html"      class="sb-item"><span class="sb-icon"> </span><span class="sb-num">37</span>딕셔너리</a>
+      <a href="38-quiz-dictionary.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">38</span>연습문제</a>
+      <a href="39-tuple-set.html"       class="sb-item"><span class="sb-icon"> </span><span class="sb-num">39</span>튜플과 셋</a>
+      <a href="40-quiz-tuple-set.html"  class="sb-item"><span class="sb-icon"> </span><span class="sb-num">40</span>연습문제</a>
+      <a href="41-mini-project-07.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">41</span>🎮 미니 프로젝트 ⑦</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-file">
+    <div class="sb-group-header" onclick="toggleGroup('grp-file')"><span class="sb-group-title">파일 &amp; 예외처리</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="42-file-io.html"         class="sb-item"><span class="sb-icon"> </span><span class="sb-num">42</span>파일 입출력</a>
+      <a href="43-quiz-file-io.html"    class="sb-item"><span class="sb-icon"> </span><span class="sb-num">43</span>연습문제</a>
+      <a href="44-exception-basic.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">44</span>예외처리 기초</a>
+      <a href="45-quiz-exception.html"  class="sb-item"><span class="sb-icon"> </span><span class="sb-num">45</span>연습문제</a>
+      <a href="46-mini-project-08.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">46</span>🎮 미니 프로젝트 ⑧</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-end">
+    <div class="sb-group-header" onclick="toggleGroup('grp-end')"><span class="sb-group-title">마무리</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="47-final-project.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">47</span>★ 최종 프로젝트</a>
+      <a href="48-next-step.html"     class="sb-item"><span class="sb-icon"> </span><span class="sb-num">48</span>다음 단계 미리보기</a>
+    </div>
+  </div>
+</aside>
+
+<main class="content" id="mainContent">
+<div class="content-inner">
+
+  <div class="chap-meta">
+    <span class="badge project">PROJECT</span>
+    <span>흐름 제어</span>
+    <span style="color:var(--text3)">·</span>
+    <span>챕터 25 / 48</span>
+  </div>
+  <h1 class="chap-title">🎮 미니 프로젝트 ④<br><span class="hl">숫자 야구 게임</span></h1>
+  <p class="chap-subtitle">지금까지 배운 반복문을 총동원해서 실제로 동작하는 게임을 만들어봅니다. 흐름 제어 섹션의 완결판입니다.</p>
+
+  <div class="project-banner">
+    <div class="pb-label">MINI PROJECT 04</div>
+    <div class="pb-title">숫자 야구 게임</div>
+    <div class="pb-desc">컴퓨터가 서로 다른 숫자 3개를 무작위로 고르면, 플레이어가 스트라이크·볼 힌트를 바탕으로 숫자를 맞히는 게임입니다. 시도 횟수가 적을수록 높은 점수를 받습니다.</div>
+    <div class="pb-tags">
+      <span class="pb-tag">while True</span>
+      <span class="pb-tag">for / in</span>
+      <span class="pb-tag">break / continue</span>
+      <span class="pb-tag">리스트</span>
+      <span class="pb-tag">input()</span>
+      <span class="pb-tag">f-string</span>
+      <span class="pb-tag">random.sample</span>
+    </div>
+  </div>
+
+  <div class="learn-guide">
+    <div class="lg-title">이 프로젝트의 학습 흐름</div>
+    <div class="lg-steps">
+      <div class="lg-step"><span class="lg-n">1</span>게임 규칙 이해</div>
+      <span class="lg-arrow">→</span>
+      <div class="lg-step"><span class="lg-n">2</span>실행 예시 확인</div>
+      <span class="lg-arrow">→</span>
+      <div class="lg-step"><span class="lg-n">3</span>기능 명세서</div>
+      <span class="lg-arrow">→</span>
+      <div class="lg-step"><span class="lg-n">4</span>단계별 구현</div>
+      <span class="lg-arrow">→</span>
+      <div class="lg-step"><span class="lg-n">5</span>힌트 &amp; 정답</div>
+    </div>
+  </div>
+
+  <!-- ─── 1. 복습 ─── -->
+  <h2><span class="n">1.</span>지금까지 배운 개념 복습</h2>
+  <p>이 프로젝트에서 사용할 개념들입니다. 각 카드를 보며 기억을 되살려 보세요.</p>
+  <div class="review-grid">
+    <div class="review-card">
+      <div class="rc-label">while True + break</div>
+      <div class="rc-code">while True:<br>&nbsp;&nbsp;...<br>&nbsp;&nbsp;if 조건: break</div>
+      <div class="rc-desc">무한 반복, 원하는 시점에 탈출</div>
+    </div>
+    <div class="review-card">
+      <div class="rc-label">for i in range(3)</div>
+      <div class="rc-code">for i in range(3):<br>&nbsp;&nbsp;lst[i]</div>
+      <div class="rc-desc">인덱스로 리스트 비교</div>
+    </div>
+    <div class="review-card">
+      <div class="rc-label">continue</div>
+      <div class="rc-code">if 잘못된 입력:<br>&nbsp;&nbsp;print("⚠")<br>&nbsp;&nbsp;continue</div>
+      <div class="rc-desc">이번 회차 건너뜀, 재입력 유도</div>
+    </div>
+    <div class="review-card">
+      <div class="rc-label">in 연산자</div>
+      <div class="rc-code">5 in [1, 5, 9]<br># True</div>
+      <div class="rc-desc">리스트에 값이 있는지 확인</div>
+    </div>
+    <div class="review-card">
+      <div class="rc-label">input().split()</div>
+      <div class="rc-code">"1 5 9".split()<br># ["1","5","9"]</div>
+      <div class="rc-desc">공백으로 입력 나누기</div>
+    </div>
+    <div class="review-card">
+      <div class="rc-label">random.sample</div>
+      <div class="rc-code">random.sample(<br>&nbsp;&nbsp;range(1,10), 3)<br># [3, 7, 2]</div>
+      <div class="rc-desc">중복 없이 N개 무작위 선택</div>
+    </div>
+  </div>
+
+  <!-- ─── 2. 규칙 & 예시 ─── -->
+  <h2><span class="n">2.</span>게임 규칙 &amp; 실행 예시</h2>
+  <h3>규칙</h3>
+  <p>컴퓨터는 <strong>1~9 사이의 서로 다른 숫자 3개</strong>를 무작위로 선택합니다. 플레이어는 숫자 3개를 입력하고, 힌트를 받아 정답을 좁혀나갑니다.</p>
+  <table class="rules-table">
+    <thead><tr><th>판정</th><th>의미</th><th>예시 — 정답: 1 5 9</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="hit">스트라이크 (S)</td>
+        <td style="color:var(--text2);text-align:left;font-family:'Noto Sans KR',sans-serif">숫자와 자리가 모두 맞음</td>
+        <td class="hit">입력 1 5 3 → 2S 0B</td>
+      </tr>
+      <tr>
+        <td class="blow">볼 (B)</td>
+        <td style="color:var(--text2);text-align:left;font-family:'Noto Sans KR',sans-serif">숫자는 맞지만 자리가 다름</td>
+        <td class="blow">입력 9 1 5 → 0S 3B</td>
+      </tr>
+      <tr>
+        <td class="out">아웃</td>
+        <td style="color:var(--text2);text-align:left;font-family:'Noto Sans KR',sans-serif">숫자가 하나도 포함되지 않음</td>
+        <td class="out">입력 2 3 4 → 아웃!</td>
+      </tr>
+      <tr>
+        <td class="hit">3스트라이크</td>
+        <td style="color:var(--text2);text-align:left;font-family:'Noto Sans KR',sans-serif">모든 자리 정확히 일치 → 게임 종료</td>
+        <td class="hit">입력 1 5 9 → 정답!</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="tip-box">
+    <div class="box-label">💡 입력 형식</div>
+    <p>숫자 3개를 <strong>공백으로 구분해서</strong> 입력합니다: <code>1 5 9</code><br>중복 숫자(예: <code>1 1 5</code>)나 3개가 아닌 입력은 다시 요청합니다.</p>
+  </div>
+
+  <h3>실행 예시 1 — 일반 게임 흐름</h3>
+  <div class="output-demo">
+    <div class="od-header"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span><span style="margin-left:4px">터미널</span></div>
+    <div class="od-body"><pre><span class="od-output">⚾ 숫자 야구 게임
+1~9에서 서로 다른 숫자 3개를 맞혀보세요!
+시도 횟수가 적을수록 높은 점수를 받습니다.
+</span>
+<span class="od-prompt">숫자 3개를 공백으로 입력하세요: </span><span class="od-input">1 2 3</span>
+<span class="od-dim">→ 1S 1B</span>
+
+<span class="od-prompt">숫자 3개를 공백으로 입력하세요: </span><span class="od-input">1 4 5</span>
+<span class="od-dim">→ 1S 0B</span>
+
+<span class="od-prompt">숫자 3개를 공백으로 입력하세요: </span><span class="od-input">1 6 7</span>
+<span class="od-dim">→ 아웃!</span>
+
+<span class="od-prompt">숫자 3개를 공백으로 입력하세요: </span><span class="od-input">1 8 3</span>
+<span class="od-dim">→ 2S 0B</span>
+
+<span class="od-prompt">숫자 3개를 공백으로 입력하세요: </span><span class="od-input">1 8 9</span>
+<span class="od-output">🎉 정답! 5번 만에 맞혔습니다!
+⭐ 점수: 6점  (10점 만점)</span></pre>
+    </div>
+  </div>
+
+  <h3>실행 예시 2 — 잘못된 입력 처리</h3>
+  <div class="output-demo">
+    <div class="od-header"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span><span style="margin-left:4px">터미널</span></div>
+    <div class="od-body"><pre><span class="od-prompt">숫자 3개를 공백으로 입력하세요: </span><span class="od-input">1 1 5</span>
+<span class="od-warn">⚠ 서로 다른 숫자 3개를 입력해야 합니다. 다시 입력하세요.</span>
+
+<span class="od-prompt">숫자 3개를 공백으로 입력하세요: </span><span class="od-input">5 9</span>
+<span class="od-warn">⚠ 숫자 3개를 공백으로 구분해서 입력해야 합니다. 다시 입력하세요.</span>
+
+<span class="od-prompt">숫자 3개를 공백으로 입력하세요: </span><span class="od-input">abc</span>
+<span class="od-warn">⚠ 1~9 사이의 숫자만 입력 가능합니다. 다시 입력하세요.</span>
+
+<span class="od-prompt">숫자 3개를 공백으로 입력하세요: </span><span class="od-input">1 5 9</span>
+<span class="od-output">🎉 정답! 1번 만에 맞혔습니다!
+⭐ 점수: 10점  (10점 만점)</span></pre>
+    </div>
+  </div>
+
+  <!-- ─── 3. 기능 명세서 ─── -->
+  <h2><span class="n">3.</span>기능 명세서</h2>
+  <p>코드를 쓰기 전, <strong>무엇이 필요한지</strong> 먼저 파악하세요. 기능 명세서를 보며 전체 구조를 머릿속으로 그려보는 것이 코딩보다 중요합니다.</p>
+  <table class="spec-table">
+    <thead><tr><th>구분</th><th>기능</th><th>사용 개념</th></tr></thead>
+    <tbody>
+      <tr><td>초기화</td><td>1~9에서 서로 다른 숫자 3개를 무작위 선택</td><td><code>random.sample(range(1,10), 3)</code></td></tr>
+      <tr><td>입력</td><td>플레이어에게 숫자 3개 입력받기 (공백 구분)</td><td><code>input().split()</code></td></tr>
+      <tr><td>검증</td><td>입력이 정확히 3개인지 확인</td><td><code>len()</code> + <code>if</code> + <code>continue</code></td></tr>
+      <tr><td>검증</td><td>각 입력이 1~9 사이 숫자인지 확인</td><td><code>isdigit()</code> + <code>for</code> + <code>continue</code></td></tr>
+      <tr><td>검증</td><td>중복 숫자 없는지 확인</td><td><code>len(set(...))</code> + <code>continue</code></td></tr>
+      <tr><td>판정</td><td>스트라이크 개수 세기 — 같은 자리, 같은 숫자</td><td><code>for i in range(3)</code></td></tr>
+      <tr><td>판정</td><td>볼 개수 세기 — 다른 자리, 같은 숫자</td><td><code>for / in</code></td></tr>
+      <tr><td>판정</td><td>아웃 판정 — 스트라이크 + 볼 = 0</td><td><code>if s == 0 and b == 0</code></td></tr>
+      <tr><td>반복</td><td>3스트라이크까지 계속 입력받기</td><td><code>while True</code> + <code>break</code></td></tr>
+      <tr><td>출력</td><td>시도 횟수에 따른 점수 계산 및 출력</td><td><code>if / elif</code> + <code>f-string</code></td></tr>
+    </tbody>
+  </table>
+
+  <!-- ─── 4. 단계별 구현 ─── -->
+  <h2><span class="n">4.</span>단계별 구현 가이드</h2>
+  <p><strong>한 단계씩 완성하고 직접 실행</strong>해서 결과를 확인한 뒤 다음으로 넘어가세요. 처음부터 완성본을 만들려다 막히면 아무것도 못 합니다.</p>
+
+  <div class="step-list">
+
+    <div class="step-card">
+      <div class="step-header">
+        <span class="step-num">STEP 1</span>
+        <span class="step-title">정답 생성 &amp; 시작 배너 출력</span>
+        <span class="step-concept">random.sample · print</span>
+      </div>
+      <div class="step-body">
+        <p>컴퓨터가 사용할 정답 숫자 3개를 만들고 게임 시작 배너를 출력합니다. <code>random.sample()</code>은 주어진 범위에서 <strong>중복 없이</strong> N개를 골라줍니다.</p>
+        <div class="code-block">
+          <div class="code-block-header">STEP 1 구현</div>
+          <pre><code><span class="kw">import</span> <span class="fn">random</span>
+
+<span class="fn">answer</span> <span class="pn">=</span> <span class="fn">random</span><span class="pn">.</span><span class="fn">sample</span><span class="pn">(</span><span class="fn">range</span><span class="pn">(</span><span class="num">1</span><span class="pn">,</span> <span class="num">10</span><span class="pn">),</span> <span class="num">3</span><span class="pn">)</span>   <span class="cm"># [3, 7, 2] 같은 무작위 리스트</span>
+<span class="fn">tries</span> <span class="pn">=</span> <span class="num">0</span>                                   <span class="cm"># 시도 횟수</span>
+
+<span class="fn">print</span><span class="pn">(</span><span class="str">"⚾ 숫자 야구 게임"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"1~9에서 서로 다른 숫자 3개를 맞혀보세요!"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"시도 횟수가 적을수록 높은 점수를 받습니다."</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">()</span>
+
+<span class="cm"># 개발 중에는 이 줄의 주석을 해제해서 정답을 확인하며 테스트하세요</span>
+<span class="cm"># print(f"[개발용] 정답: {answer}")</span></code></pre>
+        </div>
+        <div class="tip-box">
+          <div class="box-label">💡 random.sample vs random.randint</div>
+          <p><code>random.randint(1, 9)</code>는 중복을 허용하므로 야구 게임에 맞지 않습니다. <code>random.sample(범위, 개수)</code>는 중복 없이 뽑아주므로 이 게임에 딱 맞습니다.</p>
+        </div>
+        <p>▶ 실행하면 배너가 출력됩니다. 정답 확인 주석을 해제하면 테스트할 때 편합니다.</p>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-header">
+        <span class="step-num">STEP 2</span>
+        <span class="step-title">입력 받기 &amp; 유효성 검사</span>
+        <span class="step-concept">input().split() · isdigit() · continue</span>
+      </div>
+      <div class="step-body">
+        <p>잘못된 입력이면 <code>continue</code>로 건너뛰어 다시 입력받습니다. 유효성 검사는 세 단계입니다 — <strong>개수 → 숫자 여부 → 중복</strong>.</p>
+        <div class="code-block">
+          <div class="code-block-header">STEP 2 구현 — while 루프 안에 작성</div>
+          <pre><code><span class="kw">while</span> <span class="kw">True</span><span class="pn">:</span>
+    <span class="fn">raw</span>   <span class="pn">=</span> <span class="fn">input</span><span class="pn">(</span><span class="str">"숫자 3개를 공백으로 입력하세요: "</span><span class="pn">)</span>
+    <span class="fn">parts</span> <span class="pn">=</span> <span class="fn">raw</span><span class="pn">.</span><span class="fn">split</span><span class="pn">()</span>        <span class="cm"># "1 5 9"  →  ["1", "5", "9"]</span>
+
+    <span class="cm"># 검증 1: 정확히 3개인지</span>
+    <span class="kw">if</span> <span class="fn">len</span><span class="pn">(</span><span class="fn">parts</span><span class="pn">)</span> <span class="pn">!=</span> <span class="num">3</span><span class="pn">:</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">"⚠ 숫자 3개를 공백으로 구분해서 입력해야 합니다. 다시 입력하세요."</span><span class="pn">)</span>
+        <span class="kw">continue</span>
+
+    <span class="cm"># 검증 2: 1~9 사이 숫자인지</span>
+    <span class="fn">valid</span> <span class="pn">=</span> <span class="kw">True</span>
+    <span class="kw">for</span> <span class="fn">p</span> <span class="kw">in</span> <span class="fn">parts</span><span class="pn">:</span>
+        <span class="kw">if</span> <span class="kw">not</span> <span class="fn">p</span><span class="pn">.</span><span class="fn">isdigit</span><span class="pn">()</span> <span class="kw">or</span> <span class="kw">not</span> <span class="pn">(</span><span class="num">1</span> <span class="pn">&lt;=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">p</span><span class="pn">)</span> <span class="pn">&lt;=</span> <span class="num">9</span><span class="pn">):</span>
+            <span class="fn">valid</span> <span class="pn">=</span> <span class="kw">False</span>
+            <span class="kw">break</span>
+    <span class="kw">if</span> <span class="kw">not</span> <span class="fn">valid</span><span class="pn">:</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">"⚠ 1~9 사이의 숫자만 입력 가능합니다. 다시 입력하세요."</span><span class="pn">)</span>
+        <span class="kw">continue</span>
+
+    <span class="cm"># 문자열 리스트 → 정수 리스트로 변환</span>
+    <span class="fn">guess</span> <span class="pn">=</span> <span class="pn">[</span><span class="fn">int</span><span class="pn">(</span><span class="fn">p</span><span class="pn">)</span> <span class="kw">for</span> <span class="fn">p</span> <span class="kw">in</span> <span class="fn">parts</span><span class="pn">]</span>
+
+    <span class="cm"># 검증 3: 중복 없는지</span>
+    <span class="kw">if</span> <span class="fn">len</span><span class="pn">(</span><span class="fn">set</span><span class="pn">(</span><span class="fn">guess</span><span class="pn">))</span> <span class="pn">!=</span> <span class="num">3</span><span class="pn">:</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">"⚠ 서로 다른 숫자 3개를 입력해야 합니다. 다시 입력하세요."</span><span class="pn">)</span>
+        <span class="kw">continue</span>
+
+    <span class="cm"># 여기까지 왔다면 유효한 입력 → 시도 횟수 증가</span>
+    <span class="fn">tries</span> <span class="pn">+=</span> <span class="num">1</span>
+    <span class="cm"># STEP 3 코드가 여기에 이어집니다</span></code></pre>
+        </div>
+        <div class="tip-box">
+          <div class="box-label">💡 set()으로 중복 검사하기</div>
+          <p><code>set()</code>은 중복을 제거한 집합입니다. <code>[1, 1, 5]</code>를 set으로 바꾸면 <code>{1, 5}</code>가 되어 길이가 2 — 원래 리스트 길이(3)와 다르므로 중복이 있습니다.</p>
+        </div>
+        <div class="warn-box">
+          <div class="box-label">⚠ 리스트 컴프리헨션 미리보기</div>
+          <p><code>[int(p) for p in parts]</code>는 "parts의 각 요소를 int로 바꾼 리스트"라는 뜻입니다. 이 문법은 실버 과정에서 자세히 배웁니다. 지금은 <strong>문자열 리스트를 숫자 리스트로 바꾸는 방법</strong>으로만 이해하고 그대로 사용하세요.</p>
+        </div>
+        <p>▶ <code>abc</code>, <code>1 1 5</code>, <code>5 9</code> 등을 입력해서 오류 메시지가 제대로 나오는지 확인하세요.</p>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-header">
+        <span class="step-num">STEP 3</span>
+        <span class="step-title">스트라이크 &amp; 볼 판정 로직</span>
+        <span class="step-concept">for i in range(3) · in 연산자 · 카운터</span>
+      </div>
+      <div class="step-body">
+        <p>게임의 핵심입니다. 스트라이크는 <strong>자리도 숫자도 같은 경우</strong>, 볼은 <strong>숫자는 같지만 자리가 다른 경우</strong>입니다.</p>
+        <p>스트라이크를 먼저 셉니다. 그다음, 정답에 포함되어 있지만 자리가 다른 숫자의 수가 볼입니다.</p>
+        <div class="code-block">
+          <div class="code-block-header">STEP 3 구현 — tries += 1 아래에 이어서</div>
+          <pre><code>    <span class="cm"># 스트라이크: 자리와 숫자 모두 일치</span>
+    <span class="fn">strike</span> <span class="pn">=</span> <span class="num">0</span>
+    <span class="kw">for</span> <span class="fn">i</span> <span class="kw">in</span> <span class="fn">range</span><span class="pn">(</span><span class="num">3</span><span class="pn">):</span>
+        <span class="kw">if</span> <span class="fn">guess</span><span class="pn">[</span><span class="fn">i</span><span class="pn">]</span> <span class="pn">==</span> <span class="fn">answer</span><span class="pn">[</span><span class="fn">i</span><span class="pn">]:</span>
+            <span class="fn">strike</span> <span class="pn">+=</span> <span class="num">1</span>
+
+    <span class="cm"># 볼: 정답에 있지만 자리가 다름</span>
+    <span class="fn">ball</span> <span class="pn">=</span> <span class="num">0</span>
+    <span class="kw">for</span> <span class="fn">i</span> <span class="kw">in</span> <span class="fn">range</span><span class="pn">(</span><span class="num">3</span><span class="pn">):</span>
+        <span class="kw">if</span> <span class="fn">guess</span><span class="pn">[</span><span class="fn">i</span><span class="pn">]</span> <span class="kw">in</span> <span class="fn">answer</span> <span class="kw">and</span> <span class="fn">guess</span><span class="pn">[</span><span class="fn">i</span><span class="pn">]</span> <span class="pn">!=</span> <span class="fn">answer</span><span class="pn">[</span><span class="fn">i</span><span class="pn">]:</span>
+            <span class="fn">ball</span> <span class="pn">+=</span> <span class="num">1</span>
+
+    <span class="cm"># 결과 출력</span>
+    <span class="kw">if</span> <span class="fn">strike</span> <span class="pn">==</span> <span class="num">3</span><span class="pn">:</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">f"🎉 정답! {tries}번 만에 맞혔습니다!"</span><span class="pn">)</span>
+        <span class="kw">break</span>                           <span class="cm"># 게임 종료!</span>
+    <span class="kw">elif</span> <span class="fn">strike</span> <span class="pn">==</span> <span class="num">0</span> <span class="kw">and</span> <span class="fn">ball</span> <span class="pn">==</span> <span class="num">0</span><span class="pn">:</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">"→ 아웃!"</span><span class="pn">)</span>
+    <span class="kw">else</span><span class="pn">:</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">f"→ {strike}S {ball}B"</span><span class="pn">)</span></code></pre>
+        </div>
+        <p>▶ 정답을 미리 출력해두고, 다양한 입력을 넣어 S/B 수가 올바른지 확인하세요.</p>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-header">
+        <span class="step-num">STEP 4</span>
+        <span class="step-title">점수 계산 &amp; 최종 출력</span>
+        <span class="step-concept">if / elif / else · f-string</span>
+      </div>
+      <div class="step-body">
+        <p>게임 종료(<code>break</code>) 후, <code>while</code> 루프 <strong>바깥</strong>에 점수 계산 코드를 작성합니다. 들여쓰기에 주의하세요.</p>
+        <div class="code-block">
+          <div class="code-block-header">STEP 4 구현 — while 루프 완전히 바깥</div>
+          <pre><code><span class="cm"># while True: 블록이 끝난 뒤 (들여쓰기 없음)</span>
+
+<span class="kw">if</span> <span class="fn">tries</span> <span class="pn">==</span> <span class="num">1</span><span class="pn">:</span>
+    <span class="fn">score</span> <span class="pn">=</span> <span class="num">10</span>
+<span class="kw">elif</span> <span class="fn">tries</span> <span class="pn">&lt;=</span> <span class="num">3</span><span class="pn">:</span>
+    <span class="fn">score</span> <span class="pn">=</span> <span class="num">8</span>
+<span class="kw">elif</span> <span class="fn">tries</span> <span class="pn">&lt;=</span> <span class="num">6</span><span class="pn">:</span>
+    <span class="fn">score</span> <span class="pn">=</span> <span class="num">6</span>
+<span class="kw">elif</span> <span class="fn">tries</span> <span class="pn">&lt;=</span> <span class="num">10</span><span class="pn">:</span>
+    <span class="fn">score</span> <span class="pn">=</span> <span class="num">4</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">score</span> <span class="pn">=</span> <span class="num">2</span>
+
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"⭐ 점수: {score}점  (10점 만점)"</span><span class="pn">)</span></code></pre>
+        </div>
+        <p>▶ 여러 번 실행해서 시도 횟수에 따라 점수가 달라지는지 확인하세요.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ─── 5. 힌트 ─── -->
+  <h2><span class="n">5.</span>막혔을 때 — 단계별 힌트</h2>
+  <p>충분히 혼자 시도해본 뒤에 열어보세요.</p>
+
+  <div class="hint-list">
+
+    <div class="hint-item" id="hint1">
+      <div class="hint-toggle" onclick="toggleHint('hint1')">
+        <span class="hint-toggle-label">💡 힌트 1 — input().split()이 뭔가요?</span>
+        <span class="hint-arrow">▼</span>
+      </div>
+      <div class="hint-body"><div class="hint-content">
+        <p><code>split()</code>은 공백을 기준으로 문자열을 나눠서 리스트로 반환합니다.</p>
+        <div class="code-block"><div class="code-block-header">예시</div>
+          <pre><code><span class="fn">raw</span>   <span class="pn">=</span> <span class="str">"1 5 9"</span>
+<span class="fn">parts</span> <span class="pn">=</span> <span class="fn">raw</span><span class="pn">.</span><span class="fn">split</span><span class="pn">()</span>
+<span class="fn">print</span><span class="pn">(</span><span class="fn">parts</span><span class="pn">)</span>     <span class="cm"># ["1", "5", "9"]  ← 문자열 리스트!</span>
+<span class="fn">print</span><span class="pn">(</span><span class="fn">len</span><span class="pn">(</span><span class="fn">parts</span><span class="pn">))</span> <span class="cm"># 3</span></code></pre>
+        </div>
+        <p>결과가 <strong>문자열</strong> 리스트임에 주의하세요. 숫자 비교를 하려면 <code>int(p)</code>로 변환해야 합니다.</p>
+      </div></div>
+    </div>
+
+    <div class="hint-item" id="hint2">
+      <div class="hint-toggle" onclick="toggleHint('hint2')">
+        <span class="hint-toggle-label">💡 힌트 2 — 스트라이크와 볼의 차이가 헷갈려요</span>
+        <span class="hint-arrow">▼</span>
+      </div>
+      <div class="hint-body"><div class="hint-content">
+        <p>예시로 직접 추적해보겠습니다. 정답이 <code>[1, 5, 9]</code>, 입력이 <code>[9, 1, 5]</code>라면:</p>
+        <div class="code-block"><div class="code-block-header">추적 예시</div>
+          <pre><code><span class="cm"># 스트라이크: 같은 인덱스, 같은 값</span>
+<span class="cm"># i=0: guess[0]=9, answer[0]=1 → 다름</span>
+<span class="cm"># i=1: guess[1]=1, answer[1]=5 → 다름</span>
+<span class="cm"># i=2: guess[2]=5, answer[2]=9 → 다름  → strike = 0</span>
+
+<span class="cm"># 볼: answer에 있지만 같은 자리가 아님</span>
+<span class="cm"># i=0: 9 in [1,5,9]=True, 9≠answer[0](1)=True → 볼!</span>
+<span class="cm"># i=1: 1 in [1,5,9]=True, 1≠answer[1](5)=True → 볼!</span>
+<span class="cm"># i=2: 5 in [1,5,9]=True, 5≠answer[2](9)=True → 볼!</span>
+<span class="cm"># → ball = 3  →  결과: 0S 3B ✅</span></code></pre>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="hint-item" id="hint3">
+      <div class="hint-toggle" onclick="toggleHint('hint3')">
+        <span class="hint-toggle-label">💡 힌트 3 — 전체 코드 구조 (의사 코드)</span>
+        <span class="hint-arrow">▼</span>
+      </div>
+      <div class="hint-body"><div class="hint-content">
+        <p>들여쓰기가 어디에 속하는지 헷갈릴 때 이 구조를 참고하세요.</p>
+        <div class="code-block"><div class="code-block-header">전체 구조</div>
+          <pre><code><span class="kw">import</span> <span class="fn">random</span>
+<span class="fn">answer</span> <span class="pn">=</span> ...           <span class="cm"># 정답 생성</span>
+<span class="fn">tries</span>  <span class="pn">=</span> <span class="num">0</span>
+<span class="fn">print</span><span class="pn">()</span>               <span class="cm"># 배너</span>
+
+<span class="kw">while</span> <span class="kw">True</span><span class="pn">:</span>             <span class="cm"># ← 게임 루프 시작</span>
+    <span class="fn">raw</span>   <span class="pn">=</span> <span class="fn">input</span><span class="pn">()</span>
+    <span class="fn">parts</span> <span class="pn">=</span> <span class="fn">raw</span><span class="pn">.</span><span class="fn">split</span><span class="pn">()</span>
+
+    <span class="kw">if</span> <span class="fn">len</span><span class="pn">(</span><span class="fn">parts</span><span class="pn">)</span> <span class="pn">!=</span> <span class="num">3</span><span class="pn">:</span>  <span class="cm"># 검증 1</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">"⚠ ..."</span><span class="pn">)</span>
+        <span class="kw">continue</span>
+    <span class="cm"># 검증 2, 3 ...</span>
+
+    <span class="fn">tries</span> <span class="pn">+=</span> <span class="num">1</span>           <span class="cm"># 유효 입력만 카운트</span>
+
+    <span class="cm"># 판정 (strike, ball 계산)</span>
+    <span class="kw">if</span> <span class="fn">strike</span> <span class="pn">==</span> <span class="num">3</span><span class="pn">:</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">"🎉 정답!"</span><span class="pn">)</span>
+        <span class="kw">break</span>            <span class="cm"># ← 루프 탈출</span>
+    <span class="kw">else</span><span class="pn">:</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="fn">f"→ {strike}S {ball}B"</span><span class="pn">)</span>
+
+<span class="cm"># while 루프 바깥 — 점수 계산</span>
+<span class="kw">if</span> <span class="fn">tries</span> <span class="pn">==</span> <span class="num">1</span><span class="pn">:</span>
+    <span class="fn">score</span> <span class="pn">=</span> <span class="num">10</span>
+<span class="cm"># ...</span></code></pre>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="hint-item" id="hint4">
+      <div class="hint-toggle" onclick="toggleHint('hint4')">
+        <span class="hint-toggle-label">💡 힌트 4 — isdigit()이 뭔가요?</span>
+        <span class="hint-arrow">▼</span>
+      </div>
+      <div class="hint-body"><div class="hint-content">
+        <p>문자열이 숫자로만 이루어져 있으면 <code>True</code>, 아니면 <code>False</code>를 반환합니다.</p>
+        <div class="code-block"><div class="code-block-header">예시</div>
+          <pre><code><span class="fn">print</span><span class="pn">(</span><span class="str">"5"</span><span class="pn">.</span><span class="fn">isdigit</span><span class="pn">())</span>    <span class="cm"># True</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"abc"</span><span class="pn">.</span><span class="fn">isdigit</span><span class="pn">())</span>  <span class="cm"># False</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"1.5"</span><span class="pn">.</span><span class="fn">isdigit</span><span class="pn">())</span>  <span class="cm"># False  (소수점 포함 → False)</span></code></pre>
+        </div>
+        <p><code>isdigit()</code>으로 먼저 확인한 뒤 <code>int()</code>로 변환해야 안전합니다. 순서를 바꾸면 <code>ValueError</code>가 발생합니다.</p>
+      </div></div>
+    </div>
+
+  </div>
+
+  <!-- ─── 6. 전체 정답 ─── -->
+  <h2><span class="n">6.</span>전체 정답 코드</h2>
+  <p>먼저 스스로 완성해보고, 아래 정답과 비교해보세요. 결과가 같다면 코드가 달라도 모두 정답입니다.</p>
+
+  <button class="answer-toggle-btn" onclick="toggleAnswer()">
+    <span>✅ 전체 정답 코드 보기</span>
+    <span class="atb-icon" id="answerIcon">▼ 펼치기</span>
+  </button>
+  <div class="answer-body" id="answerBody">
+    <pre><span class="kw">import</span> <span class="fn">random</span>
+
+<span class="cm"># ── 초기화 ─────────────────────────────────────</span>
+<span class="fn">answer</span> <span class="pn">=</span> <span class="fn">random</span><span class="pn">.</span><span class="fn">sample</span><span class="pn">(</span><span class="fn">range</span><span class="pn">(</span><span class="num">1</span><span class="pn">,</span> <span class="num">10</span><span class="pn">),</span> <span class="num">3</span><span class="pn">)</span>
+<span class="fn">tries</span> <span class="pn">=</span> <span class="num">0</span>
+
+<span class="fn">print</span><span class="pn">(</span><span class="str">"⚾ 숫자 야구 게임"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"1~9에서 서로 다른 숫자 3개를 맞혀보세요!"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"시도 횟수가 적을수록 높은 점수를 받습니다."</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">()</span>
+
+<span class="cm"># ── 게임 루프 ──────────────────────────────────</span>
+<span class="kw">while</span> <span class="kw">True</span><span class="pn">:</span>
+    <span class="fn">raw</span>   <span class="pn">=</span> <span class="fn">input</span><span class="pn">(</span><span class="str">"숫자 3개를 공백으로 입력하세요: "</span><span class="pn">)</span>
+    <span class="fn">parts</span> <span class="pn">=</span> <span class="fn">raw</span><span class="pn">.</span><span class="fn">split</span><span class="pn">()</span>
+
+    <span class="cm"># 검증 1: 개수</span>
+    <span class="kw">if</span> <span class="fn">len</span><span class="pn">(</span><span class="fn">parts</span><span class="pn">)</span> <span class="pn">!=</span> <span class="num">3</span><span class="pn">:</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">"⚠ 숫자 3개를 공백으로 구분해서 입력해야 합니다. 다시 입력하세요."</span><span class="pn">)</span>
+        <span class="kw">continue</span>
+
+    <span class="cm"># 검증 2: 1~9 사이 숫자</span>
+    <span class="fn">valid</span> <span class="pn">=</span> <span class="kw">True</span>
+    <span class="kw">for</span> <span class="fn">p</span> <span class="kw">in</span> <span class="fn">parts</span><span class="pn">:</span>
+        <span class="kw">if</span> <span class="kw">not</span> <span class="fn">p</span><span class="pn">.</span><span class="fn">isdigit</span><span class="pn">()</span> <span class="kw">or</span> <span class="kw">not</span> <span class="pn">(</span><span class="num">1</span> <span class="pn">&lt;=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">p</span><span class="pn">)</span> <span class="pn">&lt;=</span> <span class="num">9</span><span class="pn">):</span>
+            <span class="fn">valid</span> <span class="pn">=</span> <span class="kw">False</span>
+            <span class="kw">break</span>
+    <span class="kw">if</span> <span class="kw">not</span> <span class="fn">valid</span><span class="pn">:</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">"⚠ 1~9 사이의 숫자만 입력 가능합니다. 다시 입력하세요."</span><span class="pn">)</span>
+        <span class="kw">continue</span>
+
+    <span class="cm"># 검증 3: 중복 없는지</span>
+    <span class="fn">guess</span> <span class="pn">=</span> <span class="pn">[</span><span class="fn">int</span><span class="pn">(</span><span class="fn">p</span><span class="pn">)</span> <span class="kw">for</span> <span class="fn">p</span> <span class="kw">in</span> <span class="fn">parts</span><span class="pn">]</span>
+    <span class="kw">if</span> <span class="fn">len</span><span class="pn">(</span><span class="fn">set</span><span class="pn">(</span><span class="fn">guess</span><span class="pn">))</span> <span class="pn">!=</span> <span class="num">3</span><span class="pn">:</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">"⚠ 서로 다른 숫자 3개를 입력해야 합니다. 다시 입력하세요."</span><span class="pn">)</span>
+        <span class="kw">continue</span>
+
+    <span class="fn">tries</span> <span class="pn">+=</span> <span class="num">1</span>
+
+    <span class="cm"># ── 판정 ───────────────────────────────────</span>
+    <span class="fn">strike</span> <span class="pn">=</span> <span class="num">0</span>
+    <span class="kw">for</span> <span class="fn">i</span> <span class="kw">in</span> <span class="fn">range</span><span class="pn">(</span><span class="num">3</span><span class="pn">):</span>
+        <span class="kw">if</span> <span class="fn">guess</span><span class="pn">[</span><span class="fn">i</span><span class="pn">]</span> <span class="pn">==</span> <span class="fn">answer</span><span class="pn">[</span><span class="fn">i</span><span class="pn">]:</span>
+            <span class="fn">strike</span> <span class="pn">+=</span> <span class="num">1</span>
+
+    <span class="fn">ball</span> <span class="pn">=</span> <span class="num">0</span>
+    <span class="kw">for</span> <span class="fn">i</span> <span class="kw">in</span> <span class="fn">range</span><span class="pn">(</span><span class="num">3</span><span class="pn">):</span>
+        <span class="kw">if</span> <span class="fn">guess</span><span class="pn">[</span><span class="fn">i</span><span class="pn">]</span> <span class="kw">in</span> <span class="fn">answer</span> <span class="kw">and</span> <span class="fn">guess</span><span class="pn">[</span><span class="fn">i</span><span class="pn">]</span> <span class="pn">!=</span> <span class="fn">answer</span><span class="pn">[</span><span class="fn">i</span><span class="pn">]:</span>
+            <span class="fn">ball</span> <span class="pn">+=</span> <span class="num">1</span>
+
+    <span class="cm"># ── 결과 출력 ──────────────────────────────</span>
+    <span class="kw">if</span> <span class="fn">strike</span> <span class="pn">==</span> <span class="num">3</span><span class="pn">:</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">f"🎉 정답! {tries}번 만에 맞혔습니다!"</span><span class="pn">)</span>
+        <span class="kw">break</span>
+    <span class="kw">elif</span> <span class="fn">strike</span> <span class="pn">==</span> <span class="num">0</span> <span class="kw">and</span> <span class="fn">ball</span> <span class="pn">==</span> <span class="num">0</span><span class="pn">:</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">"→ 아웃!"</span><span class="pn">)</span>
+    <span class="kw">else</span><span class="pn">:</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">f"→ {strike}S {ball}B"</span><span class="pn">)</span>
+
+<span class="cm"># ── 점수 계산 ──────────────────────────────────</span>
+<span class="kw">if</span> <span class="fn">tries</span> <span class="pn">==</span> <span class="num">1</span><span class="pn">:</span>
+    <span class="fn">score</span> <span class="pn">=</span> <span class="num">10</span>
+<span class="kw">elif</span> <span class="fn">tries</span> <span class="pn">&lt;=</span> <span class="num">3</span><span class="pn">:</span>
+    <span class="fn">score</span> <span class="pn">=</span> <span class="num">8</span>
+<span class="kw">elif</span> <span class="fn">tries</span> <span class="pn">&lt;=</span> <span class="num">6</span><span class="pn">:</span>
+    <span class="fn">score</span> <span class="pn">=</span> <span class="num">6</span>
+<span class="kw">elif</span> <span class="fn">tries</span> <span class="pn">&lt;=</span> <span class="num">10</span><span class="pn">:</span>
+    <span class="fn">score</span> <span class="pn">=</span> <span class="num">4</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">score</span> <span class="pn">=</span> <span class="num">2</span>
+
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"⭐ 점수: {score}점  (10점 만점)"</span><span class="pn">)</span></pre>
+  </div>
+
+  <!-- ─── 7. 도전 과제 ─── -->
+  <h2><span class="n">7.</span>도전 과제 ★</h2>
+  <p>기본 버전을 완성했다면 아래 도전을 시도해보세요. 힌트는 없습니다.</p>
+  <div class="challenge-box">
+    <div class="challenge-title">CHALLENGE — 선택적 심화</div>
+    <ul class="challenge-list">
+      <li><strong>최대 시도 제한</strong> — 10번 안에 못 맞히면 "게임 오버! 정답은 {answer}였습니다." 출력 후 종료</li>
+      <li><strong>추측 기록</strong> — 매 시도마다 지금까지의 모든 입력과 결과를 리스트에 저장해서 출력</li>
+      <li><strong>다시 하기</strong> — 게임 종료 후 "다시 하시겠습니까? (y/n)"을 물어서 y이면 새 게임 시작</li>
+      <li><strong>4자리 모드</strong> — 시작 시 3자리/4자리 중 선택하게 해서 난이도 조절</li>
+    </ul>
+  </div>
+
+  <div class="section-divider"></div>
+  <div class="cheer-box">
+    <span class="cheer-icon">🏆</span>
+    <div class="cheer-text">
+      <strong>흐름 제어 섹션 완주!</strong><br>
+      조건문부터 for문, while문, break, continue까지 — 파이썬 흐름 제어의 모든 도구를 손에 쥐었습니다. 숫자 야구 게임 하나가 이 모든 개념을 자연스럽게 통합합니다. 완성한 순간 여러분은 이미 <strong>작동하는 프로그램을 만드는 개발자</strong>입니다. 다음은 에러 읽는 법 — 코드가 잘못됐을 때 당황하지 않고 고치는 법을 배웁니다. 계속 달려봅시다! 🚀
+    </div>
+  </div>
+
+  <div class="chap-nav">
+    <a href="24-quiz-while.html" class="chap-nav-btn">
+      <span class="cnb-dir">← 이전 챕터</span>
+      <span class="cnb-title"><span>24.</span> 연습문제 — while문</span>
+    </a>
+    <a href="26-error-types.html" class="chap-nav-btn next">
+      <span class="cnb-dir">다음 챕터 →</span>
+      <span class="cnb-title"><span>26.</span> 에러 읽는 법</span>
+    </a>
+  </div>
+
+</div>
+</main>
+</div>
+
+<script>
+  const isMobile = () => window.innerWidth <= 720;
+  const overlay  = document.getElementById('sidebarOverlay');
+  function toggleSidebar() {
+    document.body.classList.toggle('sidebar-closed');
+    if (isMobile()) overlay.classList.toggle('visible', !document.body.classList.contains('sidebar-closed'));
+    localStorage.setItem('sp-sidebar', document.body.classList.contains('sidebar-closed') ? 'closed' : 'open');
+  }
+  function closeSidebar() {
+    document.body.classList.add('sidebar-closed');
+    overlay.classList.remove('visible');
+    localStorage.setItem('sp-sidebar', 'closed');
+  }
+  function toggleGroup(id) { document.getElementById(id).classList.toggle('open'); }
+  window.addEventListener('DOMContentLoaded', () => {
+    if (isMobile()) document.body.classList.add('sidebar-closed');
+    else if (localStorage.getItem('sp-sidebar') === 'closed') document.body.classList.add('sidebar-closed');
+  });
+  window.addEventListener('resize', () => { if (!isMobile()) overlay.classList.remove('visible'); });
+  function toggleHint(id) { document.getElementById(id).classList.toggle('open'); }
+  function toggleAnswer() {
+    const body = document.getElementById('answerBody');
+    const icon = document.getElementById('answerIcon');
+    const visible = body.classList.toggle('visible');
+    icon.textContent = visible ? '▲ 접기' : '▼ 펼치기';
+  }
+</script>
+</body>
+</html>

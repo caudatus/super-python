@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<!--
+  슈퍼파이썬 (SuperPython) — 브론즈 챕터 36
+  미니 프로젝트 ⑥ — 텍스트 RPG 전투 시뮬레이터
+  LESSON 뱃지 | 함수 섹션 마무리
+-->
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>미니 프로젝트 ⑥ — 브론즈 | 슈퍼파이썬</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#111111; --bg-nav:#0A0A0A; --bg-side:#0E0E0E; --bg-card:#181818;
+      --bg-code:#1A1A1A; --bg-tip:#131A13; --bg-warn:#1A1410; --bg-info:#101520;
+      --accent:#00CC70; --accent-dim:#007A42; --accent-bg:rgba(0,204,112,0.07);
+      --accent2:#C8A000; --accent3:#BB88FF; --text:#D8D8D8; --text-head:#EFEFEF;
+      --text2:#888888; --text3:#444444; --border:#222222; --border2:#2E2E2E;
+      --sy-kw:#C792EA; --sy-fn:#82AAFF; --sy-str:#C3E88D;
+      --sy-cm:#546E7A; --sy-num:#F78C6C; --sy-pn:#89DDFF; --sy-ln-t:#555555;
+      --sidebar-w:248px; --content-max:720px; --header-h:48px;
+      font-variant-ligatures: none;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Noto Sans KR', sans-serif; font-size: 15px; line-height: 1.8; overflow-x: hidden; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent-dim); }
+
+    /* ── HEADER ── */
+    .top-header { position: fixed; top: 0; left: 0; right: 0; z-index: 200; height: var(--header-h); background: var(--bg-nav); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 16px; }
+    .header-open-btn { display: none; align-items: center; justify-content: center; width: 28px; height: 28px; flex-shrink: 0; margin-right: 12px; background: var(--bg-card); border: 1px solid var(--border2); border-radius: 4px; cursor: pointer; color: var(--text2); font-size: 12px; transition: background .15s, color .15s, border-color .15s; }
+    .header-open-btn:hover { background: var(--accent-bg); color: var(--accent); border-color: var(--accent); }
+    body.sidebar-closed .header-open-btn { display: flex; }
+    .header-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; font-family: 'JetBrains Mono', monospace; font-size: 12px; overflow: hidden; }
+    .header-logo  { color: var(--accent); text-decoration: none; font-weight: 700; white-space: nowrap; }
+    .header-sep   { color: var(--text3); flex-shrink: 0; }
+    .header-grade { color: var(--text2); white-space: nowrap; }
+    .header-chap  { color: var(--text-head); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .header-center { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text3); display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding: 0 16px; }
+    .progress-mini { width: 80px; height: 3px; background: var(--border2); border-radius: 2px; overflow: hidden; }
+    .progress-mini-fill { height: 100%; background: var(--accent); border-radius: 2px; }
+    .header-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .nav-btn { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text2); background: transparent; border: 1px solid var(--border2); padding: 4px 12px; text-decoration: none; transition: border-color .15s, color .15s; white-space: nowrap; }
+    .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .nav-btn.primary { color: var(--bg-nav); background: var(--accent); border-color: var(--accent); font-weight: 700; }
+    .nav-btn.primary:hover { filter: brightness(1.1); }
+
+    /* ── LAYOUT ── */
+    .layout { display: flex; padding-top: var(--header-h); min-height: 100vh; }
+
+    /* ── SIDEBAR ── */
+    .sidebar { width: var(--sidebar-w); flex-shrink: 0; position: fixed; top: var(--header-h); bottom: 0; left: 0; background: var(--bg-side); border-right: 1px solid var(--border); overflow-y: auto; overflow-x: hidden; transition: transform .22s ease; z-index: 150; padding-top: 8px; }
+    body.sidebar-closed .sidebar { transform: translateX(calc(-1 * var(--sidebar-w))); }
+    body.sidebar-closed .content { margin-left: 0; }
+    .sidebar-toggle { position: absolute; top: 10px; right: 10px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: var(--bg-card); border: 1px solid var(--border2); border-radius: 4px; cursor: pointer; color: var(--text2); font-size: 12px; z-index: 10; transition: background .15s, color .15s, border-color .15s; }
+    .sidebar-toggle:hover { background: var(--accent-bg); color: var(--accent); border-color: var(--accent); }
+    body.sidebar-closed .sidebar-toggle { display: none; }
+    .sidebar-progress { margin: 44px 12px 12px; padding: 12px 14px; background: var(--bg-card); border: 1px solid var(--border); }
+    .sp-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); margin-bottom: 6px; letter-spacing: .08em; }
+    .sp-bar   { height: 4px; background: var(--border2); border-radius: 2px; overflow: hidden; margin-bottom: 5px; }
+    .sp-fill  { height: 100%; background: var(--accent); border-radius: 2px; }
+    .sp-text  { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text2); }
+    .sp-text span { color: var(--accent); }
+    .sb-group { border-bottom: 1px solid var(--border); }
+    .sb-group-header { display: flex; align-items: center; justify-content: space-between; padding: 9px 14px 9px 12px; cursor: pointer; user-select: none; transition: background .12s; gap: 8px; }
+    .sb-group-header:hover { background: rgba(255,255,255,.03); }
+    .sb-group-title { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; letter-spacing: .06em; color: var(--text2); text-transform: uppercase; flex: 1; }
+    .sb-group.current .sb-group-title { color: var(--accent); }
+    .sb-group-arrow { font-size: 9px; color: var(--text3); transition: transform .2s; flex-shrink: 0; }
+    .sb-group.open .sb-group-arrow { transform: rotate(90deg); color: var(--accent); }
+    .sb-items { overflow: hidden; max-height: 0; transition: max-height .28s ease; }
+    .sb-group.open .sb-items { max-height: 1200px; }
+    .sb-item { display: flex; align-items: baseline; gap: 8px; padding: 6px 14px 6px 20px; font-size: 13px; color: var(--text2); text-decoration: none; border-left: 2px solid transparent; transition: background .1s, color .1s, border-color .1s; line-height: 1.45; }
+    .sb-item:hover  { background: rgba(255,255,255,.03); color: var(--text); }
+    .sb-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--accent-bg); font-weight: 500; }
+    .sb-item.done   { color: var(--text3); }
+    .sb-icon { font-size: 9px; flex-shrink: 0; font-family: 'JetBrains Mono', monospace; width: 10px; text-align: center; color: var(--text3); }
+    .sb-item.active .sb-icon { color: var(--accent); }
+    .sb-item.done   .sb-icon { color: var(--accent-dim); }
+    .sb-num { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); flex-shrink: 0; min-width: 22px; }
+
+    /* ── CONTENT ── */
+    .content { margin-left: var(--sidebar-w); flex: 1; min-width: 0; padding: 48px 52px 96px; transition: margin-left .22s ease; }
+    .content-inner { max-width: var(--content-max); margin: 0 auto; }
+
+    /* ── TYPOGRAPHY ── */
+    .chap-meta { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text3); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .badge { font-size: 10px; padding: 2px 8px; background: var(--accent-bg); color: var(--accent); border: 1px solid rgba(0,204,112,.25); letter-spacing: .06em; }
+    .badge.project { background: rgba(187,136,255,.1); color: var(--accent3); border-color: rgba(187,136,255,.25); }
+    .chap-title    { font-family: 'JetBrains Mono', monospace; font-size: clamp(22px,3.5vw,30px); font-weight: 700; color: var(--text-head); line-height: 1.25; margin-bottom: 8px; }
+    .chap-title .hl  { color: var(--accent); }
+    .chap-title .hl2 { color: var(--accent3); }
+    .chap-subtitle { font-size: 15px; color: var(--text2); margin-bottom: 32px; line-height: 1.65; }
+    h2 { font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 700; color: var(--text-head); margin: 44px 0 16px; display: flex; align-items: baseline; gap: 10px; }
+    h2 .n { color: var(--accent); font-size: 13px; }
+    h3 { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 700; color: var(--accent); margin: 28px 0 12px; }
+    p  { color: var(--text); margin-bottom: 16px; line-height: 1.9; font-size: 15px; }
+    code { font-family: 'JetBrains Mono', monospace; font-size: 13px; background: var(--bg-code); color: var(--accent); padding: 1px 6px; border: 1px solid var(--border2); border-radius: 2px; }
+    strong { color: var(--text-head); font-weight: 700; }
+    ul { padding-left: 20px; margin-bottom: 16px; }
+    ul li { margin-bottom: 6px; color: var(--text); line-height: 1.75; }
+
+    /* ── 목표 박스 ── */
+    .goal-box { background: var(--bg-card); border: 1px solid var(--border2); border-left: 3px solid var(--accent3); padding: 18px 22px; margin-bottom: 32px; }
+    .goal-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent3); letter-spacing: .08em; margin-bottom: 12px; }
+    .goal-list { padding-left: 18px; }
+    .goal-list li { color: var(--text); font-size: 14px; margin-bottom: 6px; line-height: 1.7; }
+    .goal-list li::marker { color: var(--accent3); }
+
+    /* ── 개념 태그 ── */
+    .concept-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+    .concept-tag { font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 4px 10px; background: var(--bg-code); border: 1px solid var(--border2); color: var(--text2); }
+
+    /* ── 코드 블록 ── */
+    .code-block { background: var(--bg-code); border: 1px solid var(--border2); margin: 16px 0 24px; overflow: hidden; }
+    .code-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; border-bottom: 1px solid var(--border2); background: var(--bg-card); }
+    .code-lang { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); letter-spacing: .08em; }
+    .code-copy { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); background: transparent; border: 1px solid var(--border2); padding: 3px 10px; cursor: pointer; transition: color .15s, border-color .15s; }
+    .code-copy:hover { color: var(--accent); border-color: var(--accent); }
+    .code-body { padding: 16px 20px; overflow-x: auto; }
+    .code-body pre { font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.8; color: var(--text); white-space: pre; }
+    .ln { display: inline-block; width: 28px; text-align: right; margin-right: 16px; color: var(--sy-ln-t); user-select: none; font-size: 12px; }
+    .kw{color:var(--sy-kw);} .fn{color:var(--sy-fn);} .str{color:var(--sy-str);}
+    .cm{color:var(--sy-cm);} .num{color:var(--sy-num);} .pn{color:var(--sy-pn);}
+
+    /* ── 결과 출력 박스 ── */
+    .output-box { background: #0A0F0A; border: 1px solid var(--border2); border-left: 3px solid var(--accent); margin: 0 0 24px; padding: 14px 20px; }
+    .output-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); margin-bottom: 10px; letter-spacing: .08em; }
+    .output-body  { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #A8D8A8; line-height: 1.85; white-space: pre-wrap; }
+
+    /* ── 팁 / 경고 / 정보 박스 ── */
+    .tip-box  { background: var(--bg-tip);  border: 1px solid rgba(0,204,112,.15);  border-left: 3px solid var(--accent);  padding: 14px 18px; margin: 16px 0 24px; }
+    .warn-box { background: var(--bg-warn); border: 1px solid rgba(255,160,50,.15);  border-left: 3px solid var(--accent2); padding: 14px 18px; margin: 16px 0 24px; }
+    .info-box { background: var(--bg-info); border: 1px solid rgba(100,140,255,.15); border-left: 3px solid #6488FF;        padding: 14px 18px; margin: 16px 0 24px; }
+    .box-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .08em; margin-bottom: 8px; }
+    .tip-box  .box-label { color: var(--accent); }
+    .warn-box .box-label { color: var(--accent2); }
+    .info-box .box-label { color: #6488FF; }
+    .tip-box p, .warn-box p, .info-box p { margin-bottom: 0; font-size: 14px; color: var(--text2); line-height: 1.8; }
+
+    /* ── 단계별 힌트 / 정답 아코디언 ── */
+    .step-block { margin-bottom: 12px; border: 1px solid var(--border2); }
+    .step-toggle { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; cursor: pointer; user-select: none; background: var(--bg-card); transition: background .12s; }
+    .step-toggle:hover { background: rgba(255,255,255,.03); }
+    .step-toggle-label { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+    .step-num  { color: var(--accent3); }
+    .step-name { color: var(--text-head); }
+    .step-arrow { font-size: 10px; color: var(--text3); transition: transform .2s; }
+    .step-block.open .step-arrow { transform: rotate(90deg); color: var(--accent); }
+    .step-body { display: none; border-top: 1px solid var(--border2); }
+    .step-block.open .step-body { display: block; }
+    .step-desc { padding: 14px 18px; font-size: 14px; color: var(--text2); line-height: 1.8; border-bottom: 1px solid var(--border); }
+    .step-desc p { margin-bottom: 8px; color: var(--text2); font-size: 14px; }
+    .step-desc p:last-child { margin-bottom: 0; }
+
+    /* ── 힌트 / 정답 탭 ── */
+    .hint-answer { margin: 0; }
+    .hint-answer-tabs { display: flex; border-bottom: 1px solid var(--border); }
+    .ha-tab { font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 8px 16px; cursor: pointer; color: var(--text3); border: none; background: transparent; border-right: 1px solid var(--border); transition: color .15s, background .15s; }
+    .ha-tab:hover   { color: var(--text2); background: rgba(255,255,255,.02); }
+    .ha-tab.active  { color: var(--accent); background: var(--accent-bg); }
+    .ha-panel { display: none; padding: 14px 18px; background: var(--bg-code); }
+    .ha-panel.active { display: block; }
+    .ha-panel pre { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text2); line-height: 1.8; white-space: pre-wrap; margin: 0; }
+
+    /* ── 최종 결과 코드 섹션 ── */
+    .full-code-header { display: flex; align-items: center; gap: 12px; margin: 44px 0 0; padding: 12px 16px; border: 1px solid var(--border2); background: var(--bg-card); cursor: pointer; user-select: none; transition: background .12s, border-color .15s; }
+    .full-code-header:hover { background: rgba(255,255,255,.03); border-color: var(--accent3); }
+    .full-code-title  { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 700; color: var(--text-head); flex: 1; }
+    .full-code-badge  { font-family: 'JetBrains Mono', monospace; font-size: 10px; padding: 3px 8px; background: rgba(187,136,255,.1); color: var(--accent3); border: 1px solid rgba(187,136,255,.25); }
+    .full-code-arrow  { font-size: 10px; color: var(--text3); transition: transform .2s; flex-shrink: 0; }
+    .full-code-wrap.open .full-code-arrow  { transform: rotate(90deg); color: var(--accent3); }
+    .full-code-wrap.open .full-code-header { border-bottom: none; border-color: var(--accent3); }
+    .full-code-body   { display: none; border: 1px solid var(--accent3); border-top: none; margin-bottom: 24px; }
+    .full-code-wrap.open .full-code-body   { display: block; }
+    .full-code-body .code-block { border: none; margin: 0; }
+
+    /* ── 도전과제 ── */
+    .challenge-box { background: var(--bg-card); border: 1px solid var(--border2); border-top: 2px solid var(--accent2); padding: 20px 22px; margin: 32px 0; }
+    .challenge-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent2); letter-spacing: .08em; margin-bottom: 14px; }
+    .challenge-list { padding-left: 0; list-style: none; }
+    .challenge-list li { display: flex; align-items: baseline; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--text); }
+    .challenge-list li:last-child { border-bottom: none; }
+    .c-num { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent2); flex-shrink: 0; min-width: 24px; }
+
+    /* ── 요약 박스 ── */
+    .summary-box { background: var(--bg-card); border: 1px solid var(--border2); padding: 20px 24px; margin: 32px 0; }
+    .summary-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); letter-spacing: .08em; margin-bottom: 14px; }
+    .summary-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+    .summary-item { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: var(--text2); line-height: 1.55; }
+    .summary-item::before { content: '✓'; color: var(--accent); flex-shrink: 0; font-family: 'JetBrains Mono', monospace; font-size: 12px; margin-top: 2px; }
+
+    /* ── 격려 / 네비 ── */
+    .section-divider { height: 1px; background: var(--border); margin: 44px 0; }
+    .cheer-box { border: 1px solid var(--border); background: var(--bg); padding: 18px 22px; margin-bottom: 44px; display: flex; gap: 14px; align-items: flex-start; }
+    .cheer-icon { font-size: 18px; flex-shrink: 0; line-height: 1.5; }
+    .cheer-text { font-size: 14px; color: var(--text2); line-height: 1.85; }
+    .cheer-text strong { color: var(--text-head); }
+    .chap-nav { display: flex; justify-content: space-between; padding-top: 32px; border-top: 1px solid var(--border); gap: 12px; flex-wrap: wrap; }
+    .chap-nav-btn { display: flex; flex-direction: column; gap: 4px; text-decoration: none; padding: 14px 18px; border: 1px solid var(--border2); background: var(--bg-card); flex: 1; max-width: 300px; transition: border-color .15s; }
+    .chap-nav-btn:hover { border-color: var(--accent); }
+    .chap-nav-btn.next  { text-align: right; }
+    .cnb-dir   { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); letter-spacing: .07em; }
+    .cnb-title { font-size: 13px; color: var(--text2); line-height: 1.45; }
+    .cnb-title span { color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+
+    /* ── 반응형 ── */
+    .sidebar-overlay { display: none; position: fixed; inset: 0; top: var(--header-h); z-index: 140; background: rgba(0,0,0,.65); }
+    @media (max-width: 720px) {
+      .sidebar-overlay.visible { display: block; }
+      .content { margin-left: 0; padding: 28px 20px 72px; }
+      .header-center { display: none; }
+      .summary-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 480px) {
+      .header-grade { display: none; }
+      .chap-nav-btn { max-width: 100%; }
+      .header-right .nav-btn:not(.primary) { display: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition: none !important; animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header class="top-header">
+  <button class="header-open-btn" onclick="toggleSidebar()">▶</button>
+  <div class="header-left">
+    <a href="../index.html" class="header-logo">SUPERPYTHON</a>
+    <span class="header-sep">/</span>
+    <span class="header-grade">🟤 BRONZE</span>
+    <span class="header-sep">/</span>
+    <span class="header-chap">36. 🎮 미니 프로젝트 ⑥</span>
+  </div>
+  <div class="header-center">
+    <span>36 / 48</span>
+    <div class="progress-mini"><div class="progress-mini-fill" style="width:75%"></div></div>
+    <span>75%</span>
+  </div>
+  <div class="header-right">
+    <a href="35-quiz-module.html" class="nav-btn">← 이전</a>
+    <a href="37-dictionary.html"  class="nav-btn primary">다음 →</a>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<div class="layout">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar" id="sidebar">
+    <button class="sidebar-toggle" onclick="toggleSidebar()">◀</button>
+    <div class="sidebar-progress">
+      <div class="sp-label">BRONZE 진행률</div>
+      <div class="sp-bar"><div class="sp-fill" style="width:75%"></div></div>
+      <div class="sp-text"><span>35</span> / 48 챕터 완료</div>
+    </div>
+
+    <div class="sb-group" id="grp-env">
+      <div class="sb-group-header" onclick="toggleGroup('grp-env')"><span class="sb-group-title">환경 설정</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="01-what-is-python.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">01</span>파이썬이란?</a>
+        <a href="02-setup.html"          class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">02</span>개발환경 설치</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-basic1">
+      <div class="sb-group-header" onclick="toggleGroup('grp-basic1')"><span class="sb-group-title">기초 문법 1</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="03-print.html"                    class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">03</span>print()란?</a>
+        <a href="04-quiz-print.html"               class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">04</span>연습문제</a>
+        <a href="05-variables.html"                class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">05</span>변수와 데이터 타입</a>
+        <a href="06-operators.html"                class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">06</span>연산자</a>
+        <a href="07-quiz-variables-operators.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">07</span>연습문제</a>
+        <a href="08-string.html"                   class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">08</span>문자열 String</a>
+        <a href="09-quiz-string.html"              class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">09</span>연습문제</a>
+        <a href="10-fstring.html"                  class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">10</span>f-string 완전정리</a>
+        <a href="11-quiz-fstring.html"             class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">11</span>연습문제</a>
+        <a href="12-mini-project-01.html"          class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">12</span>🎮 미니 프로젝트 ①</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-basic2">
+      <div class="sb-group-header" onclick="toggleGroup('grp-basic2')"><span class="sb-group-title">기초 문법 2</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="13-list.html"            class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">13</span>리스트</a>
+        <a href="14-quiz-list.html"       class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">14</span>연습문제</a>
+        <a href="15-input.html"           class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">15</span>input() 함수</a>
+        <a href="16-quiz-input.html"      class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">16</span>연습문제</a>
+        <a href="17-mini-project-02.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">17</span>🎮 미니 프로젝트 ②</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-flow">
+      <div class="sb-group-header" onclick="toggleGroup('grp-flow')"><span class="sb-group-title">흐름 제어</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="18-if.html"              class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">18</span>조건문 (if)</a>
+        <a href="19-quiz-if.html"         class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">19</span>연습문제</a>
+        <a href="20-mini-project-03.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">20</span>🎮 미니 프로젝트 ③</a>
+        <a href="21-for-range.html"       class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">21</span>for문과 range()</a>
+        <a href="22-quiz-for.html"        class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">22</span>연습문제</a>
+        <a href="23-while.html"           class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">23</span>while문</a>
+        <a href="24-quiz-while.html"      class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">24</span>연습문제</a>
+        <a href="25-mini-project-04.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">25</span>🎮 미니 프로젝트 ④</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-error">
+      <div class="sb-group-header" onclick="toggleGroup('grp-error')"><span class="sb-group-title">에러 &amp; 디버깅</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="26-error-types.html"    class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">26</span>에러 읽는 법</a>
+        <a href="27-debugging.html"      class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">27</span>기초 디버깅 실습</a>
+        <a href="28-quiz-debugging.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">28</span>연습문제</a>
+      </div>
+    </div>
+    <div class="sb-group current open" id="grp-func">
+      <div class="sb-group-header" onclick="toggleGroup('grp-func')"><span class="sb-group-title">함수</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="29-function-basic.html"         class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">29</span>함수 기초</a>
+        <a href="30-quiz-function-basic.html"    class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">30</span>연습문제</a>
+        <a href="31-mini-project-05.html"        class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">31</span>🎮 미니 프로젝트 ⑤</a>
+        <a href="32-function-advanced.html"      class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">32</span>함수 심화</a>
+        <a href="33-quiz-function-advanced.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">33</span>연습문제</a>
+        <a href="34-module.html"                 class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">34</span>모듈</a>
+        <a href="35-quiz-module.html"            class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">35</span>연습문제</a>
+        <a href="36-mini-project-06.html"        class="sb-item active"><span class="sb-icon">▶</span><span class="sb-num">36</span>🎮 미니 프로젝트 ⑥</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-ds">
+      <div class="sb-group-header" onclick="toggleGroup('grp-ds')"><span class="sb-group-title">자료구조</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="37-dictionary.html"      class="sb-item"><span class="sb-icon"> </span><span class="sb-num">37</span>딕셔너리</a>
+        <a href="38-quiz-dictionary.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">38</span>연습문제</a>
+        <a href="39-tuple-set.html"       class="sb-item"><span class="sb-icon"> </span><span class="sb-num">39</span>튜플과 셋</a>
+        <a href="40-quiz-tuple-set.html"  class="sb-item"><span class="sb-icon"> </span><span class="sb-num">40</span>연습문제</a>
+        <a href="41-mini-project-07.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">41</span>🎮 미니 프로젝트 ⑦</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-file">
+      <div class="sb-group-header" onclick="toggleGroup('grp-file')"><span class="sb-group-title">파일 &amp; 예외처리</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="42-file-io.html"         class="sb-item"><span class="sb-icon"> </span><span class="sb-num">42</span>파일 입출력</a>
+        <a href="43-quiz-file-io.html"    class="sb-item"><span class="sb-icon"> </span><span class="sb-num">43</span>연습문제</a>
+        <a href="44-exception-basic.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">44</span>예외처리 기초</a>
+        <a href="45-quiz-exception.html"  class="sb-item"><span class="sb-icon"> </span><span class="sb-num">45</span>연습문제</a>
+        <a href="46-mini-project-08.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">46</span>🎮 미니 프로젝트 ⑧</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-end">
+      <div class="sb-group-header" onclick="toggleGroup('grp-end')"><span class="sb-group-title">마무리</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="47-final-project.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">47</span>★ 최종 프로젝트</a>
+        <a href="48-next-step.html"     class="sb-item"><span class="sb-icon"> </span><span class="sb-num">48</span>다음 단계 미리보기</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── CONTENT ── -->
+  <main class="content" id="mainContent">
+    <div class="content-inner">
+
+      <div class="chap-meta">
+        <span class="badge project">PROJECT</span>
+        <span>함수</span>
+        <span style="color:var(--text3)">·</span>
+        <span>챕터 36 / 48</span>
+      </div>
+      <h1 class="chap-title">🎮 미니 프로젝트 ⑥<br><span class="hl2">텍스트 RPG</span> <span class="hl">전투 시뮬레이터</span></h1>
+      <p class="chap-subtitle">함수 기초부터 심화, 그리고 모듈까지 — 지금까지 배운 함수 섹션의 모든 개념을 한 프로그램에 녹여냅니다. 랜덤 전투가 실제로 동작하는 나만의 RPG를 만들어보세요.</p>
+
+      <!-- 목표 -->
+      <div class="goal-box">
+        <div class="goal-label">▸ 이 프로젝트를 마치면</div>
+        <ul class="goal-list">
+          <li>함수를 <strong>역할별로 분리</strong>하여 프로그램을 구조화할 수 있다</li>
+          <li>기본값 매개변수와 <code>*args</code>를 실전 코드에 적용할 수 있다</li>
+          <li><code>random</code> 모듈로 불확실성(크리티컬, 회피)을 구현할 수 있다</li>
+          <li><code>math</code> 모듈로 수치 계산(데미지 공식)을 처리할 수 있다</li>
+          <li><code>while</code>과 함수가 어떻게 협력하는지 이해할 수 있다</li>
+          <li>완성된 게임 한 판을 처음부터 끝까지 직접 실행할 수 있다</li>
+        </ul>
+      </div>
+
+      <!-- 사용 개념 -->
+      <h2><span class="n">1.</span>사용할 개념들</h2>
+      <p>새로운 문법은 <strong>하나도 없습니다.</strong> 지금까지 배운 것만으로 완성합니다.</p>
+      <div class="concept-tags">
+        <span class="concept-tag">함수 정의 / 호출</span>
+        <span class="concept-tag">기본값 매개변수</span>
+        <span class="concept-tag">*args</span>
+        <span class="concept-tag">return</span>
+        <span class="concept-tag">import random</span>
+        <span class="concept-tag">import math</span>
+        <span class="concept-tag">random.randint()</span>
+        <span class="concept-tag">random.random()</span>
+        <span class="concept-tag">math.floor()</span>
+        <span class="concept-tag">while / break</span>
+        <span class="concept-tag">if / elif / else</span>
+        <span class="concept-tag">f-string</span>
+      </div>
+
+      <div class="tip-box">
+        <div class="box-label">💡 미니 프로젝트 공략법</div>
+        <p>정답을 바로 보지 마세요. <strong>기능 명세 읽기 → 혼자 시도 → 막히면 힌트 → 최후의 수단으로 정답 코드</strong> 순서로 진행할 때 실력이 가장 빠르게 늡니다. 막히는 것은 실패가 아니라 성장 과정입니다.</p>
+      </div>
+
+      <!-- 완성 결과물 -->
+      <h2><span class="n">2.</span>완성 결과물 미리보기</h2>
+      <p>여러분이 만들 프로그램을 실행하면 아래와 같이 출력됩니다.</p>
+
+      <div class="output-box">
+        <div class="output-label">▸ 실행 결과 (매 실행마다 다른 결과가 나옵니다)</div>
+        <div class="output-body">========================================
+  ⚔️  텍스트 RPG 전투 시뮬레이터  ⚔️
+========================================
+[영웅] 아처  HP: 80  공격력: 18  방어력: 6
+[몬스터] 고블린  HP: 60  공격력: 12  방어력: 3
+
+--- 1 라운드 ---
+아처 의 공격! 고블린 에게 15 데미지!
+고블린 의 공격! 아처 에게 6 데미지!
+[아처 HP: 74]  [고블린 HP: 45]
+
+--- 2 라운드 ---
+아처 의 공격! ✨ 크리티컬! 고블린 에게 30 데미지!
+고블린 의 공격! 아처 가 공격을 회피했다!
+[아처 HP: 74]  [고블린 HP: 15]
+
+--- 3 라운드 ---
+아처 의 공격! 고블린 에게 17 데미지!
+고블린 이 쓰러졌다!
+
+========================================
+🏆  아처 승리!  (3 라운드)
+========================================
+전투 로그가 저장될 경로: /Users/kim/projects/battle_log.txt</div>
+      </div>
+
+      <!-- 기능 명세 -->
+      <h2><span class="n">3.</span>기능 명세서</h2>
+      <p>프로그램이 갖춰야 할 기능을 정리합니다. 코드를 짜기 전에 먼저 읽고 전체 구조를 머릿속에 그려보세요.</p>
+
+      <div class="info-box">
+        <div class="box-label">📋 구현할 함수 목록</div>
+        <p>
+          <strong>① <code>create_character(name, hp, attack, defense)</code></strong> — 캐릭터 정보를 담은 리스트 반환<br>
+          <strong>② <code>print_status(*characters)</code></strong> — <code>*args</code>로 여러 캐릭터 상태를 한 번에 출력<br>
+          <strong>③ <code>calculate_damage(attack, defense, crit_rate=0.2)</code></strong> — 데미지 계산 (크리티컬 포함)<br>
+          <strong>④ <code>attack_action(attacker, defender)</code></strong> — 공격 1회 실행, 결과 출력, 방어자 HP 갱신<br>
+          <strong>⑤ <code>battle(hero, monster)</code></strong> — 승패가 결정될 때까지 while 반복 전투 진행<br>
+          <strong>⑥ <code>show_log_path()</code></strong> — os.path.join으로 로그 저장 경로 출력
+        </p>
+      </div>
+
+      <div class="warn-box">
+        <div class="box-label">⚠️ 게임 규칙</div>
+        <p>
+          • 기본 데미지 = <code>attack - defense</code>, 최소 1 이상<br>
+          • 크리티컬(20% 확률): 데미지 × 2, "✨ 크리티컬!" 출력<br>
+          • 회피(10% 확률): 데미지 0, "회피했다!" 출력<br>
+          • 캐릭터는 <code>[이름, HP, 공격력, 방어력]</code> 형태의 리스트로 관리<br>
+          • HP가 0 이하가 되면 해당 캐릭터 패배
+        </p>
+      </div>
+
+      <!-- 단계별 구현 -->
+      <h2><span class="n">4.</span>단계별 구현 가이드</h2>
+      <p>한 번에 전체를 짜려 하지 말고, 아래 단계를 하나씩 완성하면서 각 단계마다 테스트해보세요.</p>
+
+      <!-- STEP 1 -->
+      <div class="step-block" id="step1">
+        <div class="step-toggle" onclick="toggleStep('step1')">
+          <span class="step-toggle-label">
+            <span class="step-num">STEP 1</span>
+            <span class="step-name">캐릭터 생성 함수</span>
+          </span>
+          <span class="step-arrow">▶</span>
+        </div>
+        <div class="step-body">
+          <div class="step-desc">
+            <p><code>create_character(name, hp, attack, defense)</code> 함수를 만드세요. 네 가지 정보를 받아서 <code>[이름, HP, 공격력, 방어력]</code> 형태의 리스트를 반환합니다.</p>
+            <p>완성 후 <code>hero = create_character("전사", 100, 20, 8)</code>를 출력해서 리스트가 맞게 만들어지는지 확인하세요.</p>
+          </div>
+          <div class="hint-answer">
+            <div class="hint-answer-tabs">
+              <button class="ha-tab active" onclick="switchTab(this, 'step1-hint')">💡 힌트</button>
+              <button class="ha-tab"        onclick="switchTab(this, 'step1-answer')">✅ 정답 코드</button>
+            </div>
+            <div class="ha-panel active" id="step1-hint">
+              <pre>함수가 리스트를 반환하려면 return [...]을 사용합니다.
+네 가지 매개변수를 그대로 리스트에 담으면 됩니다.</pre>
+            </div>
+            <div class="ha-panel" id="step1-answer">
+              <pre><span class="kw">def</span> <span class="fn">create_character</span><span class="pn">(</span>name<span class="pn">,</span> hp<span class="pn">,</span> attack<span class="pn">,</span> defense<span class="pn">):</span>
+    <span class="kw">return</span> <span class="pn">[</span>name<span class="pn">,</span> hp<span class="pn">,</span> attack<span class="pn">,</span> defense<span class="pn">]</span>
+
+<span class="cm"># 테스트</span>
+hero <span class="pn">=</span> <span class="fn">create_character</span><span class="pn">(</span><span class="str">"전사"</span><span class="pn">,</span> <span class="num">100</span><span class="pn">,</span> <span class="num">20</span><span class="pn">,</span> <span class="num">8</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span>hero<span class="pn">)</span>  <span class="cm"># ['전사', 100, 20, 8]</span></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="step-block" id="step2">
+        <div class="step-toggle" onclick="toggleStep('step2')">
+          <span class="step-toggle-label">
+            <span class="step-num">STEP 2</span>
+            <span class="step-name">상태 출력 함수 (*args 활용)</span>
+          </span>
+          <span class="step-arrow">▶</span>
+        </div>
+        <div class="step-body">
+          <div class="step-desc">
+            <p><code>print_status(*characters)</code> 함수를 만드세요. <code>*args</code>를 이용해 캐릭터를 여러 개 받아서 각각의 이름, HP, 공격력, 방어력을 한 줄씩 출력합니다.</p>
+            <p>리스트의 인덱스: <code>[0]</code> 이름, <code>[1]</code> HP, <code>[2]</code> 공격력, <code>[3]</code> 방어력</p>
+          </div>
+          <div class="hint-answer">
+            <div class="hint-answer-tabs">
+              <button class="ha-tab active" onclick="switchTab(this, 'step2-hint')">💡 힌트</button>
+              <button class="ha-tab"        onclick="switchTab(this, 'step2-answer')">✅ 정답 코드</button>
+            </div>
+            <div class="ha-panel active" id="step2-hint">
+              <pre>def print_status(*characters):
+    for ch in characters:
+        print(f"[{ch[0]}]  HP: {ch[1]}  공격력: {ch[2]}  방어력: {ch[3]}")</pre>
+            </div>
+            <div class="ha-panel" id="step2-answer">
+              <pre><span class="kw">def</span> <span class="fn">print_status</span><span class="pn">(*</span>characters<span class="pn">):</span>
+    <span class="kw">for</span> ch <span class="kw">in</span> characters<span class="pn">:</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">f"[{ch[0]}]  HP: {ch[1]}  공격력: {ch[2]}  방어력: {ch[3]}"</span><span class="pn">)</span>
+
+<span class="cm"># 테스트 — 두 캐릭터를 한 번에 전달</span>
+<span class="fn">print_status</span><span class="pn">(</span>hero<span class="pn">,</span> monster<span class="pn">)</span></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="step-block" id="step3">
+        <div class="step-toggle" onclick="toggleStep('step3')">
+          <span class="step-toggle-label">
+            <span class="step-num">STEP 3</span>
+            <span class="step-name">데미지 계산 함수 (기본값 매개변수)</span>
+          </span>
+          <span class="step-arrow">▶</span>
+        </div>
+        <div class="step-body">
+          <div class="step-desc">
+            <p><code>calculate_damage(attack, defense, crit_rate=0.2)</code> 함수를 만드세요.</p>
+            <p>반환값은 <strong>(최종 데미지, 크리티컬 여부, 회피 여부)</strong> 세 가지를 담은 튜플입니다.</p>
+            <p>로직: ① 회피 판정 (10% 확률, <code>random.random() &lt; 0.1</code>) → ② 크리티컬 판정 (<code>random.random() &lt; crit_rate</code>) → ③ 기본 데미지 = <code>attack - defense</code>, 최소 1 → ④ 크리티컬이면 × 2, <code>math.floor()</code>로 정수화</p>
+          </div>
+          <div class="hint-answer">
+            <div class="hint-answer-tabs">
+              <button class="ha-tab active" onclick="switchTab(this, 'step3-hint')">💡 힌트</button>
+              <button class="ha-tab"        onclick="switchTab(this, 'step3-answer')">✅ 정답 코드</button>
+            </div>
+            <div class="ha-panel active" id="step3-hint">
+              <pre>import random
+import math
+
+def calculate_damage(attack, defense, crit_rate=0.2):
+    # 회피 먼저 판정
+    if random.random() < 0.1:
+        return (0, False, True)   # (데미지, 크리티컬, 회피)
+    
+    base = max(1, attack - defense)
+    is_crit = random.random() < crit_rate
+    damage = math.floor(base * 2) if is_crit else base
+    return (damage, is_crit, False)</pre>
+            </div>
+            <div class="ha-panel" id="step3-answer">
+              <pre><span class="kw">import</span> random
+<span class="kw">import</span> math
+
+<span class="kw">def</span> <span class="fn">calculate_damage</span><span class="pn">(</span>attack<span class="pn">,</span> defense<span class="pn">,</span> crit_rate<span class="pn">=</span><span class="num">0.2</span><span class="pn">):</span>
+    <span class="cm"># ① 회피 판정 (10%)</span>
+    <span class="kw">if</span> random<span class="pn">.</span><span class="fn">random</span><span class="pn">()</span> <span class="pn">&lt;</span> <span class="num">0.1</span><span class="pn">:</span>
+        <span class="kw">return</span> <span class="pn">(</span><span class="num">0</span><span class="pn">,</span> <span class="kw">False</span><span class="pn">,</span> <span class="kw">True</span><span class="pn">)</span>
+
+    <span class="cm"># ② 기본 데미지 (최소 1)</span>
+    base <span class="pn">=</span> <span class="fn">max</span><span class="pn">(</span><span class="num">1</span><span class="pn">,</span> attack <span class="pn">-</span> defense<span class="pn">)</span>
+
+    <span class="cm"># ③ 크리티컬 판정</span>
+    is_crit <span class="pn">=</span> random<span class="pn">.</span><span class="fn">random</span><span class="pn">()</span> <span class="pn">&lt;</span> crit_rate
+    damage  <span class="pn">=</span> math<span class="pn">.</span><span class="fn">floor</span><span class="pn">(</span>base <span class="pn">*</span> <span class="num">2</span><span class="pn">)</span> <span class="kw">if</span> is_crit <span class="kw">else</span> base
+
+    <span class="kw">return</span> <span class="pn">(</span>damage<span class="pn">,</span> is_crit<span class="pn">,</span> <span class="kw">False</span><span class="pn">)</span>
+
+<span class="cm"># 세 값을 한 번에 받는 언패킹</span>
+dmg<span class="pn">,</span> crit<span class="pn">,</span> evade <span class="pn">=</span> <span class="fn">calculate_damage</span><span class="pn">(</span><span class="num">20</span><span class="pn">,</span> <span class="num">5</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span>dmg<span class="pn">,</span> crit<span class="pn">,</span> evade<span class="pn">)</span></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4 -->
+      <div class="step-block" id="step4">
+        <div class="step-toggle" onclick="toggleStep('step4')">
+          <span class="step-toggle-label">
+            <span class="step-num">STEP 4</span>
+            <span class="step-name">공격 실행 함수</span>
+          </span>
+          <span class="step-arrow">▶</span>
+        </div>
+        <div class="step-body">
+          <div class="step-desc">
+            <p><code>attack_action(attacker, defender)</code> 함수를 만드세요.</p>
+            <p>Step 3의 <code>calculate_damage()</code>를 호출해서 데미지를 구하고, 결과에 따라 다른 메시지를 출력합니다. 마지막으로 방어자의 HP를 실제로 감소시킵니다.</p>
+            <p>리스트의 인덱스 1번이 HP입니다. <code>defender[1] -= damage</code> 형태로 수정합니다.</p>
+          </div>
+          <div class="hint-answer">
+            <div class="hint-answer-tabs">
+              <button class="ha-tab active" onclick="switchTab(this, 'step4-hint')">💡 힌트</button>
+              <button class="ha-tab"        onclick="switchTab(this, 'step4-answer')">✅ 정답 코드</button>
+            </div>
+            <div class="ha-panel active" id="step4-hint">
+              <pre>dmg, crit, evade = calculate_damage(attacker[2], defender[3])
+
+if evade:
+    print(f"{defender[0]} 가 공격을 회피했다!")
+elif crit:
+    print(f"✨ 크리티컬! {defender[0]} 에게 {dmg} 데미지!")
+    defender[1] -= dmg
+else:
+    print(f"{attacker[0]} 의 공격! {defender[0]} 에게 {dmg} 데미지!")
+    defender[1] -= dmg</pre>
+            </div>
+            <div class="ha-panel" id="step4-answer">
+              <pre><span class="kw">def</span> <span class="fn">attack_action</span><span class="pn">(</span>attacker<span class="pn">,</span> defender<span class="pn">):</span>
+    dmg<span class="pn">,</span> crit<span class="pn">,</span> evade <span class="pn">=</span> <span class="fn">calculate_damage</span><span class="pn">(</span>attacker<span class="pn">[</span><span class="num">2</span><span class="pn">],</span> defender<span class="pn">[</span><span class="num">3</span><span class="pn">])</span>
+
+    <span class="kw">if</span> evade<span class="pn">:</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">f"{attacker[0]} 의 공격! {defender[0]} 가 공격을 회피했다!"</span><span class="pn">)</span>
+    <span class="kw">elif</span> crit<span class="pn">:</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">f"{attacker[0]} 의 공격! ✨ 크리티컬! {defender[0]} 에게 {dmg} 데미지!"</span><span class="pn">)</span>
+        defender<span class="pn">[</span><span class="num">1</span><span class="pn">]</span> <span class="pn">-=</span> dmg
+    <span class="kw">else</span><span class="pn">:</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">f"{attacker[0]} 의 공격! {defender[0]} 에게 {dmg} 데미지!"</span><span class="pn">)</span>
+        defender<span class="pn">[</span><span class="num">1</span><span class="pn">]</span> <span class="pn">-=</span> dmg</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 5 -->
+      <div class="step-block" id="step5">
+        <div class="step-toggle" onclick="toggleStep('step5')">
+          <span class="step-toggle-label">
+            <span class="step-num">STEP 5</span>
+            <span class="step-name">전투 루프 함수</span>
+          </span>
+          <span class="step-arrow">▶</span>
+        </div>
+        <div class="step-body">
+          <div class="step-desc">
+            <p><code>battle(hero, monster)</code> 함수를 만드세요. <code>while True</code> 루프 안에서 라운드를 진행하고, 어느 한 쪽 HP가 0 이하가 되면 승패를 출력하고 <code>break</code>합니다.</p>
+            <p>순서: ① 라운드 번호 출력 → ② 영웅 공격 → ③ 몬스터 HP 확인(0 이하면 영웅 승리) → ④ 몬스터 공격 → ⑤ 영웅 HP 확인(0 이하면 몬스터 승리) → ⑥ 현재 HP 상태 출력</p>
+          </div>
+          <div class="hint-answer">
+            <div class="hint-answer-tabs">
+              <button class="ha-tab active" onclick="switchTab(this, 'step5-hint')">💡 힌트</button>
+              <button class="ha-tab"        onclick="switchTab(this, 'step5-answer')">✅ 정답 코드</button>
+            </div>
+            <div class="ha-panel active" id="step5-hint">
+              <pre>def battle(hero, monster):
+    round_num = 1
+    while True:
+        print(f"\n--- {round_num} 라운드 ---")
+        attack_action(hero, monster)
+        if monster[1] <= 0:
+            print(f"\n{monster[0]} 이 쓰러졌다!")
+            print(f"🏆  {hero[0]} 승리!  ({round_num} 라운드)")
+            break
+        attack_action(monster, hero)
+        if hero[1] <= 0:
+            print(f"\n{hero[0]} 이 쓰러졌다!")
+            print(f"💀  {monster[0]} 승리!  ({round_num} 라운드)")
+            break
+        print(f"[{hero[0]} HP: {hero[1]}]  [{monster[0]} HP: {monster[1]}]")
+        round_num += 1</pre>
+            </div>
+            <div class="ha-panel" id="step5-answer">
+              <pre><span class="kw">def</span> <span class="fn">battle</span><span class="pn">(</span>hero<span class="pn">,</span> monster<span class="pn">):</span>
+    round_num <span class="pn">=</span> <span class="num">1</span>
+    <span class="kw">while</span> <span class="kw">True</span><span class="pn">:</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">f"\n--- {round_num} 라운드 ---"</span><span class="pn">)</span>
+
+        <span class="cm"># 영웅 공격</span>
+        <span class="fn">attack_action</span><span class="pn">(</span>hero<span class="pn">,</span> monster<span class="pn">)</span>
+        <span class="kw">if</span> monster<span class="pn">[</span><span class="num">1</span><span class="pn">]</span> <span class="pn">&lt;=</span> <span class="num">0</span><span class="pn">:</span>
+            <span class="fn">print</span><span class="pn">(</span><span class="str">f"\n{monster[0]} 이 쓰러졌다!"</span><span class="pn">)</span>
+            <span class="fn">print</span><span class="pn">(</span><span class="str">f"\n{'='*40}"</span><span class="pn">)</span>
+            <span class="fn">print</span><span class="pn">(</span><span class="str">f"🏆  {hero[0]} 승리!  ({round_num} 라운드)"</span><span class="pn">)</span>
+            <span class="fn">print</span><span class="pn">(</span><span class="str">f"{'='*40}"</span><span class="pn">)</span>
+            <span class="kw">break</span>
+
+        <span class="cm"># 몬스터 공격</span>
+        <span class="fn">attack_action</span><span class="pn">(</span>monster<span class="pn">,</span> hero<span class="pn">)</span>
+        <span class="kw">if</span> hero<span class="pn">[</span><span class="num">1</span><span class="pn">]</span> <span class="pn">&lt;=</span> <span class="num">0</span><span class="pn">:</span>
+            <span class="fn">print</span><span class="pn">(</span><span class="str">f"\n{hero[0]} 이 쓰러졌다!"</span><span class="pn">)</span>
+            <span class="fn">print</span><span class="pn">(</span><span class="str">f"\n{'='*40}"</span><span class="pn">)</span>
+            <span class="fn">print</span><span class="pn">(</span><span class="str">f"💀  {monster[0]} 승리!  ({round_num} 라운드)"</span><span class="pn">)</span>
+            <span class="fn">print</span><span class="pn">(</span><span class="str">f"{'='*40}"</span><span class="pn">)</span>
+            <span class="kw">break</span>
+
+        <span class="cm"># HP 현황 출력</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">f"[{hero[0]} HP: {hero[1]}]  [{monster[0]} HP: {monster[1]}]"</span><span class="pn">)</span>
+        round_num <span class="pn">+=</span> <span class="num">1</span></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 6 -->
+      <div class="step-block" id="step6">
+        <div class="step-toggle" onclick="toggleStep('step6')">
+          <span class="step-toggle-label">
+            <span class="step-num">STEP 6</span>
+            <span class="step-name">로그 경로 출력 + 전체 조립</span>
+          </span>
+          <span class="step-arrow">▶</span>
+        </div>
+        <div class="step-body">
+          <div class="step-desc">
+            <p><code>show_log_path()</code> 함수를 만들어 <code>os.path.join(os.getcwd(), "battle_log.txt")</code>로 경로를 구성해 출력합니다.</p>
+            <p>그 다음 지금까지 만든 함수들을 아래 순서로 조립해 전체를 실행해보세요.</p>
+          </div>
+          <div class="hint-answer">
+            <div class="hint-answer-tabs">
+              <button class="ha-tab active" onclick="switchTab(this, 'step6-hint')">💡 힌트</button>
+              <button class="ha-tab"        onclick="switchTab(this, 'step6-answer')">✅ 정답 코드</button>
+            </div>
+            <div class="ha-panel active" id="step6-hint">
+              <pre># 메인 실행 순서
+hero    = create_character("아처", 80, 18, 6)
+monster = create_character("고블린", 60, 12, 3)
+
+print("=" * 40)
+print("  ⚔️  텍스트 RPG 전투 시뮬레이터  ⚔️")
+print("=" * 40)
+print_status(hero, monster)
+
+battle(hero, monster)
+show_log_path()</pre>
+            </div>
+            <div class="ha-panel" id="step6-answer">
+              <pre><span class="kw">import</span> os
+
+<span class="kw">def</span> <span class="fn">show_log_path</span><span class="pn">():</span>
+    path <span class="pn">=</span> os<span class="pn">.</span>path<span class="pn">.</span><span class="fn">join</span><span class="pn">(</span>os<span class="pn">.</span><span class="fn">getcwd</span><span class="pn">(),</span> <span class="str">"battle_log.txt"</span><span class="pn">)</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">f"전투 로그가 저장될 경로: {path}"</span><span class="pn">)</span>
+
+<span class="cm"># ─── 메인 실행부 ───</span>
+hero    <span class="pn">=</span> <span class="fn">create_character</span><span class="pn">(</span><span class="str">"아처"</span><span class="pn">,</span>  <span class="num">80</span><span class="pn">,</span> <span class="num">18</span><span class="pn">,</span> <span class="num">6</span><span class="pn">)</span>
+monster <span class="pn">=</span> <span class="fn">create_character</span><span class="pn">(</span><span class="str">"고블린"</span><span class="pn">,</span> <span class="num">60</span><span class="pn">,</span> <span class="num">12</span><span class="pn">,</span> <span class="num">3</span><span class="pn">)</span>
+
+<span class="fn">print</span><span class="pn">(</span><span class="str">"=" </span><span class="pn">*</span> <span class="num">40</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"  ⚔️  텍스트 RPG 전투 시뮬레이터  ⚔️"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"=" </span><span class="pn">*</span> <span class="num">40</span><span class="pn">)</span>
+<span class="fn">print_status</span><span class="pn">(</span>hero<span class="pn">,</span> monster<span class="pn">)</span>
+
+<span class="fn">battle</span><span class="pn">(</span>hero<span class="pn">,</span> monster<span class="pn">)</span>
+<span class="fn">show_log_path</span><span class="pn">()</span></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 최종 전체 코드 -->
+      <div class="full-code-wrap" id="fullCodeWrap">
+        <div class="full-code-header" onclick="toggleFullCode()">
+          <span class="full-code-title">5. 최종 완성 코드</span>
+          <span class="full-code-badge">FULL CODE</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);margin-right:4px;">클릭해서 펼치기</span>
+          <span class="full-code-arrow">▶</span>
+        </div>
+        <div class="full-code-body">
+          <p style="padding:12px 18px 4px;font-size:14px;color:var(--text2);">모든 단계를 합친 완성본입니다. 직접 짠 코드와 비교해보세요.</p>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">PYTHON</span>
+          <button class="code-copy" onclick="copyCode(this)">복사</button>
+        </div>
+        <div class="code-body"><pre><span class="ln">1</span><span class="kw">import</span> random
+<span class="ln">2</span><span class="kw">import</span> math
+<span class="ln">3</span><span class="kw">import</span> os
+<span class="ln">4</span>
+<span class="ln">5</span><span class="cm"># ── 함수 정의 ──────────────────────────────────</span>
+<span class="ln">6</span>
+<span class="ln">7</span><span class="kw">def</span> <span class="fn">create_character</span><span class="pn">(</span>name<span class="pn">,</span> hp<span class="pn">,</span> attack<span class="pn">,</span> defense<span class="pn">):</span>
+<span class="ln">8</span>    <span class="str">"""캐릭터 정보를 리스트로 반환합니다."""</span>
+<span class="ln">9</span>    <span class="kw">return</span> <span class="pn">[</span>name<span class="pn">,</span> hp<span class="pn">,</span> attack<span class="pn">,</span> defense<span class="pn">]</span>
+<span class="ln">10</span>
+<span class="ln">11</span><span class="kw">def</span> <span class="fn">print_status</span><span class="pn">(*</span>characters<span class="pn">):</span>
+<span class="ln">12</span>    <span class="str">"""*args로 여러 캐릭터 상태를 한 번에 출력합니다."""</span>
+<span class="ln">13</span>    <span class="kw">for</span> ch <span class="kw">in</span> characters<span class="pn">:</span>
+<span class="ln">14</span>        <span class="fn">print</span><span class="pn">(</span><span class="str">f"[{ch[0]}]  HP: {ch[1]}  공격력: {ch[2]}  방어력: {ch[3]}"</span><span class="pn">)</span>
+<span class="ln">15</span>
+<span class="ln">16</span><span class="kw">def</span> <span class="fn">calculate_damage</span><span class="pn">(</span>attack<span class="pn">,</span> defense<span class="pn">,</span> crit_rate<span class="pn">=</span><span class="num">0.2</span><span class="pn">):</span>
+<span class="ln">17</span>    <span class="str">"""데미지를 계산합니다. (데미지, 크리티컬, 회피) 튜플 반환."""</span>
+<span class="ln">18</span>    <span class="kw">if</span> random<span class="pn">.</span><span class="fn">random</span><span class="pn">()</span> <span class="pn">&lt;</span> <span class="num">0.1</span><span class="pn">:</span>          <span class="cm"># 10% 회피</span>
+<span class="ln">19</span>        <span class="kw">return</span> <span class="pn">(</span><span class="num">0</span><span class="pn">,</span> <span class="kw">False</span><span class="pn">,</span> <span class="kw">True</span><span class="pn">)</span>
+<span class="ln">20</span>    base    <span class="pn">=</span> <span class="fn">max</span><span class="pn">(</span><span class="num">1</span><span class="pn">,</span> attack <span class="pn">-</span> defense<span class="pn">)</span>  <span class="cm"># 최소 1 보장</span>
+<span class="ln">21</span>    is_crit <span class="pn">=</span> random<span class="pn">.</span><span class="fn">random</span><span class="pn">()</span> <span class="pn">&lt;</span> crit_rate
+<span class="ln">22</span>    damage  <span class="pn">=</span> math<span class="pn">.</span><span class="fn">floor</span><span class="pn">(</span>base <span class="pn">*</span> <span class="num">2</span><span class="pn">)</span> <span class="kw">if</span> is_crit <span class="kw">else</span> base
+<span class="ln">23</span>    <span class="kw">return</span> <span class="pn">(</span>damage<span class="pn">,</span> is_crit<span class="pn">,</span> <span class="kw">False</span><span class="pn">)</span>
+<span class="ln">24</span>
+<span class="ln">25</span><span class="kw">def</span> <span class="fn">attack_action</span><span class="pn">(</span>attacker<span class="pn">,</span> defender<span class="pn">):</span>
+<span class="ln">26</span>    <span class="str">"""공격 1회를 실행하고 방어자 HP를 갱신합니다."""</span>
+<span class="ln">27</span>    dmg<span class="pn">,</span> crit<span class="pn">,</span> evade <span class="pn">=</span> <span class="fn">calculate_damage</span><span class="pn">(</span>attacker<span class="pn">[</span><span class="num">2</span><span class="pn">],</span> defender<span class="pn">[</span><span class="num">3</span><span class="pn">])</span>
+<span class="ln">28</span>    <span class="kw">if</span> evade<span class="pn">:</span>
+<span class="ln">29</span>        <span class="fn">print</span><span class="pn">(</span><span class="str">f"  {attacker[0]} 의 공격! → {defender[0]} 가 회피했다!"</span><span class="pn">)</span>
+<span class="ln">30</span>    <span class="kw">elif</span> crit<span class="pn">:</span>
+<span class="ln">31</span>        <span class="fn">print</span><span class="pn">(</span><span class="str">f"  {attacker[0]} 의 공격! ✨ 크리티컬! → {defender[0]} 에게 {dmg} 데미지!"</span><span class="pn">)</span>
+<span class="ln">32</span>        defender<span class="pn">[</span><span class="num">1</span><span class="pn">]</span> <span class="pn">-=</span> dmg
+<span class="ln">33</span>    <span class="kw">else</span><span class="pn">:</span>
+<span class="ln">34</span>        <span class="fn">print</span><span class="pn">(</span><span class="str">f"  {attacker[0]} 의 공격! → {defender[0]} 에게 {dmg} 데미지!"</span><span class="pn">)</span>
+<span class="ln">35</span>        defender<span class="pn">[</span><span class="num">1</span><span class="pn">]</span> <span class="pn">-=</span> dmg
+<span class="ln">36</span>
+<span class="ln">37</span><span class="kw">def</span> <span class="fn">battle</span><span class="pn">(</span>hero<span class="pn">,</span> monster<span class="pn">):</span>
+<span class="ln">38</span>    <span class="str">"""승패가 결정될 때까지 전투를 진행합니다."""</span>
+<span class="ln">39</span>    round_num <span class="pn">=</span> <span class="num">1</span>
+<span class="ln">40</span>    <span class="kw">while</span> <span class="kw">True</span><span class="pn">:</span>
+<span class="ln">41</span>        <span class="fn">print</span><span class="pn">(</span><span class="str">f"\n--- {round_num} 라운드 ---"</span><span class="pn">)</span>
+<span class="ln">42</span>        <span class="fn">attack_action</span><span class="pn">(</span>hero<span class="pn">,</span> monster<span class="pn">)</span>
+<span class="ln">43</span>        <span class="kw">if</span> monster<span class="pn">[</span><span class="num">1</span><span class="pn">]</span> <span class="pn">&lt;=</span> <span class="num">0</span><span class="pn">:</span>
+<span class="ln">44</span>            <span class="fn">print</span><span class="pn">(</span><span class="str">f"  {monster[0]} 이 쓰러졌다!\n"</span><span class="pn">)</span>
+<span class="ln">45</span>            <span class="fn">print</span><span class="pn">(</span><span class="str">"=" </span><span class="pn">*</span> <span class="num">40</span><span class="pn">)</span>
+<span class="ln">46</span>            <span class="fn">print</span><span class="pn">(</span><span class="str">f"🏆  {hero[0]} 승리!  ({round_num} 라운드)"</span><span class="pn">)</span>
+<span class="ln">47</span>            <span class="fn">print</span><span class="pn">(</span><span class="str">"=" </span><span class="pn">*</span> <span class="num">40</span><span class="pn">)</span>
+<span class="ln">48</span>            <span class="kw">break</span>
+<span class="ln">49</span>        <span class="fn">attack_action</span><span class="pn">(</span>monster<span class="pn">,</span> hero<span class="pn">)</span>
+<span class="ln">50</span>        <span class="kw">if</span> hero<span class="pn">[</span><span class="num">1</span><span class="pn">]</span> <span class="pn">&lt;=</span> <span class="num">0</span><span class="pn">:</span>
+<span class="ln">51</span>            <span class="fn">print</span><span class="pn">(</span><span class="str">f"  {hero[0]} 이 쓰러졌다!\n"</span><span class="pn">)</span>
+<span class="ln">52</span>            <span class="fn">print</span><span class="pn">(</span><span class="str">"=" </span><span class="pn">*</span> <span class="num">40</span><span class="pn">)</span>
+<span class="ln">53</span>            <span class="fn">print</span><span class="pn">(</span><span class="str">f"💀  {monster[0]} 승리!  ({round_num} 라운드)"</span><span class="pn">)</span>
+<span class="ln">54</span>            <span class="fn">print</span><span class="pn">(</span><span class="str">"=" </span><span class="pn">*</span> <span class="num">40</span><span class="pn">)</span>
+<span class="ln">55</span>            <span class="kw">break</span>
+<span class="ln">56</span>        <span class="fn">print</span><span class="pn">(</span><span class="str">f"  [{hero[0]} HP: {hero[1]}]  [{monster[0]} HP: {monster[1]}]"</span><span class="pn">)</span>
+<span class="ln">57</span>        round_num <span class="pn">+=</span> <span class="num">1</span>
+<span class="ln">58</span>
+<span class="ln">59</span><span class="kw">def</span> <span class="fn">show_log_path</span><span class="pn">():</span>
+<span class="ln">60</span>    <span class="str">"""os 모듈로 로그 저장 경로를 구성해 출력합니다."""</span>
+<span class="ln">61</span>    path <span class="pn">=</span> os<span class="pn">.</span>path<span class="pn">.</span><span class="fn">join</span><span class="pn">(</span>os<span class="pn">.</span><span class="fn">getcwd</span><span class="pn">(),</span> <span class="str">"battle_log.txt"</span><span class="pn">)</span>
+<span class="ln">62</span>    <span class="fn">print</span><span class="pn">(</span><span class="str">f"\n전투 로그가 저장될 경로: {path}"</span><span class="pn">)</span>
+<span class="ln">63</span>
+<span class="ln">64</span><span class="cm"># ── 메인 실행부 ────────────────────────────────</span>
+<span class="ln">65</span>hero    <span class="pn">=</span> <span class="fn">create_character</span><span class="pn">(</span><span class="str">"아처"</span><span class="pn">,</span>  <span class="num">80</span><span class="pn">,</span> <span class="num">18</span><span class="pn">,</span> <span class="num">6</span><span class="pn">)</span>
+<span class="ln">66</span>monster <span class="pn">=</span> <span class="fn">create_character</span><span class="pn">(</span><span class="str">"고블린"</span><span class="pn">,</span> <span class="num">60</span><span class="pn">,</span> <span class="num">12</span><span class="pn">,</span> <span class="num">3</span><span class="pn">)</span>
+<span class="ln">67</span>
+<span class="ln">68</span><span class="fn">print</span><span class="pn">(</span><span class="str">"=" </span><span class="pn">*</span> <span class="num">40</span><span class="pn">)</span>
+<span class="ln">69</span><span class="fn">print</span><span class="pn">(</span><span class="str">"  ⚔️  텍스트 RPG 전투 시뮬레이터  ⚔️"</span><span class="pn">)</span>
+<span class="ln">70</span><span class="fn">print</span><span class="pn">(</span><span class="str">"=" </span><span class="pn">*</span> <span class="num">40</span><span class="pn">)</span>
+<span class="ln">71</span><span class="fn">print_status</span><span class="pn">(</span>hero<span class="pn">,</span> monster<span class="pn">)</span>
+<span class="ln">72</span>
+<span class="ln">73</span><span class="fn">battle</span><span class="pn">(</span>hero<span class="pn">,</span> monster<span class="pn">)</span>
+<span class="ln">74</span><span class="fn">show_log_path</span><span class="pn">()</span></pre></div>
+      </div>
+        </div><!-- /.full-code-body -->
+      </div><!-- /.full-code-wrap -->
+
+      <!-- 도전 과제 -->
+      <div class="challenge-box">
+        <div class="challenge-label">🔥 도전 과제 — 더 나아가고 싶다면</div>
+        <ul class="challenge-list">
+          <li><span class="c-num">①</span> <code>create_character()</code>에 직업(type)을 추가하고, 직업에 따라 크리티컬 확률을 다르게 적용해보세요 (예: 도적은 40%)</li>
+          <li><span class="c-num">②</span> <code>input()</code>으로 영웅의 이름과 직업을 직접 입력받아 커스텀 캐릭터를 만들어보세요</li>
+          <li><span class="c-num">③</span> 몬스터를 <code>random.choice()</code>로 여러 종류 중 하나를 랜덤으로 뽑아 전투를 시작하게 만들어보세요</li>
+          <li><span class="c-num">④</span> 전투가 끝난 뒤 라운드 수와 승패를 실제 파일에 저장해보세요 (파일 입출력은 42번 챕터에서 배웁니다)</li>
+        </ul>
+      </div>
+
+      <!-- 요약 -->
+      <div class="summary-box">
+        <div class="summary-label">📌 이번 프로젝트에서 사용한 개념</div>
+        <div class="summary-grid">
+          <div class="summary-item">함수로 역할 분리 (단일 책임)</div>
+          <div class="summary-item"><code>return</code>으로 값 반환</div>
+          <div class="summary-item">기본값 매개변수 <code>crit_rate=0.2</code></div>
+          <div class="summary-item"><code>*args</code>로 가변 인수 처리</div>
+          <div class="summary-item"><code>random.random()</code> 확률 판정</div>
+          <div class="summary-item"><code>math.floor()</code> 정수 처리</div>
+          <div class="summary-item">튜플 반환 + 언패킹</div>
+          <div class="summary-item"><code>while True / break</code> 게임 루프</div>
+          <div class="summary-item"><code>os.path.join()</code> 경로 구성</div>
+          <div class="summary-item">리스트로 상태 관리</div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="cheer-box">
+        <span class="cheer-icon">⚔️</span>
+        <div class="cheer-text">
+          <strong>함수 섹션 완주!</strong><br>
+          함수 기초부터 심화, 모듈까지 — 이제 여러분은 코드를 역할별로 나누고, 모듈에서 강력한 도구를 꺼내 쓰는 방법을 압니다. 다음 섹션 <strong>자료구조</strong>에서는 딕셔너리, 튜플, 셋을 배워 데이터를 더 스마트하게 다루는 법을 익힙니다. 잘 하고 있어요!
+        </div>
+      </div>
+
+      <div class="chap-nav">
+        <a href="35-quiz-module.html" class="chap-nav-btn">
+          <span class="cnb-dir">← 이전 챕터</span>
+          <span class="cnb-title"><span>35.</span> 연습문제 — 모듈</span>
+        </a>
+        <a href="37-dictionary.html" class="chap-nav-btn next">
+          <span class="cnb-dir">다음 챕터 →</span>
+          <span class="cnb-title"><span>37.</span> 딕셔너리</span>
+        </a>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+  function toggleFullCode() {
+    const wrap = document.getElementById('fullCodeWrap');
+    const hint = wrap.querySelector('span[style]');
+    wrap.classList.toggle('open');
+    if (hint) hint.textContent = wrap.classList.contains('open') ? '클릭해서 접기' : '클릭해서 펼치기';
+  }
+
+  function toggleStep(id) {
+    const el = document.getElementById(id);
+    el.classList.toggle('open');
+  }
+
+  function switchTab(btn, panelId) {
+    const container = btn.closest('.hint-answer');
+    container.querySelectorAll('.ha-tab').forEach(t => t.classList.remove('active'));
+    container.querySelectorAll('.ha-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(panelId).classList.add('active');
+  }
+
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    const text = pre.innerText.replace(/^\d+\t/gm, '').replace(/^\s*\d+\s{2}/gm, '');
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '복사됨!';
+      setTimeout(() => btn.textContent = '복사', 1800);
+    });
+  }
+
+  const isMobile = () => window.innerWidth <= 720;
+  const overlay  = document.getElementById('sidebarOverlay');
+  function toggleSidebar() {
+    document.body.classList.toggle('sidebar-closed');
+    if (isMobile()) overlay.classList.toggle('visible', !document.body.classList.contains('sidebar-closed'));
+    localStorage.setItem('sp-sidebar', document.body.classList.contains('sidebar-closed') ? 'closed' : 'open');
+  }
+  function closeSidebar() {
+    document.body.classList.add('sidebar-closed');
+    overlay.classList.remove('visible');
+    localStorage.setItem('sp-sidebar', 'closed');
+  }
+  function toggleGroup(id) { document.getElementById(id).classList.toggle('open'); }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    if (isMobile()) document.body.classList.add('sidebar-closed');
+    else if (localStorage.getItem('sp-sidebar') === 'closed') document.body.classList.add('sidebar-closed');
+  });
+  window.addEventListener('resize', () => { if (!isMobile()) overlay.classList.remove('visible'); });
+</script>
+</body>
+</html>

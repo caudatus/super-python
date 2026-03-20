@@ -1,0 +1,2534 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>09. 연습문제 — 문자열 String — 브론즈 | 슈퍼파이썬</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#111111; --bg-nav:#0A0A0A; --bg-side:#0E0E0E; --bg-card:#181818;
+      --bg-code:#1A1A1A; --bg-tip:#131A13; --bg-warn:#1A1410; --bg-info:#101520;
+      --accent:#00CC70; --accent-dim:#007A42; --accent-bg:rgba(0,204,112,0.07);
+      --accent2:#C8A000; --text:#D8D8D8; --text-head:#EFEFEF;
+      --text2:#888888; --text3:#444444; --border:#222222; --border2:#2E2E2E;
+      --sy-kw:#C792EA; --sy-fn:#82AAFF; --sy-str:#C3E88D;
+      --sy-cm:#546E7A; --sy-num:#F78C6C; --sy-pn:#89DDFF; --sy-ln-t:#555555;
+      --sidebar-w:248px; --content-max:720px; --header-h:48px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Noto Sans KR', sans-serif; font-size: 15px; line-height: 1.8; overflow-x: hidden; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent-dim); }
+
+    /* HEADER */
+    .top-header { position: fixed; top: 0; left: 0; right: 0; z-index: 200; height: var(--header-h); background: var(--bg-nav); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 16px; }
+    .header-open-btn { display: none; align-items: center; justify-content: center; width: 28px; height: 28px; flex-shrink: 0; margin-right: 12px; background: var(--bg-card); border: 1px solid var(--border2); border-radius: 4px; cursor: pointer; color: var(--text2); font-size: 12px; transition: background .15s, color .15s, border-color .15s; }
+    .header-open-btn:hover { background: var(--accent-bg); color: var(--accent); border-color: var(--accent); }
+    body.sidebar-closed .header-open-btn { display: flex; }
+    .header-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; font-family: 'JetBrains Mono', monospace; font-size: 12px; overflow: hidden; }
+    .header-logo  { color: var(--accent); text-decoration: none; font-weight: 700; white-space: nowrap; }
+    .header-sep   { color: var(--text3); flex-shrink: 0; }
+    .header-grade { color: var(--text2); white-space: nowrap; }
+    .header-chap  { color: var(--text-head); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .header-center { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text3); display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding: 0 16px; }
+    .progress-mini { width: 80px; height: 3px; background: var(--border2); border-radius: 2px; overflow: hidden; }
+    .progress-mini-fill { height: 100%; background: var(--accent); border-radius: 2px; }
+    .header-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .nav-btn { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text2); background: transparent; border: 1px solid var(--border2); padding: 4px 12px; text-decoration: none; transition: border-color .15s, color .15s; white-space: nowrap; }
+    .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .nav-btn.primary { color: var(--bg-nav); background: var(--accent); border-color: var(--accent); font-weight: 700; }
+    .nav-btn.primary:hover { filter: brightness(1.1); }
+
+    /* LAYOUT */
+    .layout { display: flex; padding-top: var(--header-h); min-height: 100vh; }
+
+    /* SIDEBAR */
+    .sidebar { width: var(--sidebar-w); flex-shrink: 0; position: fixed; top: var(--header-h); bottom: 0; left: 0; background: var(--bg-side); border-right: 1px solid var(--border); overflow-y: auto; overflow-x: hidden; transition: transform .22s ease; z-index: 150; padding-top: 8px; }
+    body.sidebar-closed .sidebar { transform: translateX(calc(-1 * var(--sidebar-w))); }
+    body.sidebar-closed .content { margin-left: 0; }
+    .sidebar-toggle { position: absolute; top: 10px; right: 10px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: var(--bg-card); border: 1px solid var(--border2); border-radius: 4px; cursor: pointer; color: var(--text2); font-size: 12px; z-index: 10; transition: background .15s, color .15s, border-color .15s; }
+    .sidebar-toggle:hover { background: var(--accent-bg); color: var(--accent); border-color: var(--accent); }
+    body.sidebar-closed .sidebar-toggle { display: none; }
+    .sidebar-progress { margin: 44px 12px 12px; padding: 12px 14px; background: var(--bg-card); border: 1px solid var(--border); }
+    .sp-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); margin-bottom: 6px; letter-spacing: .08em; }
+    .sp-bar   { height: 4px; background: var(--border2); border-radius: 2px; overflow: hidden; margin-bottom: 5px; }
+    .sp-fill  { height: 100%; background: var(--accent); border-radius: 2px; }
+    .sp-text  { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text2); }
+    .sp-text span { color: var(--accent); }
+    .sb-group { border-bottom: 1px solid var(--border); }
+    .sb-group-header { display: flex; align-items: center; justify-content: space-between; padding: 9px 14px 9px 12px; cursor: pointer; user-select: none; transition: background .12s; gap: 8px; }
+    .sb-group-header:hover { background: rgba(255,255,255,.03); }
+    .sb-group-title { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; letter-spacing: .06em; color: var(--text2); text-transform: uppercase; flex: 1; }
+    .sb-group.current .sb-group-title { color: var(--accent); }
+    .sb-group-arrow { font-size: 9px; color: var(--text3); transition: transform .2s; flex-shrink: 0; }
+    .sb-group.open .sb-group-arrow { transform: rotate(90deg); color: var(--accent); }
+    .sb-items { overflow: hidden; max-height: 0; transition: max-height .28s ease; }
+    .sb-group.open .sb-items { max-height: 1200px; }
+    .sb-item { display: flex; align-items: baseline; gap: 8px; padding: 6px 14px 6px 20px; font-size: 13px; color: var(--text2); text-decoration: none; border-left: 2px solid transparent; transition: background .1s, color .1s, border-color .1s; line-height: 1.45; }
+    .sb-item:hover  { background: rgba(255,255,255,.03); color: var(--text); }
+    .sb-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--accent-bg); font-weight: 500; }
+    .sb-item.done   { color: var(--text3); }
+    .sb-icon { font-size: 9px; flex-shrink: 0; font-family: 'JetBrains Mono', monospace; width: 10px; text-align: center; color: var(--text3); }
+    .sb-item.active .sb-icon { color: var(--accent); }
+    .sb-item.done   .sb-icon { color: var(--accent-dim); }
+    .sb-num { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); flex-shrink: 0; min-width: 22px; }
+
+    /* CONTENT */
+    .content { margin-left: var(--sidebar-w); flex: 1; min-width: 0; padding: 48px 52px 96px; transition: margin-left .22s ease; }
+    .content-inner { max-width: var(--content-max);margin:0 auto; }
+
+    /* 챕터 헤더 */
+    .chap-meta { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text3); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .badge      { font-size: 10px; padding: 2px 8px; background: var(--accent-bg); color: var(--accent); border: 1px solid rgba(0,204,112,.25); letter-spacing: .06em; }
+    .badge.quiz { background: rgba(200,160,0,.1); color: var(--accent2); border-color: rgba(200,160,0,.25); }
+    .chap-title    { font-family: 'JetBrains Mono', monospace; font-size: clamp(22px,3.5vw,30px); font-weight: 700; color: var(--text-head); line-height: 1.25; margin-bottom: 8px; }
+    .chap-title .hl { color: var(--accent); }
+    .chap-subtitle  { font-size: 15px; color: var(--text2); margin-bottom: 32px; line-height: 1.65; }
+    p    { color: var(--text); margin-bottom: 16px; line-height: 1.9; font-size: 15px; }
+    code { font-family: 'JetBrains Mono', monospace; font-size: 13px; background: var(--bg-code); color: var(--accent); padding: 1px 6px; border: 1px solid var(--border2); border-radius: 2px; }
+    strong { color: var(--text-head); font-weight: 700; }
+
+    /* 스코어보드 */
+    .scoreboard { display: flex; gap: 12px; margin-bottom: 36px; flex-wrap: wrap; }
+    .score-card { flex: 1; min-width: 100px; background: var(--bg-card); border: 1px solid var(--border2); padding: 14px 18px; display: flex; flex-direction: column; gap: 4px; }
+    .score-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); letter-spacing: .08em; }
+    .score-val   { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; color: var(--accent); }
+    .score-val.total { color: var(--text2); }
+
+    /* 난이도 구분 헤더 */
+    .diff-header { display: flex; align-items: center; gap: 12px; margin: 44px 0 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+    .diff-header:first-of-type { margin-top: 0; }
+    .diff-badge { font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 3px 10px; font-weight: 700; letter-spacing: .06em; }
+    .diff-badge.easy   { background: rgba(0,204,112,.12);  color: var(--accent);  border: 1px solid rgba(0,204,112,.25); }
+    .diff-badge.medium { background: rgba(200,160,0,.12);  color: var(--accent2); border: 1px solid rgba(200,160,0,.25); }
+    .diff-badge.hard   { background: rgba(255,80,80,.10);  color: #FF7070;        border: 1px solid rgba(255,80,80,.20); }
+    .diff-title  { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 700; color: var(--text-head); }
+    .diff-count  { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text3); margin-left: auto; }
+
+    /* 문제 카드 */
+    .q-card { background: var(--bg-card); border: 1px solid var(--border2); margin-bottom: 16px; overflow: hidden; transition: border-color .15s; }
+    .q-card:hover  { border-color: var(--border); }
+    .q-card.solved { border-left: 3px solid var(--accent); }
+    .q-card.wrong  { border-left: 3px solid #FF5555; }
+    .q-header { display: flex; align-items: flex-start; gap: 14px; padding: 16px 18px; }
+    .q-num    { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text3); flex-shrink: 0; min-width: 28px; padding-top: 1px; }
+    .q-body   { flex: 1; min-width: 0; }
+    .q-text   { font-size: 14px; color: var(--text); line-height: 1.8; }
+    .q-text code { font-size: 12px; }
+    .q-expected { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text3); margin-top: 8px; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+    .q-expected-label { font-size: 10px; letter-spacing: .06em; flex-shrink: 0; }
+    .q-expected-val   { color: var(--accent); }
+    .q-error-code { margin: 10px 0; background: #160A0A; border: 1px solid #3A1A1A; border-left: 3px solid #FF5555; padding: 10px 16px; }
+    .q-error-code pre { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #FF8080; line-height: 1.7; }
+    .q-code-block { margin: 10px 0; background: var(--bg-code); border: 1px solid var(--border2); padding: 10px 16px; }
+    .q-code-block pre { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text); line-height: 1.7; }
+    .kw{color:var(--sy-kw);}.fn{color:var(--sy-fn);}.str{color:var(--sy-str);}
+    .cm{color:var(--sy-cm);}.num{color:var(--sy-num);}.pn{color:var(--sy-pn);}
+
+    /* 입력 영역 */
+    .q-input-area { padding: 0 18px 14px 60px; }
+    .q-textarea { width: 100%; min-height: 60px; background: var(--bg-code); color: var(--text); border: 1px solid var(--border2); font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.7; padding: 10px 14px; resize: vertical; outline: none; transition: border-color .15s; }
+    .q-textarea:focus { border-color: var(--accent); }
+    .q-textarea::placeholder { color: var(--text3); }
+    .q-actions { display: flex; gap: 8px; margin-top: 8px; align-items: center; flex-wrap: wrap; }
+    .btn-check  { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; padding: 6px 16px; background: var(--accent); color: var(--bg-nav); border: none; cursor: pointer; transition: filter .15s; }
+    .btn-check:hover { filter: brightness(1.1); }
+    .btn-hint   { font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 6px 14px; background: transparent; color: var(--text3); border: 1px solid var(--border2); cursor: pointer; transition: color .15s, border-color .15s; }
+    .btn-hint:hover { color: var(--accent2); border-color: var(--accent2); }
+    .btn-answer { font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 6px 14px; background: transparent; color: var(--text3); border: 1px solid var(--border2); cursor: pointer; transition: color .15s, border-color .15s; margin-left: auto; }
+    .btn-answer:hover { color: var(--text2); border-color: var(--border); }
+    .q-result { font-family: 'JetBrains Mono', monospace; font-size: 12px; margin-top: 6px; display: none; }
+    .q-result.ok  { color: var(--accent); }
+    .q-result.err { color: #FF7070; }
+
+    /* 힌트/정답 드롭다운 */
+    .q-dropdown { display: none; margin: 0 18px 14px 60px; border: 1px solid var(--border2); }
+    .q-dropdown.visible { display: block; }
+    .q-dropdown-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; padding: 7px 14px; border-bottom: 1px solid var(--border); letter-spacing: .08em; }
+    .q-hint-label   { color: var(--accent2); background: rgba(200,160,0,.05); }
+    .q-answer-label { color: var(--accent);  background: var(--accent-bg); }
+    .q-dropdown-body     { padding: 12px 14px; background: var(--bg-code); }
+    .q-dropdown-body pre { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text2); line-height: 1.7; white-space: pre-wrap; margin: 0; }
+
+    /* 격려/네비 */
+    .section-divider { height: 1px; background: var(--border); margin: 44px 0; }
+    .cheer-box { border: 1px solid var(--border); background: var(--bg); padding: 18px 22px; margin-bottom: 44px; display: flex; gap: 14px; align-items: flex-start; }
+    .cheer-icon { font-size: 18px; flex-shrink: 0; line-height: 1.5; }
+    .cheer-text { font-size: 14px; color: var(--text2); line-height: 1.85; }
+    .cheer-text strong { color: var(--text-head); }
+    .chap-nav { display: flex; justify-content: space-between; padding-top: 32px; border-top: 1px solid var(--border); gap: 12px; flex-wrap: wrap; }
+    .chap-nav-btn { display: flex; flex-direction: column; gap: 4px; text-decoration: none; padding: 14px 18px; border: 1px solid var(--border2); background: var(--bg-card); flex: 1; max-width: 300px; transition: border-color .15s; }
+    .chap-nav-btn:hover { border-color: var(--accent); }
+    .chap-nav-btn.next  { text-align: right; }
+    .cnb-dir   { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); letter-spacing: .07em; }
+    .cnb-title { font-size: 13px; color: var(--text2); line-height: 1.45; }
+    .cnb-title span { color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+
+    /* 반응형 */
+    .sidebar-overlay { display: none; position: fixed; inset: 0; top: var(--header-h); z-index: 140; background: rgba(0,0,0,.65); }
+    @media (max-width: 720px) {
+      .sidebar-overlay.visible { display: block; }
+      .content { margin-left: 0; padding: 28px 20px 72px; }
+      .header-center { display: none; }
+      .q-input-area { padding: 0 14px 14px; }
+      .q-dropdown   { margin: 0 14px 14px; }
+    }
+    @media (max-width: 480px) {
+      .header-grade { display: none; }
+      .chap-nav-btn { max-width: 100%; }
+      .header-right .nav-btn:not(.primary) { display: none; }
+      .scoreboard { gap: 8px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition: none !important; animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="top-header">
+  <button class="header-open-btn" onclick="toggleSidebar()">▶</button>
+  <div class="header-left">
+    <a href="../index.html" class="header-logo">SUPERPYTHON</a>
+    <span class="header-sep">/</span>
+    <span class="header-grade">🟤 BRONZE</span>
+    <span class="header-sep">/</span>
+    <span class="header-chap">09. 연습문제 — 문자열 String</span>
+  </div>
+  <div class="header-center">
+    <span>09 / 48</span>
+    <div class="progress-mini"><div class="progress-mini-fill" style="width:18.75%"></div></div>
+    <span>18.75%</span>
+  </div>
+  <div class="header-right">
+    <a href="08-string.html" class="nav-btn">← 이전</a>
+    <a href="10-fstring.html" class="nav-btn primary">다음 →</a>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <button class="sidebar-toggle" onclick="toggleSidebar()">◀</button>
+    <div class="sidebar-progress">
+      <div class="sp-label">BRONZE 진행률</div>
+      <div class="sp-bar"><div class="sp-fill" style="width:18.75%"></div></div>
+      <div class="sp-text"><span>9</span> / 48 챕터 완료</div>
+    </div>
+
+    <div class="sb-group" id="grp-env">
+      <div class="sb-group-header" onclick="toggleGroup('grp-env')"><span class="sb-group-title">환경 설정</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="01-what-is-python.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">01</span>파이썬이란?</a>
+        <a href="02-setup.html"          class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">02</span>개발환경 설치</a>
+      </div>
+    </div>
+    <div class="sb-group current open" id="grp-basic1">
+      <div class="sb-group-header" onclick="toggleGroup('grp-basic1')"><span class="sb-group-title">기초 문법 1</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="03-print.html"                    class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">03</span>print()란?</a>
+        <a href="04-quiz-print.html"               class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">04</span>연습문제</a>
+        <a href="05-variables.html"                class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">05</span>변수와 데이터 타입</a>
+        <a href="06-operators.html"                class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">06</span>연산자</a>
+        <a href="07-quiz-variables-operators.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">07</span>연습문제</a>
+        <a href="08-string.html"                   class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">08</span>문자열 String</a>
+        <a href="09-quiz-string.html"              class="sb-item active"><span class="sb-icon">▶</span><span class="sb-num">09</span>연습문제</a>
+        <a href="10-fstring.html"                  class="sb-item"><span class="sb-icon"> </span><span class="sb-num">10</span>f-string 완전정리</a>
+        <a href="11-quiz-fstring.html"             class="sb-item"><span class="sb-icon"> </span><span class="sb-num">11</span>연습문제</a>
+        <a href="12-mini-project-01.html"          class="sb-item"><span class="sb-icon"> </span><span class="sb-num">12</span>🎮 미니 프로젝트 ①</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-basic2">
+      <div class="sb-group-header" onclick="toggleGroup('grp-basic2')"><span class="sb-group-title">기초 문법 2</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="13-list.html"            class="sb-item"><span class="sb-icon"> </span><span class="sb-num">13</span>리스트</a>
+        <a href="14-quiz-list.html"       class="sb-item"><span class="sb-icon"> </span><span class="sb-num">14</span>연습문제</a>
+        <a href="15-input.html"           class="sb-item"><span class="sb-icon"> </span><span class="sb-num">15</span>input() 함수</a>
+        <a href="16-quiz-input.html"      class="sb-item"><span class="sb-icon"> </span><span class="sb-num">16</span>연습문제</a>
+        <a href="17-mini-project-02.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">17</span>🎮 미니 프로젝트 ②</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-flow">
+      <div class="sb-group-header" onclick="toggleGroup('grp-flow')"><span class="sb-group-title">흐름 제어</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="18-if.html"              class="sb-item"><span class="sb-icon"> </span><span class="sb-num">18</span>조건문 (if)</a>
+        <a href="19-quiz-if.html"         class="sb-item"><span class="sb-icon"> </span><span class="sb-num">19</span>연습문제</a>
+        <a href="20-mini-project-03.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">20</span>🎮 미니 프로젝트 ③</a>
+        <a href="21-for-range.html"       class="sb-item"><span class="sb-icon"> </span><span class="sb-num">21</span>for문과 range()</a>
+        <a href="22-quiz-for.html"        class="sb-item"><span class="sb-icon"> </span><span class="sb-num">22</span>연습문제</a>
+        <a href="23-while.html"           class="sb-item"><span class="sb-icon"> </span><span class="sb-num">23</span>while문</a>
+        <a href="24-quiz-while.html"      class="sb-item"><span class="sb-icon"> </span><span class="sb-num">24</span>연습문제</a>
+        <a href="25-mini-project-04.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">25</span>🎮 미니 프로젝트 ④</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-error">
+      <div class="sb-group-header" onclick="toggleGroup('grp-error')"><span class="sb-group-title">에러 &amp; 디버깅</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="26-error-types.html"    class="sb-item"><span class="sb-icon"> </span><span class="sb-num">26</span>에러 읽는 법</a>
+        <a href="27-debugging.html"      class="sb-item"><span class="sb-icon"> </span><span class="sb-num">27</span>기초 디버깅 실습</a>
+        <a href="28-quiz-debugging.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">28</span>연습문제</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-func">
+      <div class="sb-group-header" onclick="toggleGroup('grp-func')"><span class="sb-group-title">함수</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="29-function-basic.html"         class="sb-item"><span class="sb-icon"> </span><span class="sb-num">29</span>함수 기초</a>
+        <a href="30-quiz-function-basic.html"    class="sb-item"><span class="sb-icon"> </span><span class="sb-num">30</span>연습문제</a>
+        <a href="31-mini-project-05.html"        class="sb-item"><span class="sb-icon"> </span><span class="sb-num">31</span>🎮 미니 프로젝트 ⑤</a>
+        <a href="32-function-advanced.html"      class="sb-item"><span class="sb-icon"> </span><span class="sb-num">32</span>함수 심화</a>
+        <a href="33-quiz-function-advanced.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">33</span>연습문제</a>
+        <a href="34-module.html"                 class="sb-item"><span class="sb-icon"> </span><span class="sb-num">34</span>모듈</a>
+        <a href="35-quiz-module.html"            class="sb-item"><span class="sb-icon"> </span><span class="sb-num">35</span>연습문제</a>
+        <a href="36-mini-project-06.html"        class="sb-item"><span class="sb-icon"> </span><span class="sb-num">36</span>🎮 미니 프로젝트 ⑥</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-ds">
+      <div class="sb-group-header" onclick="toggleGroup('grp-ds')"><span class="sb-group-title">자료구조</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="37-dictionary.html"      class="sb-item"><span class="sb-icon"> </span><span class="sb-num">37</span>딕셔너리</a>
+        <a href="38-quiz-dictionary.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">38</span>연습문제</a>
+        <a href="39-tuple-set.html"       class="sb-item"><span class="sb-icon"> </span><span class="sb-num">39</span>튜플과 셋</a>
+        <a href="40-quiz-tuple-set.html"  class="sb-item"><span class="sb-icon"> </span><span class="sb-num">40</span>연습문제</a>
+        <a href="41-mini-project-07.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">41</span>🎮 미니 프로젝트 ⑦</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-file">
+      <div class="sb-group-header" onclick="toggleGroup('grp-file')"><span class="sb-group-title">파일 &amp; 예외처리</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="42-file-io.html"          class="sb-item"><span class="sb-icon"> </span><span class="sb-num">42</span>파일 입출력</a>
+        <a href="43-quiz-file-io.html"     class="sb-item"><span class="sb-icon"> </span><span class="sb-num">43</span>연습문제</a>
+        <a href="44-exception-basic.html"  class="sb-item"><span class="sb-icon"> </span><span class="sb-num">44</span>예외처리 기초</a>
+        <a href="45-quiz-exception.html"   class="sb-item"><span class="sb-icon"> </span><span class="sb-num">45</span>연습문제</a>
+        <a href="46-mini-project-08.html"  class="sb-item"><span class="sb-icon"> </span><span class="sb-num">46</span>🎮 미니 프로젝트 ⑧</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-end">
+      <div class="sb-group-header" onclick="toggleGroup('grp-end')"><span class="sb-group-title">마무리</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="47-final-project.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">47</span>★ 최종 프로젝트</a>
+        <a href="48-next-step.html"     class="sb-item"><span class="sb-icon"> </span><span class="sb-num">48</span>다음 단계 미리보기</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- CONTENT -->
+  <main class="content" id="mainContent">
+    <div class="content-inner">
+
+      <div class="chap-meta">
+        <span class="badge quiz">QUIZ</span>
+        <span>기초 문법 1</span>
+        <span style="color:var(--text3)">·</span>
+        <span>챕터 09 / 48</span>
+      </div>
+      <h1 class="chap-title">연습문제 — <span class="hl">문자열 String</span></h1>
+      <p class="chap-subtitle">배운 것을 직접 코드로 써봐야 진짜 실력이 됩니다. 먼저 스스로 풀고 나서 정답을 확인하세요.</p>
+
+      <!-- 스코어보드 -->
+      <div class="scoreboard">
+        <div class="score-card"><div class="score-label">SOLVED</div><div class="score-val" id="solved-count">0</div></div>
+        <div class="score-card"><div class="score-label">TOTAL</div><div class="score-val total" id="total-count">50</div></div>
+        <div class="score-card"><div class="score-label">LEVEL</div><div class="score-val" id="level-text" style="font-size:13px;padding-top:4px;">도전 중...</div></div>
+      </div>
+
+      <!-- ══════════════════════════════
+           🟢 하 (1–10번)
+      ══════════════════════════════ -->
+      <div class="diff-header">
+        <span class="diff-badge easy">하</span>
+        <span class="diff-title">문자열 기초 & 인덱싱</span>
+        <span class="diff-count">1 – 10번</span>
+      </div>
+
+      <!-- Q1 -->
+      <div class="q-card" id="q1">
+        <div class="q-header">
+          <span class="q-num">Q1.</span>
+          <div class="q-body">
+            <p class="q-text">변수 <code>name = "Python"</code>을 선언하고, <code>print()</code>로 출력하는 코드를 작성하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">Python</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q1-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(1)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(1)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(1)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q1-result"></div>
+        </div>
+        <div class="q-dropdown" id="q1-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>변수에 값을 담을 때는 = 를 사용하고,
+print() 안에 변수 이름을 그대로 넣으면 됩니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q1-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">name</span> <span class="pn">=</span> <span class="str">"Python"</span>
+<span class="fn">print</span><span class="pn">(</span>name<span class="pn">)</span>  <span class="cm"># 변수 name에 담긴 "Python"을 출력</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="q-card" id="q2">
+        <div class="q-header">
+          <span class="q-num">Q2.</span>
+          <div class="q-body">
+            <p class="q-text"><code>greeting = "Hello, World!"</code>에서 <code>len()</code>으로 문자열의 길이를 출력하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">13</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q2-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(2)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(2)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(2)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q2-result"></div>
+        </div>
+        <div class="q-dropdown" id="q2-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>len(변수명) 으로 문자열 길이를 구합니다.
+공백과 쉼표, 느낌표도 모두 1글자로 셉니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q2-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">greeting</span> <span class="pn">=</span> <span class="str">"Hello, World!"</span>
+<span class="fn">print</span><span class="pn">(</span><span class="fn">len</span><span class="pn">(</span>greeting<span class="pn">))</span>  <span class="cm"># H,e,l,l,o,,,space,W,o,r,l,d,! = 13글자</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="q-card" id="q3">
+        <div class="q-header">
+          <span class="q-num">Q3.</span>
+          <div class="q-body">
+            <p class="q-text"><code>word = "Python"</code>에서 인덱싱으로 첫 번째 글자 <code>P</code>를 출력하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">P</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q3-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(3)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(3)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(3)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q3-result"></div>
+        </div>
+        <div class="q-dropdown" id="q3-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>파이썬에서 인덱스는 0부터 시작합니다.
+word[0] 이 첫 번째 글자입니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q3-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">word</span> <span class="pn">=</span> <span class="str">"Python"</span>
+<span class="fn">print</span><span class="pn">(</span>word<span class="pn">[</span><span class="num">0</span><span class="pn">])</span>  <span class="cm"># 인덱스 0 = 첫 번째 글자 'P'</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q4 -->
+      <div class="q-card" id="q4">
+        <div class="q-header">
+          <span class="q-num">Q4.</span>
+          <div class="q-body">
+            <p class="q-text"><code>word = "Python"</code>에서 음수 인덱스로 마지막 글자 <code>n</code>을 출력하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">n</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q4-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(4)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(4)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(4)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q4-result"></div>
+        </div>
+        <div class="q-dropdown" id="q4-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>음수 인덱스는 뒤에서부터 셉니다.
+-1이 마지막 글자, -2가 뒤에서 두 번째 글자입니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q4-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">word</span> <span class="pn">=</span> <span class="str">"Python"</span>
+<span class="fn">print</span><span class="pn">(</span>word<span class="pn">[</span><span class="num">-1</span><span class="pn">])</span>  <span class="cm"># -1은 마지막 글자 'n'</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q5 -->
+      <div class="q-card" id="q5">
+        <div class="q-header">
+          <span class="q-num">Q5.</span>
+          <div class="q-body">
+            <p class="q-text"><code>"hello"</code>를 <code>.upper()</code>메서드로 모두 대문자로 바꿔 출력하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">HELLO</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q5-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(5)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(5)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(5)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q5-result"></div>
+        </div>
+        <div class="q-dropdown" id="q5-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>문자열.upper() 처럼 점(.) 뒤에 메서드를 붙입니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q5-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">print</span><span class="pn">(</span><span class="str">"hello"</span><span class="pn">.</span><span class="fn">upper</span><span class="pn">())</span>  <span class="cm"># 소문자 → 대문자로 변환</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q6 -->
+      <div class="q-card" id="q6">
+        <div class="q-header">
+          <span class="q-num">Q6.</span>
+          <div class="q-body">
+            <p class="q-text"><code>"WORLD"</code>를 <code>.lower()</code>로 모두 소문자로 바꿔 출력하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">world</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q6-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(6)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(6)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(6)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q6-result"></div>
+        </div>
+        <div class="q-dropdown" id="q6-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>.lower()는 모든 글자를 소문자로 바꿉니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q6-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">print</span><span class="pn">(</span><span class="str">"WORLD"</span><span class="pn">.</span><span class="fn">lower</span><span class="pn">())</span>  <span class="cm"># 대문자 → 소문자로 변환</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q7 -->
+      <div class="q-card" id="q7">
+        <div class="q-header">
+          <span class="q-num">Q7.</span>
+          <div class="q-body">
+            <p class="q-text"><code>s = "  hello  "</code>에서 양쪽 공백을 제거해 출력하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">hello</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q7-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(7)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(7)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(7)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q7-result"></div>
+        </div>
+        <div class="q-dropdown" id="q7-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>.strip() 메서드가 양쪽 공백을 모두 제거합니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q7-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">s</span> <span class="pn">=</span> <span class="str">"  hello  "</span>
+<span class="fn">print</span><span class="pn">(</span>s<span class="pn">.</span><span class="fn">strip</span><span class="pn">())</span>  <span class="cm"># 앞뒤 공백 제거 → "hello"</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q8 -->
+      <div class="q-card" id="q8">
+        <div class="q-header">
+          <span class="q-num">Q8.</span>
+          <div class="q-body">
+            <p class="q-text">문자열 <code>"Python"</code>과 <code>" is fun"</code>을 <code>+</code> 연산자로 이어 붙여 출력하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">Python is fun</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q8-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(8)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(8)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(8)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q8-result"></div>
+        </div>
+        <div class="q-dropdown" id="q8-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>문자열끼리 + 로 이어 붙이는 것을 문자열 연결(concatenation)이라고 합니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q8-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">print</span><span class="pn">(</span><span class="str">"Python"</span> <span class="pn">+</span> <span class="str">" is fun"</span><span class="pn">)</span>  <span class="cm"># 두 문자열을 + 로 연결</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q9 -->
+      <div class="q-card" id="q9">
+        <div class="q-header">
+          <span class="q-num">Q9.</span>
+          <div class="q-body">
+            <p class="q-text">문자열 <code>"ha"</code>를 <code>*</code> 연산자로 3번 반복해서 출력하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">hahaha</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q9-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(9)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(9)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(9)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q9-result"></div>
+        </div>
+        <div class="q-dropdown" id="q9-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>문자열 * 숫자 형식으로 문자열을 반복할 수 있습니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q9-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">print</span><span class="pn">(</span><span class="str">"ha"</span> <span class="pn">*</span> <span class="num">3</span><span class="pn">)</span>  <span class="cm"># "ha"를 3번 반복 → "hahaha"</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q10 -->
+      <div class="q-card" id="q10">
+        <div class="q-header">
+          <span class="q-num">Q10.</span>
+          <div class="q-body">
+            <p class="q-text"><code>s = "Python"</code>에서 슬라이싱으로 <code>"Pyt"</code>(앞 3글자)만 출력하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">Pyt</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q10-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(10)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(10)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(10)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q10-result"></div>
+        </div>
+        <div class="q-dropdown" id="q10-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>슬라이싱: 변수[시작:끝] → 끝 인덱스의 글자는 포함되지 않습니다.
+앞 3글자라면 [0:3] 또는 [:3]을 사용하세요.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q10-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">s</span> <span class="pn">=</span> <span class="str">"Python"</span>
+<span class="fn">print</span><span class="pn">(</span>s<span class="pn">[:</span><span class="num">3</span><span class="pn">])</span>  <span class="cm"># 인덱스 0,1,2 → "Pyt"</span></pre></div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════
+           🟡 중 (11–35번)
+      ══════════════════════════════ -->
+      <div class="diff-header">
+        <span class="diff-badge medium">중</span>
+        <span class="diff-title">메서드 & 슬라이싱 응용</span>
+        <span class="diff-count">11 – 35번</span>
+      </div>
+
+      <!-- Q11 -->
+      <div class="q-card" id="q11">
+        <div class="q-header">
+          <span class="q-num">Q11.</span>
+          <div class="q-body">
+            <p class="q-text"><code>s = "Python"</code>에서 슬라이싱으로 뒤 3글자 <code>"hon"</code>만 출력하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">hon</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q11-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(11)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(11)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(11)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q11-result"></div>
+        </div>
+        <div class="q-dropdown" id="q11-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>끝에서 3글자는 [-3:] 슬라이싱으로 가져올 수 있습니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q11-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">s</span> <span class="pn">=</span> <span class="str">"Python"</span>
+<span class="fn">print</span><span class="pn">(</span>s<span class="pn">[-</span><span class="num">3</span><span class="pn">:])</span>  <span class="cm"># 뒤에서 3번째부터 끝까지 → "hon"</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q12 -->
+      <div class="q-card" id="q12">
+        <div class="q-header">
+          <span class="q-num">Q12.</span>
+          <div class="q-body">
+            <p class="q-text"><code>s = "Hello World"</code>에서 <code>.replace()</code>로 <code>"World"</code>를 <code>"Python"</code>으로 바꿔 출력하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">Hello Python</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q12-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(12)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(12)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(12)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q12-result"></div>
+        </div>
+        <div class="q-dropdown" id="q12-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>.replace("찾을 것", "바꿀 것") 형태로 사용합니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q12-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">s</span> <span class="pn">=</span> <span class="str">"Hello World"</span>
+<span class="fn">print</span><span class="pn">(</span>s<span class="pn">.</span><span class="fn">replace</span><span class="pn">(</span><span class="str">"World"</span><span class="pn">,</span> <span class="str">"Python"</span><span class="pn">))</span>  <span class="cm"># "World" → "Python"으로 교체</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q13 -->
+      <div class="q-card" id="q13">
+        <div class="q-header">
+          <span class="q-num">Q13.</span>
+          <div class="q-body">
+            <p class="q-text"><code>s = "apple,banana,cherry"</code>를 쉼표 기준으로 <code>.split()</code>해서 출력하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">['apple', 'banana', 'cherry']</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q13-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(13)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(13)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(13)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q13-result"></div>
+        </div>
+        <div class="q-dropdown" id="q13-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>.split(",") 처럼 구분자를 괄호 안에 넣습니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q13-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">s</span> <span class="pn">=</span> <span class="str">"apple,banana,cherry"</span>
+<span class="fn">print</span><span class="pn">(</span>s<span class="pn">.</span><span class="fn">split</span><span class="pn">(</span><span class="str">","</span><span class="pn">))</span>  <span class="cm"># 쉼표 기준으로 분리 → 리스트 반환</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q14 -->
+      <div class="q-card" id="q14">
+        <div class="q-header">
+          <span class="q-num">Q14.</span>
+          <div class="q-body">
+            <p class="q-text"><code>s = "hello world"</code>에서 <code>.find()</code>로 <code>"world"</code>가 시작하는 인덱스를 출력하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">6</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q14-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(14)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(14)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(14)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q14-result"></div>
+        </div>
+        <div class="q-dropdown" id="q14-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>.find("찾을 문자열") 은 해당 문자열이 처음 등장하는 인덱스를 반환합니다.
+없으면 -1을 반환합니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q14-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">s</span> <span class="pn">=</span> <span class="str">"hello world"</span>
+<span class="fn">print</span><span class="pn">(</span>s<span class="pn">.</span><span class="fn">find</span><span class="pn">(</span><span class="str">"world"</span><span class="pn">))</span>  <span class="cm"># 'w'의 인덱스는 6</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q15 -->
+      <div class="q-card" id="q15">
+        <div class="q-header">
+          <span class="q-num">Q15.</span>
+          <div class="q-body">
+            <p class="q-text"><code>s = "Hello World"</code>에서 <code>.count()</code>로 <code>"l"</code>이 몇 번 나오는지 출력하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">3</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q15-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(15)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(15)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(15)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q15-result"></div>
+        </div>
+        <div class="q-dropdown" id="q15-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>.count("찾을 글자") 는 해당 글자가 몇 번 등장하는지 셉니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q15-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">s</span> <span class="pn">=</span> <span class="str">"Hello World"</span>
+<span class="fn">print</span><span class="pn">(</span>s<span class="pn">.</span><span class="fn">count</span><span class="pn">(</span><span class="str">"l"</span><span class="pn">))</span>  <span class="cm"># Hel'l'o Wor'l'd → l이 3개</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q16 -->
+      <div class="q-card" id="q16">
+        <div class="q-header">
+          <span class="q-num">Q16.</span>
+          <div class="q-body">
+            <p class="q-text"><code>s = "python programming"</code>를 <code>.title()</code>로 각 단어의 첫 글자를 대문자로 바꿔 출력하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">Python Programming</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q16-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(16)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(16)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(16)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q16-result"></div>
+        </div>
+        <div class="q-dropdown" id="q16-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>.title() 은 각 단어의 첫 글자만 대문자로 바꿉니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q16-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">s</span> <span class="pn">=</span> <span class="str">"python programming"</span>
+<span class="fn">print</span><span class="pn">(</span>s<span class="pn">.</span><span class="fn">title</span><span class="pn">())</span>  <span class="cm"># 각 단어 첫 글자 대문자 → "Python Programming"</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q17 -->
+      <div class="q-card" id="q17">
+        <div class="q-header">
+          <span class="q-num">Q17.</span>
+          <div class="q-body">
+            <p class="q-text"><code>s = "Python"</code>에서 <code>.startswith("Py")</code>의 결과를 출력하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">True</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q17-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(17)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(17)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(17)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q17-result"></div>
+        </div>
+        <div class="q-dropdown" id="q17-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>.startswith("문자열") 은 해당 문자열로 시작하면 True, 아니면 False를 반환합니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q17-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">s</span> <span class="pn">=</span> <span class="str">"Python"</span>
+<span class="fn">print</span><span class="pn">(</span>s<span class="pn">.</span><span class="fn">startswith</span><span class="pn">(</span><span class="str">"Py"</span><span class="pn">))</span>  <span class="cm"># "Python"이 "Py"로 시작? → True</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q18 -->
+      <div class="q-card" id="q18">
+        <div class="q-header">
+          <span class="q-num">Q18.</span>
+          <div class="q-body">
+            <p class="q-text"><code>s = "filename.txt"</code>에서 <code>.endswith(".txt")</code>의 결과를 출력하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">True</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q18-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(18)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(18)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(18)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q18-result"></div>
+        </div>
+        <div class="q-dropdown" id="q18-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>.endswith("문자열") 은 해당 문자열로 끝나면 True를 반환합니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q18-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">s</span> <span class="pn">=</span> <span class="str">"filename.txt"</span>
+<span class="fn">print</span><span class="pn">(</span>s<span class="pn">.</span><span class="fn">endswith</span><span class="pn">(</span><span class="str">".txt"</span><span class="pn">))</span>  <span class="cm"># ".txt"로 끝나는가? → True</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q19 -->
+      <div class="q-card" id="q19">
+        <div class="q-header">
+          <span class="q-num">Q19.</span>
+          <div class="q-body">
+            <p class="q-text"><code>"Python"</code> 문자열이 <code>"th"</code>를 포함하는지 <code>in</code> 키워드로 확인하고 출력하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">True</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q19-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(19)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(19)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(19)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q19-result"></div>
+        </div>
+        <div class="q-dropdown" id="q19-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>"찾을 것" in "문자열" 형태로 포함 여부를 확인합니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q19-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">print</span><span class="pn">(</span><span class="str">"th"</span> <span class="kw">in</span> <span class="str">"Python"</span><span class="pn">)</span>  <span class="cm"># "Python"에 "th"가 있는가? → True</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q20 -->
+      <div class="q-card" id="q20">
+        <div class="q-header">
+          <span class="q-num">Q20.</span>
+          <div class="q-body">
+            <p class="q-text"><code>s = "Python"</code>에서 슬라이싱으로 2번째부터 4번째 글자 <code>"tho"</code>를 출력하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">tho</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q20-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(20)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(20)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(20)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q20-result"></div>
+        </div>
+        <div class="q-dropdown" id="q20-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>P=0, y=1, t=2, h=3, o=4, n=5
+t부터 o까지는 인덱스 2에서 4까지 → [2:5]</pre></div>
+        </div>
+        <div class="q-dropdown" id="q20-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">s</span> <span class="pn">=</span> <span class="str">"Python"</span>
+<span class="fn">print</span><span class="pn">(</span>s<span class="pn">[</span><span class="num">2</span><span class="pn">:</span><span class="num">5</span><span class="pn">])</span>  <span class="cm"># 인덱스 2,3,4 → 't','h','o' → "tho"</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q21 -->
+      <div class="q-card" id="q21">
+        <div class="q-header">
+          <span class="q-num">Q21.</span>
+          <div class="q-body">
+            <p class="q-text"><code>s = "abcdef"</code>에서 슬라이싱 스텝을 활용해 한 칸씩 건너뛰어 <code>"ace"</code>를 출력하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">ace</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q21-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(21)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(21)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(21)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q21-result"></div>
+        </div>
+        <div class="q-dropdown" id="q21-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>슬라이싱에서 [시작:끝:스텝] 형태를 쓸 수 있습니다.
+[::2]는 처음부터 끝까지 2칸씩 건너뜁니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q21-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">s</span> <span class="pn">=</span> <span class="str">"abcdef"</span>
+<span class="fn">print</span><span class="pn">(</span>s<span class="pn">[::</span><span class="num">2</span><span class="pn">])</span>  <span class="cm"># 0,2,4번 인덱스 → 'a','c','e' → "ace"</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q22 -->
+      <div class="q-card" id="q22">
+        <div class="q-header">
+          <span class="q-num">Q22.</span>
+          <div class="q-body">
+            <p class="q-text"><code>s = "Hello"</code>를 슬라이싱 스텝 <code>-1</code>로 뒤집어 출력하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">olleH</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q22-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(22)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(22)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(22)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q22-result"></div>
+        </div>
+        <div class="q-dropdown" id="q22-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>[::-1] 은 문자열을 통째로 뒤집는 파이썬의 관용적 표현입니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q22-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">s</span> <span class="pn">=</span> <span class="str">"Hello"</span>
+<span class="fn">print</span><span class="pn">(</span>s<span class="pn">[::-</span><span class="num">1</span><span class="pn">])</span>  <span class="cm"># 끝부터 처음까지 역순으로 → "olleH"</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q23 -->
+      <div class="q-card" id="q23">
+        <div class="q-header">
+          <span class="q-num">Q23.</span>
+          <div class="q-body">
+            <p class="q-text"><code>s = "  Python  "</code>에서 왼쪽 공백만 제거하고 출력하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">Python  </span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q23-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(23)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(23)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(23)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q23-result"></div>
+        </div>
+        <div class="q-dropdown" id="q23-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>.lstrip() 은 왼쪽(Left) 공백만 제거합니다.
+.rstrip() 은 오른쪽(Right) 공백만 제거합니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q23-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">s</span> <span class="pn">=</span> <span class="str">"  Python  "</span>
+<span class="fn">print</span><span class="pn">(</span>s<span class="pn">.</span><span class="fn">lstrip</span><span class="pn">())</span>  <span class="cm"># 왼쪽 공백만 제거 → "Python  "</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q24 -->
+      <div class="q-card" id="q24">
+        <div class="q-header">
+          <span class="q-num">Q24.</span>
+          <div class="q-body">
+            <p class="q-text">다음 코드의 출력 결과를 예상하고, <code>print()</code>로 그 결과를 출력하는 코드를 작성하세요.</p>
+            <div class="q-code-block"><pre><span class="fn">s</span> <span class="pn">=</span> <span class="str">"Hello, Python!"</span>
+<span class="fn">print</span><span class="pn">(</span>s<span class="pn">[</span><span class="num">7</span><span class="pn">:</span><span class="num">13</span><span class="pn">])</span></pre></div>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">Python</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q24-input" placeholder="코드를 입력하세요..." rows="3" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(24)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(24)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(24)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q24-result"></div>
+        </div>
+        <div class="q-dropdown" id="q24-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>인덱스를 하나씩 세어보세요.
+H=0, e=1, l=2, l=3, o=4, ,=5, space=6, P=7, ...</pre></div>
+        </div>
+        <div class="q-dropdown" id="q24-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">s</span> <span class="pn">=</span> <span class="str">"Hello, Python!"</span>
+<span class="fn">print</span><span class="pn">(</span>s<span class="pn">[</span><span class="num">7</span><span class="pn">:</span><span class="num">13</span><span class="pn">])</span>  <span class="cm"># 인덱스 7~12 → "Python"</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q25 -->
+      <div class="q-card" id="q25">
+        <div class="q-header">
+          <span class="q-num">Q25.</span>
+          <div class="q-body">
+            <p class="q-text"><code>s = "12345"</code>에서 <code>.isdigit()</code>의 결과를 출력하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">True</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q25-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(25)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(25)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(25)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q25-result"></div>
+        </div>
+        <div class="q-dropdown" id="q25-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>.isdigit() 은 문자열이 모두 숫자로만 이루어져 있으면 True를 반환합니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q25-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">s</span> <span class="pn">=</span> <span class="str">"12345"</span>
+<span class="fn">print</span><span class="pn">(</span>s<span class="pn">.</span><span class="fn">isdigit</span><span class="pn">())</span>  <span class="cm"># 모두 숫자 → True</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q26 -->
+      <div class="q-card" id="q26">
+        <div class="q-header">
+          <span class="q-num">Q26.</span>
+          <div class="q-body">
+            <p class="q-text"><code>words = ["Python", "is", "awesome"]</code>에서 <code>" ".join(words)</code>의 결과를 출력하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">Python is awesome</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q26-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(26)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(26)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(26)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q26-result"></div>
+        </div>
+        <div class="q-dropdown" id="q26-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>"구분자".join(리스트) 는 리스트의 각 요소를 구분자로 이어 붙입니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q26-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">words</span> <span class="pn">=</span> <span class="pn">[</span><span class="str">"Python"</span><span class="pn">,</span> <span class="str">"is"</span><span class="pn">,</span> <span class="str">"awesome"</span><span class="pn">]</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">" "</span><span class="pn">.</span><span class="fn">join</span><span class="pn">(</span>words<span class="pn">))</span>  <span class="cm"># 공백으로 이어 붙임 → "Python is awesome"</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q27 -->
+      <div class="q-card" id="q27">
+        <div class="q-header">
+          <span class="q-num">Q27.</span>
+          <div class="q-body">
+            <p class="q-text"><code>name = "Alice"</code>, <code>age = 25</code>일 때, <code>str()</code>을 활용해 <code>"이름: Alice, 나이: 25"</code>를 출력하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">이름: Alice, 나이: 25</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q27-input" placeholder="코드를 입력하세요..." rows="3" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(27)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(27)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(27)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q27-result"></div>
+        </div>
+        <div class="q-dropdown" id="q27-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>숫자는 str()로 문자열로 바꿔야 + 연결이 됩니다.
+"이름: " + name + ", 나이: " + str(age)</pre></div>
+        </div>
+        <div class="q-dropdown" id="q27-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">name</span> <span class="pn">=</span> <span class="str">"Alice"</span>
+<span class="fn">age</span> <span class="pn">=</span> <span class="num">25</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"이름: "</span> <span class="pn">+</span> name <span class="pn">+</span> <span class="str">", 나이: "</span> <span class="pn">+</span> <span class="fn">str</span><span class="pn">(</span>age<span class="pn">))</span>
+<span class="cm"># 숫자 age를 str()로 변환해야 문자열과 + 연결 가능</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q28 -->
+      <div class="q-card" id="q28">
+        <div class="q-header">
+          <span class="q-num">Q28.</span>
+          <div class="q-body">
+            <p class="q-text"><code>s = "abcABC123"</code>에서 <code>.isalpha()</code>의 결과를 출력하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">False</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q28-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(28)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(28)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(28)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q28-result"></div>
+        </div>
+        <div class="q-dropdown" id="q28-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>.isalpha() 는 문자열이 모두 알파벳으로만 이루어져 있을 때 True입니다.
+숫자가 섞여 있으면 False가 됩니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q28-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">s</span> <span class="pn">=</span> <span class="str">"abcABC123"</span>
+<span class="fn">print</span><span class="pn">(</span>s<span class="pn">.</span><span class="fn">isalpha</span><span class="pn">())</span>  <span class="cm"># 숫자 123이 포함돼 있어서 → False</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q29 -->
+      <div class="q-card" id="q29">
+        <div class="q-header">
+          <span class="q-num">Q29.</span>
+          <div class="q-body">
+            <p class="q-text"><code>s = "hello"</code>를 <code>.center(11, "*")</code>로 가운데 정렬해서 출력하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">***hello***</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q29-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(29)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(29)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(29)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q29-result"></div>
+        </div>
+        <div class="q-dropdown" id="q29-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>.center(전체 너비, 채울 문자) 로 문자열을 가운데 정렬합니다.
+전체 11칸, 나머지를 * 로 채웁니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q29-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">s</span> <span class="pn">=</span> <span class="str">"hello"</span>
+<span class="fn">print</span><span class="pn">(</span>s<span class="pn">.</span><span class="fn">center</span><span class="pn">(</span><span class="num">11</span><span class="pn">,</span> <span class="str">"*"</span><span class="pn">))</span>  <span class="cm"># 5글자를 11칸 가운데 → ***hello***</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q30 -->
+      <div class="q-card" id="q30">
+        <div class="q-header">
+          <span class="q-num">Q30.</span>
+          <div class="q-body">
+            <p class="q-text">다음 코드의 출력 결과를 예상하고, <code>print()</code>로 그 결과를 직접 출력하는 코드를 작성하세요.</p>
+            <div class="q-code-block"><pre><span class="fn">s</span> <span class="pn">=</span> <span class="str">"banana"</span>
+<span class="fn">print</span><span class="pn">(</span>s<span class="pn">.</span><span class="fn">replace</span><span class="pn">(</span><span class="str">"a"</span><span class="pn">,</span> <span class="str">"@"</span><span class="pn">))</span></pre></div>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">b@n@n@</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q30-input" placeholder="코드를 입력하세요..." rows="3" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(30)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(30)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(30)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q30-result"></div>
+        </div>
+        <div class="q-dropdown" id="q30-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>.replace()는 찾은 문자열을 모두 바꿉니다.
+"banana"에서 "a"가 몇 개인지 세어보세요.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q30-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">s</span> <span class="pn">=</span> <span class="str">"banana"</span>
+<span class="fn">print</span><span class="pn">(</span>s<span class="pn">.</span><span class="fn">replace</span><span class="pn">(</span><span class="str">"a"</span><span class="pn">,</span> <span class="str">"@"</span><span class="pn">))</span>  <span class="cm"># a가 3개 → b@n@n@</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q31 -->
+      <div class="q-card" id="q31">
+        <div class="q-header">
+          <span class="q-num">Q31.</span>
+          <div class="q-body">
+            <p class="q-text"><code>sentence = "the quick brown fox"</code>에서 단어별로 분리한 후 첫 번째 단어만 출력하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">the</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q31-input" placeholder="코드를 입력하세요..." rows="3" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(31)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(31)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(31)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q31-result"></div>
+        </div>
+        <div class="q-dropdown" id="q31-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>.split() 은 공백 기준으로 단어를 분리해 리스트로 반환합니다.
+리스트의 첫 번째 요소는 [0]으로 접근합니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q31-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">sentence</span> <span class="pn">=</span> <span class="str">"the quick brown fox"</span>
+<span class="fn">words</span> <span class="pn">=</span> sentence<span class="pn">.</span><span class="fn">split</span><span class="pn">()</span>  <span class="cm"># ['the', 'quick', 'brown', 'fox']</span>
+<span class="fn">print</span><span class="pn">(</span>words<span class="pn">[</span><span class="num">0</span><span class="pn">])</span>          <span class="cm"># 첫 번째 요소 → "the"</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q32 -->
+      <div class="q-card" id="q32">
+        <div class="q-header">
+          <span class="q-num">Q32.</span>
+          <div class="q-body">
+            <p class="q-text"><code>s = "racecar"</code>에서 슬라이싱으로 문자열을 뒤집고, 원본과 같은지(<code>True</code>/<code>False</code>) 출력하세요. (회문 판별)</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">True</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q32-input" placeholder="코드를 입력하세요..." rows="3" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(32)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(32)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(32)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q32-result"></div>
+        </div>
+        <div class="q-dropdown" id="q32-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>s[::-1] 로 뒤집은 값이 s 와 같으면 회문입니다.
+print(s == s[::-1]) 처럼 비교 결과를 바로 출력할 수 있습니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q32-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">s</span> <span class="pn">=</span> <span class="str">"racecar"</span>
+<span class="fn">print</span><span class="pn">(</span>s <span class="pn">==</span> s<span class="pn">[::-</span><span class="num">1</span><span class="pn">])</span>  <span class="cm"># "racecar" == "racecar" → True</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q33 -->
+      <div class="q-card" id="q33">
+        <div class="q-header">
+          <span class="q-num">Q33.</span>
+          <div class="q-body">
+            <p class="q-text"><code>s = "Hello World"</code>에서 <code>.lower()</code>와 <code>.replace()</code>를 메서드 체이닝으로 이어서, 공백을 <code>"_"</code>로 바꿔 소문자로 출력하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">hello_world</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q33-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(33)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(33)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(33)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q33-result"></div>
+        </div>
+        <div class="q-dropdown" id="q33-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>메서드를 연달아 쓰는 것을 체이닝이라 합니다.
+s.lower().replace(" ", "_") 처럼 이어서 쓸 수 있습니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q33-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">s</span> <span class="pn">=</span> <span class="str">"Hello World"</span>
+<span class="fn">print</span><span class="pn">(</span>s<span class="pn">.</span><span class="fn">lower</span><span class="pn">().</span><span class="fn">replace</span><span class="pn">(</span><span class="str">" "</span><span class="pn">,</span> <span class="str">"_"</span><span class="pn">))</span>
+<span class="cm"># 먼저 소문자로 → "hello world"
+# 그 다음 공백을 _ 로 → "hello_world"</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q34 -->
+      <div class="q-card" id="q34">
+        <div class="q-header">
+          <span class="q-num">Q34.</span>
+          <div class="q-body">
+            <p class="q-text">다음 코드의 출력을 예상해 보고, <code>print()</code>로 그 값을 직접 출력하는 코드를 작성하세요.</p>
+            <div class="q-code-block"><pre><span class="fn">s</span> <span class="pn">=</span> <span class="str">"Python"</span>
+<span class="fn">print</span><span class="pn">(</span>s<span class="pn">[</span><span class="num">1</span><span class="pn">::</span><span class="num">2</span><span class="pn">])</span></pre></div>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">yhn</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q34-input" placeholder="코드를 입력하세요..." rows="3" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(34)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(34)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(34)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q34-result"></div>
+        </div>
+        <div class="q-dropdown" id="q34-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>P=0, y=1, t=2, h=3, o=4, n=5
+[1::2]는 인덱스 1부터 시작해서 2칸씩 건너뜁니다 → 1, 3, 5번 인덱스</pre></div>
+        </div>
+        <div class="q-dropdown" id="q34-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">s</span> <span class="pn">=</span> <span class="str">"Python"</span>
+<span class="fn">print</span><span class="pn">(</span>s<span class="pn">[</span><span class="num">1</span><span class="pn">::</span><span class="num">2</span><span class="pn">])</span>  <span class="cm"># 인덱스 1,3,5 → 'y','h','n' → "yhn"</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q35 -->
+      <div class="q-card" id="q35">
+        <div class="q-header">
+          <span class="q-num">Q35.</span>
+          <div class="q-body">
+            <p class="q-text"><code>s = "  Hello, World!  "</code>에서 양쪽 공백 제거 후, 대문자로 변환하고, <code>"WORLD"</code>를 <code>"PYTHON"</code>으로 바꿔 출력하세요. (메서드 체이닝 활용)</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">HELLO, PYTHON!</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q35-input" placeholder="코드를 입력하세요..." rows="3" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(35)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(35)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(35)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q35-result"></div>
+        </div>
+        <div class="q-dropdown" id="q35-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>.strip().upper().replace() 순서로 체이닝하세요.
+upper()로 먼저 대문자로 만든 후 "WORLD"를 찾아야 합니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q35-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">s</span> <span class="pn">=</span> <span class="str">"  Hello, World!  "</span>
+<span class="fn">print</span><span class="pn">(</span>s<span class="pn">.</span><span class="fn">strip</span><span class="pn">().</span><span class="fn">upper</span><span class="pn">().</span><span class="fn">replace</span><span class="pn">(</span><span class="str">"WORLD"</span><span class="pn">,</span> <span class="str">"PYTHON"</span><span class="pn">))</span>
+<span class="cm"># 1. strip() → "Hello, World!"
+# 2. upper() → "HELLO, WORLD!"
+# 3. replace() → "HELLO, PYTHON!"</span></pre></div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════
+           🔴 상 (36–50번)
+      ══════════════════════════════ -->
+      <div class="diff-header">
+        <span class="diff-badge hard">상</span>
+        <span class="diff-title">종합 응용 & 오류 찾기</span>
+        <span class="diff-count">36 – 50번</span>
+      </div>
+
+      <!-- Q36 -->
+      <div class="q-card" id="q36">
+        <div class="q-header">
+          <span class="q-num">Q36.</span>
+          <div class="q-body">
+            <p class="q-text">아래 코드에서 오류를 찾아 올바르게 수정하고, 오류가 발생하는 이유를 주석으로 설명하세요.</p>
+            <div class="q-error-code"><pre>name = "Python"
+age = 30
+print("이름: " + name + ", 나이: " + age)</pre></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q36-input" placeholder="수정된 코드를 입력하세요..." rows="4" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(36)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(36)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(36)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q36-result"></div>
+        </div>
+        <div class="q-dropdown" id="q36-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>파이썬에서 문자열과 정수는 + 로 직접 연결할 수 없습니다.
+오류 이름: TypeError</pre></div>
+        </div>
+        <div class="q-dropdown" id="q36-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">name</span> <span class="pn">=</span> <span class="str">"Python"</span>
+<span class="fn">age</span> <span class="pn">=</span> <span class="num">30</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"이름: "</span> <span class="pn">+</span> name <span class="pn">+</span> <span class="str">", 나이: "</span> <span class="pn">+</span> <span class="fn">str</span><span class="pn">(</span>age<span class="pn">))</span>
+<span class="cm"># 수정: age를 str()로 변환
+# 이유: TypeError — 문자열(str)과 정수(int)는 + 로 바로 연결 불가</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q37 -->
+      <div class="q-card" id="q37">
+        <div class="q-header">
+          <span class="q-num">Q37.</span>
+          <div class="q-body">
+            <p class="q-text">아래 코드의 오류를 찾아 수정하고, 올바른 출력 결과를 예상해 보세요.</p>
+            <div class="q-error-code"><pre>s = "Hello"
+print(s[10])</pre></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q37-input" placeholder="수정된 코드와 설명을 작성하세요..." rows="4" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(37)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(37)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(37)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q37-result"></div>
+        </div>
+        <div class="q-dropdown" id="q37-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>"Hello"는 5글자이므로 인덱스 0~4까지만 유효합니다.
+10을 유효한 인덱스로 바꿔보세요. 오류 이름: IndexError</pre></div>
+        </div>
+        <div class="q-dropdown" id="q37-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">s</span> <span class="pn">=</span> <span class="str">"Hello"</span>
+<span class="fn">print</span><span class="pn">(</span>s<span class="pn">[</span><span class="num">4</span><span class="pn">])</span>  <span class="cm"># o 출력</span>
+<span class="cm"># 원인: IndexError — "Hello"는 5글자, 유효 인덱스는 0~4(또는 -5~-1)
+# s[10]은 범위를 벗어남</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q38 -->
+      <div class="q-card" id="q38">
+        <div class="q-header">
+          <span class="q-num">Q38.</span>
+          <div class="q-body">
+            <p class="q-text"><code>email = "user@example.com"</code>에서 <code>@</code> 앞의 사용자명(<code>user</code>)만 추출해서 출력하세요. (<code>.split()</code> 활용)</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">user</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q38-input" placeholder="코드를 입력하세요..." rows="3" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(38)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(38)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(38)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q38-result"></div>
+        </div>
+        <div class="q-dropdown" id="q38-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>.split("@") 로 이메일을 @ 기준으로 나누면
+["user", "example.com"] 리스트가 됩니다. 첫 번째 요소([0])가 사용자명입니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q38-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">email</span> <span class="pn">=</span> <span class="str">"user@example.com"</span>
+<span class="fn">username</span> <span class="pn">=</span> email<span class="pn">.</span><span class="fn">split</span><span class="pn">(</span><span class="str">"@"</span><span class="pn">)[</span><span class="num">0</span><span class="pn">]</span>  <span class="cm"># @ 기준으로 분리 후 앞 부분</span>
+<span class="fn">print</span><span class="pn">(</span>username<span class="pn">)</span>  <span class="cm"># "user"</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q39 -->
+      <div class="q-card" id="q39">
+        <div class="q-header">
+          <span class="q-num">Q39.</span>
+          <div class="q-body">
+            <p class="q-text"><code>url = "https://www.superpython.com/bronze/chapter09"</code>에서 마지막 <code>/</code> 이후의 텍스트(<code>"chapter09"</code>)만 출력하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">chapter09</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q39-input" placeholder="코드를 입력하세요..." rows="3" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(39)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(39)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(39)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q39-result"></div>
+        </div>
+        <div class="q-dropdown" id="q39-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>.split("/") 로 / 기준으로 자르면 리스트가 됩니다.
+마지막 요소는 [-1] 인덱스로 가져올 수 있습니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q39-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">url</span> <span class="pn">=</span> <span class="str">"https://www.superpython.com/bronze/chapter09"</span>
+<span class="fn">print</span><span class="pn">(</span>url<span class="pn">.</span><span class="fn">split</span><span class="pn">(</span><span class="str">"/"</span><span class="pn">)[-</span><span class="num">1</span><span class="pn">])</span>  <span class="cm"># /로 분리 후 마지막 요소 → "chapter09"</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q40 -->
+      <div class="q-card" id="q40">
+        <div class="q-header">
+          <span class="q-num">Q40.</span>
+          <div class="q-body">
+            <p class="q-text"><code>phone = "010-1234-5678"</code>에서 <code>"-"</code>를 모두 제거해 숫자만 출력하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">01012345678</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q40-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(40)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(40)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(40)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q40-result"></div>
+        </div>
+        <div class="q-dropdown" id="q40-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>.replace("-", "") 로 하이픈을 빈 문자열로 바꾸면 제거됩니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q40-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">phone</span> <span class="pn">=</span> <span class="str">"010-1234-5678"</span>
+<span class="fn">print</span><span class="pn">(</span>phone<span class="pn">.</span><span class="fn">replace</span><span class="pn">(</span><span class="str">"-"</span><span class="pn">,</span> <span class="str">""</span><span class="pn">))</span>  <span class="cm"># "-" → "" 로 교체 = 삭제 효과</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q41 -->
+      <div class="q-card" id="q41">
+        <div class="q-header">
+          <span class="q-num">Q41.</span>
+          <div class="q-body">
+            <p class="q-text">아래 코드에서 오류를 찾아 수정하세요.</p>
+            <div class="q-error-code"><pre>word = "Python"
+word[0] = "J"
+print(word)</pre></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q41-input" placeholder="오류 설명과 대안 코드를 작성하세요..." rows="4" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(41)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(41)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(41)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q41-result"></div>
+        </div>
+        <div class="q-dropdown" id="q41-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>파이썬 문자열은 불변(immutable)입니다. 인덱스로 개별 글자를 수정할 수 없습니다.
+.replace()나 슬라이싱으로 새 문자열을 만들어야 합니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q41-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="cm"># 오류: TypeError — 문자열은 불변이라 인덱스로 수정 불가
+# 해결법 1: replace 활용</span>
+<span class="fn">word</span> <span class="pn">=</span> <span class="str">"Python"</span>
+<span class="fn">word</span> <span class="pn">=</span> <span class="str">"J"</span> <span class="pn">+</span> word<span class="pn">[</span><span class="num">1</span><span class="pn">:]</span>  <span class="cm"># "J" + "ython" → "Jython"</span>
+<span class="fn">print</span><span class="pn">(</span>word<span class="pn">)</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q42 -->
+      <div class="q-card" id="q42">
+        <div class="q-header">
+          <span class="q-num">Q42.</span>
+          <div class="q-body">
+            <p class="q-text"><code>s = "  Hello  World  "</code>를 앞뒤 공백 제거 후 단어 사이의 공백도 <code>"-"</code>로 통일해서 <code>"Hello-World"</code>를 출력하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">Hello-World</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q42-input" placeholder="코드를 입력하세요..." rows="3" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(42)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(42)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(42)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q42-result"></div>
+        </div>
+        <div class="q-dropdown" id="q42-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>.strip() → .split() → "-".join() 순서로 처리하면 됩니다.
+.split() 은 여러 공백도 하나로 처리합니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q42-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">s</span> <span class="pn">=</span> <span class="str">"  Hello  World  "</span>
+<span class="fn">words</span> <span class="pn">=</span> s<span class="pn">.</span><span class="fn">strip</span><span class="pn">().</span><span class="fn">split</span><span class="pn">()</span>  <span class="cm"># ["Hello", "World"]</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"-"</span><span class="pn">.</span><span class="fn">join</span><span class="pn">(</span>words<span class="pn">))</span>       <span class="cm"># "Hello-World"</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q43 -->
+      <div class="q-card" id="q43">
+        <div class="q-header">
+          <span class="q-num">Q43.</span>
+          <div class="q-body">
+            <p class="q-text"><code>s = "PYTHON"</code>에서 각 글자 사이에 <code>"-"</code>를 넣어 <code>"P-Y-T-H-O-N"</code>을 출력하세요. (<code>join()</code> 활용)</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">P-Y-T-H-O-N</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q43-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(43)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(43)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(43)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q43-result"></div>
+        </div>
+        <div class="q-dropdown" id="q43-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>문자열은 반복 가능(iterable)합니다.
+"-".join("PYTHON") 처럼 문자열을 직접 join에 넣을 수 있습니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q43-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">s</span> <span class="pn">=</span> <span class="str">"PYTHON"</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"-"</span><span class="pn">.</span><span class="fn">join</span><span class="pn">(</span>s<span class="pn">))</span>  <span class="cm"># 각 글자 사이에 "-" 삽입 → "P-Y-T-H-O-N"</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q44 -->
+      <div class="q-card" id="q44">
+        <div class="q-header">
+          <span class="q-num">Q44.</span>
+          <div class="q-body">
+            <p class="q-text"><code>s = "Hello World Python"</code>에서 <code>.count()</code>로 공백이 몇 개인지 출력하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">2</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q44-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(44)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(44)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(44)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q44-result"></div>
+        </div>
+        <div class="q-dropdown" id="q44-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>.count(" ") 로 공백 문자를 셉니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q44-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">s</span> <span class="pn">=</span> <span class="str">"Hello World Python"</span>
+<span class="fn">print</span><span class="pn">(</span>s<span class="pn">.</span><span class="fn">count</span><span class="pn">(</span><span class="str">" "</span><span class="pn">))</span>  <span class="cm"># 공백은 "Hello" "World" "Python" 사이에 2개</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q45 -->
+      <div class="q-card" id="q45">
+        <div class="q-header">
+          <span class="q-num">Q45.</span>
+          <div class="q-body">
+            <p class="q-text"><code>text = "Python3"</code>에서 숫자가 포함되어 있는지 <code>any()</code>와 <code>.isdigit()</code>을 이용해 확인하고, <code>True</code> 또는 <code>False</code>를 출력하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">True</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q45-input" placeholder="코드를 입력하세요..." rows="3" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(45)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(45)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(45)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q45-result"></div>
+        </div>
+        <div class="q-dropdown" id="q45-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>any(조건 for 글자 in 문자열) 형태를 씁니다.
+any(c.isdigit() for c in text) — c가 숫자인 글자가 하나라도 있으면 True</pre></div>
+        </div>
+        <div class="q-dropdown" id="q45-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">text</span> <span class="pn">=</span> <span class="str">"Python3"</span>
+<span class="fn">print</span><span class="pn">(</span><span class="fn">any</span><span class="pn">(</span>c<span class="pn">.</span><span class="fn">isdigit</span><span class="pn">()</span> <span class="kw">for</span> c <span class="kw">in</span> text<span class="pn">))</span>
+<span class="cm"># text의 각 글자 c에 대해 c.isdigit() 검사
+# "3"에서 True → any()가 True 반환</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q46 -->
+      <div class="q-card" id="q46">
+        <div class="q-header">
+          <span class="q-num">Q46.</span>
+          <div class="q-body">
+            <p class="q-text"><code>password = "Ab1@cd"</code>에서 대문자, 소문자, 숫자가 각각 하나씩 이상 포함되어 있는지 확인하는 조건을 만들어 <code>True</code>를 출력하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">True</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q46-input" placeholder="코드를 입력하세요..." rows="5" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(46)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(46)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(46)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q46-result"></div>
+        </div>
+        <div class="q-dropdown" id="q46-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>any(c.isupper() for c in p) → 대문자 존재
+any(c.islower() for c in p) → 소문자 존재
+any(c.isdigit() for c in p) → 숫자 존재
+세 조건을 and 로 연결해 print() 합니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q46-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">password</span> <span class="pn">=</span> <span class="str">"Ab1@cd"</span>
+<span class="fn">has_upper</span>  <span class="pn">=</span> <span class="fn">any</span><span class="pn">(</span>c<span class="pn">.</span><span class="fn">isupper</span><span class="pn">()</span> <span class="kw">for</span> c <span class="kw">in</span> password<span class="pn">)</span>  <span class="cm"># 대문자 있음?</span>
+<span class="fn">has_lower</span>  <span class="pn">=</span> <span class="fn">any</span><span class="pn">(</span>c<span class="pn">.</span><span class="fn">islower</span><span class="pn">()</span> <span class="kw">for</span> c <span class="kw">in</span> password<span class="pn">)</span>  <span class="cm"># 소문자 있음?</span>
+<span class="fn">has_digit</span>  <span class="pn">=</span> <span class="fn">any</span><span class="pn">(</span>c<span class="pn">.</span><span class="fn">isdigit</span><span class="pn">()</span> <span class="kw">for</span> c <span class="kw">in</span> password<span class="pn">)</span>  <span class="cm"># 숫자 있음?</span>
+<span class="fn">print</span><span class="pn">(</span>has_upper <span class="kw">and</span> has_lower <span class="kw">and</span> has_digit<span class="pn">)</span>  <span class="cm"># True</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q47 -->
+      <div class="q-card" id="q47">
+        <div class="q-header">
+          <span class="q-num">Q47.</span>
+          <div class="q-body">
+            <p class="q-text"><code>s = "Python is great and Python is fun"</code>에서 <code>"Python"</code>을 모두 <code>"Java"</code>로 바꾸되, <strong>첫 번째 것만</strong> 바꾸려면 어떻게 해야 할까요? 결과를 출력하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">Java is great and Python is fun</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q47-input" placeholder="코드를 입력하세요..." rows="3" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(47)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(47)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(47)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q47-result"></div>
+        </div>
+        <div class="q-dropdown" id="q47-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>.replace("찾을 것", "바꿀 것", 횟수) 처럼 세 번째 인수로 횟수를 지정할 수 있습니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q47-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">s</span> <span class="pn">=</span> <span class="str">"Python is great and Python is fun"</span>
+<span class="fn">print</span><span class="pn">(</span>s<span class="pn">.</span><span class="fn">replace</span><span class="pn">(</span><span class="str">"Python"</span><span class="pn">,</span> <span class="str">"Java"</span><span class="pn">,</span> <span class="num">1</span><span class="pn">))</span>
+<span class="cm"># 세 번째 인수 1 = 최대 1번만 교체</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q48 -->
+      <div class="q-card" id="q48">
+        <div class="q-header">
+          <span class="q-num">Q48.</span>
+          <div class="q-body">
+            <p class="q-text"><code>text = "  파이썬  은  재미있다  "</code>에서 불필요한 공백을 모두 제거하고 단어 사이는 공백 하나로 통일해서 출력하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">파이썬 은 재미있다</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q48-input" placeholder="코드를 입력하세요..." rows="3" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(48)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(48)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(48)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q48-result"></div>
+        </div>
+        <div class="q-dropdown" id="q48-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>.split() 은 인수 없이 쓰면 연속 공백도 하나로 처리합니다.
+" ".join(s.split()) 패턴으로 공백을 단일화합니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q48-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">text</span> <span class="pn">=</span> <span class="str">"  파이썬  은  재미있다  "</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">" "</span><span class="pn">.</span><span class="fn">join</span><span class="pn">(</span>text<span class="pn">.</span><span class="fn">split</span><span class="pn">()))</span>
+<span class="cm"># .split() → ["파이썬", "은", "재미있다"]
+# " ".join() → "파이썬 은 재미있다"</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q49 -->
+      <div class="q-card" id="q49">
+        <div class="q-header">
+          <span class="q-num">Q49.</span>
+          <div class="q-body">
+            <p class="q-text">아래 코드에서 오류를 찾고, 오류 원인을 설명하세요. 그리고 올바른 코드를 작성하세요.</p>
+            <div class="q-error-code"><pre>s = "Hello"
+print(s.upper)  # 대문자로 바꾸려 했음</pre></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q49-input" placeholder="수정된 코드를 입력하세요..." rows="4" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(49)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(49)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(49)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q49-result"></div>
+        </div>
+        <div class="q-dropdown" id="q49-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>메서드를 호출하려면 반드시 괄호 () 가 필요합니다.
+s.upper 는 메서드 객체 자체를 가리키고, s.upper() 는 메서드를 실행합니다.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q49-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">s</span> <span class="pn">=</span> <span class="str">"Hello"</span>
+<span class="fn">print</span><span class="pn">(</span>s<span class="pn">.</span><span class="fn">upper</span><span class="pn">())</span>  <span class="cm"># 괄호 () 추가 — HELLO 출력</span>
+<span class="cm"># 원인: s.upper는 메서드 자체(함수 객체)를 반환하고 실행하지 않음
+# 메서드를 실행하려면 항상 () 괄호가 필요합니다</span></pre></div>
+        </div>
+      </div>
+
+      <!-- Q50 -->
+      <div class="q-card" id="q50">
+        <div class="q-header">
+          <span class="q-num">Q50.</span>
+          <div class="q-body">
+            <p class="q-text">🏆 <strong>종합 도전 문제</strong>: 아래 변수들을 활용해 정해진 형식으로 출력하세요.</p>
+            <div class="q-code-block"><pre><span class="fn">title</span>    <span class="pn">=</span> <span class="str">"  super python  "</span>   <span class="cm"># 앞뒤 공백 제거 후 각 단어 첫 글자 대문자</span>
+<span class="fn">version</span>  <span class="pn">=</span> <span class="str">"3.12.0"</span>             <span class="cm"># . 기준으로 나눠서 첫 번째 숫자만</span>
+<span class="fn">slogan</span>   <span class="pn">=</span> <span class="str">"read write build"</span>   <span class="cm"># 단어 사이를 | 로 연결</span></pre></div>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">Super Python v3 | read|write|build</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q50-input" placeholder="코드를 입력하세요..." rows="6" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check"  onclick="check(50)">확인</button>
+            <button class="btn-hint"   onclick="toggleHint(50)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(50)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q50-result"></div>
+        </div>
+        <div class="q-dropdown" id="q50-hint">
+          <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+          <div class="q-dropdown-body"><pre>① title.strip().title() → "Super Python"
+② "v" + version.split(".")[0] → "v3"
+③ "|".join(slogan.split()) → "read|write|build"
+세 부분을 + 나 print() 인수로 조합하세요.</pre></div>
+        </div>
+        <div class="q-dropdown" id="q50-answer">
+          <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+          <div class="q-dropdown-body"><pre><span class="fn">title</span>   <span class="pn">=</span> <span class="str">"  super python  "</span>
+<span class="fn">version</span> <span class="pn">=</span> <span class="str">"3.12.0"</span>
+<span class="fn">slogan</span>  <span class="pn">=</span> <span class="str">"read write build"</span>
+
+<span class="fn">t</span> <span class="pn">=</span> title<span class="pn">.</span><span class="fn">strip</span><span class="pn">().</span><span class="fn">title</span><span class="pn">()</span>         <span class="cm"># "Super Python"</span>
+<span class="fn">v</span> <span class="pn">=</span> <span class="str">"v"</span> <span class="pn">+</span> version<span class="pn">.</span><span class="fn">split</span><span class="pn">(</span><span class="str">"."</span><span class="pn">)[</span><span class="num">0</span><span class="pn">]</span>  <span class="cm"># "v3"</span>
+<span class="fn">s</span> <span class="pn">=</span> <span class="str">"|"</span><span class="pn">.</span><span class="fn">join</span><span class="pn">(</span>slogan<span class="pn">.</span><span class="fn">split</span><span class="pn">())</span>     <span class="cm"># "read|write|build"</span>
+
+<span class="fn">print</span><span class="pn">(</span>t <span class="pn">+</span> <span class="str">" "</span> <span class="pn">+</span> v <span class="pn">+</span> <span class="str">" | "</span> <span class="pn">+</span> s<span class="pn">)</span>  <span class="cm"># "Super Python v3 | read|write|build"</span></pre></div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="cheer-box">
+        <span class="cheer-icon">🎯</span>
+        <div class="cheer-text">
+          <strong>문자열 연습문제 50개 완료!</strong><br>
+          틀린 문제가 있어도 괜찮습니다. 정답을 확인하고 왜 그렇게 동작하는지 이해하는 것이 핵심입니다. 특히 <strong>슬라이싱</strong>과 <strong>메서드 체이닝</strong>은 앞으로도 계속 쓰게 되니 확실히 익혀두세요. 다음 챕터에서는 문자열을 훨씬 더 세련되게 다룰 수 있는 <strong>f-string</strong>을 배웁니다. 기대하세요!
+        </div>
+      </div>
+
+      <div class="chap-nav">
+        <a href="08-string.html" class="chap-nav-btn">
+          <span class="cnb-dir">← 이전 챕터</span>
+          <span class="cnb-title"><span>08.</span> 문자열 String — 개념과 핵심 메서드</span>
+        </a>
+        <a href="10-fstring.html" class="chap-nav-btn next">
+          <span class="cnb-dir">다음 챕터 →</span>
+          <span class="cnb-title"><span>10.</span> f-string 완전정리</span>
+        </a>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+  /* 사이드바 공통 */
+  const isMobile = () => window.innerWidth <= 720;
+  const overlay  = document.getElementById('sidebarOverlay');
+  function toggleSidebar() { document.body.classList.toggle('sidebar-closed'); if (isMobile()) overlay.classList.toggle('visible', !document.body.classList.contains('sidebar-closed')); localStorage.setItem('sp-sidebar', document.body.classList.contains('sidebar-closed') ? 'closed' : 'open'); }
+  function closeSidebar()  { document.body.classList.add('sidebar-closed'); overlay.classList.remove('visible'); localStorage.setItem('sp-sidebar','closed'); }
+  function toggleGroup(id) { document.getElementById(id).classList.toggle('open'); }
+  window.addEventListener('DOMContentLoaded', () => {
+    if (isMobile()) document.body.classList.add('sidebar-closed');
+    else if (localStorage.getItem('sp-sidebar') === 'closed') document.body.classList.add('sidebar-closed');
+  });
+  window.addEventListener('resize', () => { if (!isMobile()) overlay.classList.remove('visible'); });
+
+  /* 힌트 / 정답 토글 */
+  function toggleHint(n)   { toggleDropdown(`q${n}-hint`); }
+  function toggleAnswer(n) { toggleDropdown(`q${n}-answer`); }
+  function toggleDropdown(id) {
+    document.querySelectorAll('.q-dropdown').forEach(d => { if (d.id !== id) d.classList.remove('visible'); });
+    document.getElementById(id).classList.toggle('visible');
+  }
+
+  /* ━━━ 정답 데이터 ━━━ */
+  const ANSWERS = {
+    1:  { type: 'code', expected: 'Python' },
+    2:  { type: 'code', expected: '13' },
+    3:  { type: 'code', expected: 'P' },
+    4:  { type: 'code', expected: 'n' },
+    5:  { type: 'code', expected: 'HELLO' },
+    6:  { type: 'code', expected: 'world' },
+    7:  { type: 'code', expected: 'hello' },
+    8:  { type: 'code', expected: 'Python is fun' },
+    9:  { type: 'code', expected: 'hahaha' },
+    10: { type: 'code', expected: 'Pyt' },
+    11: { type: 'code', expected: 'hon' },
+    12: { type: 'code', expected: 'Hello Python' },
+    13: { type: 'text', expected: "apple" },
+    14: { type: 'code', expected: '6' },
+    15: { type: 'code', expected: '3' },
+    16: { type: 'code', expected: 'Python Programming' },
+    17: { type: 'code', expected: 'True' },
+    18: { type: 'code', expected: 'True' },
+    19: { type: 'code', expected: 'True' },
+    20: { type: 'code', expected: 'tho' },
+    21: { type: 'code', expected: 'ace' },
+    22: { type: 'code', expected: 'olleH' },
+    23: { type: 'text', expected: 'Python' },
+    24: { type: 'code', expected: 'Python' },
+    25: { type: 'code', expected: 'True' },
+    26: { type: 'code', expected: 'Python is awesome' },
+    27: { type: 'code', expected: '이름: Alice, 나이: 25' },
+    28: { type: 'code', expected: 'False' },
+    29: { type: 'code', expected: '***hello***' },
+    30: { type: 'code', expected: 'b@n@n@' },
+    31: { type: 'code', expected: 'the' },
+    32: { type: 'code', expected: 'True' },
+    33: { type: 'code', expected: 'hello_world' },
+    34: { type: 'code', expected: 'yhn' },
+    35: { type: 'code', expected: 'HELLO, PYTHON!' },
+    36: { type: 'text', expected: 'str' },
+    37: { type: 'text', expected: 'IndexError' },
+    38: { type: 'code', expected: 'user' },
+    39: { type: 'code', expected: 'chapter09' },
+    40: { type: 'code', expected: '01012345678' },
+    41: { type: 'text', expected: 'immutable' },
+    42: { type: 'code', expected: 'Hello-World' },
+    43: { type: 'code', expected: 'P-Y-T-H-O-N' },
+    44: { type: 'code', expected: '2' },
+    45: { type: 'code', expected: 'True' },
+    46: { type: 'code', expected: 'True' },
+    47: { type: 'code', expected: 'Java is great and Python is fun' },
+    48: { type: 'code', expected: '파이썬 은 재미있다' },
+    49: { type: 'text', expected: 'upper()' },
+    50: { type: 'code', expected: 'Super Python v3 | read|write|build' },
+  };
+
+  /* ━━━ 채점 / 스코어 ━━━ */
+  let solvedSet = new Set();
+
+  function check(n) {
+    const input  = document.getElementById(`q${n}-input`).value;
+    const ans    = ANSWERS[n];
+    const result = document.getElementById(`q${n}-result`);
+    const card   = document.getElementById(`q${n}`);
+    result.style.display = 'block';
+
+    if (ans.type === 'code') {
+      const sim = simulatePrint(input.trim());
+      const exp = ans.expected;
+      const ok  = sim !== null && sim.trim() === exp.trim();
+      if (ok) {
+        result.className = 'q-result ok'; result.textContent = '✓ 정답입니다!';
+        card.className = 'q-card solved'; solvedSet.add(n);
+      } else if (sim === null) {
+        result.className = 'q-result err'; result.textContent = '코드를 확인해 주세요. print() 형태로 작성했나요?';
+        card.className = 'q-card wrong';
+      } else {
+        result.className = 'q-result err';
+        result.textContent = `✗ 출력: "${sim.trim()}"  →  예상: "${exp.trim()}"`;
+        card.className = 'q-card wrong';
+      }
+    } else {
+      const ok = input.trim().toLowerCase().includes(ans.expected.toLowerCase());
+      if (ok) { result.className = 'q-result ok'; result.textContent = '✓ 정답입니다!'; card.className = 'q-card solved'; solvedSet.add(n); }
+      else    { result.className = 'q-result err'; result.textContent = '✗ 다시 생각해보세요.'; card.className = 'q-card wrong'; }
+    }
+    updateScore();
+  }
+
+  function updateScore() {
+    const total = Object.keys(ANSWERS).length;
+    const cnt   = solvedSet.size;
+    document.getElementById('solved-count').textContent = cnt;
+    document.getElementById('total-count').textContent  = total;
+    const pct = cnt / total;
+    const lvl = cnt <= 0 ? '도전 중...' : pct < 0.4 ? '🌱 시작!' : pct < 0.7 ? '🔥 잘하고 있어요!' : pct < 1 ? '⚡ 거의 다 왔어요!' : '🏆 완벽!';
+    document.getElementById('level-text').textContent = lvl;
+  }
+
+  /* ━━━ 브라우저 내 파이썬 시뮬레이터 ━━━ */
+  function simulatePrint(code) {
+    const lines = code.trim().split('\n');
+    let output = '';
+    // 변수 저장소
+    const vars = {};
+    for (const raw of lines) {
+      const line = raw.trim();
+      if (!line || line.startsWith('#')) continue;
+      // 변수 할당 감지 (단순 문자열/숫자/리스트 대입)
+      const assignM = line.match(/^([a-zA-Z_]\w*)\s*=\s*([\s\S]+)$/);
+      if (assignM && !line.startsWith('print')) {
+        const varName = assignM[1];
+        const valStr  = assignM[2].trim();
+        vars[varName] = evalValue(valStr, vars);
+        continue;
+      }
+      const m = line.match(/^print\(([\s\S]*)\)\s*(?:#.*)?$/);
+      if (!m) { /* 할당 등 건너뜀 */ continue; }
+      const result = evalPrint(m[1].trim(), vars);
+      if (result === null) return null;
+      output += result;
+    }
+    return output.replace(/\n$/, '');
+  }
+
+  function evalValue(s, vars) {
+    s = s.trim();
+    // 리스트 리터럴 (단순 문자열 요소만)
+    const listM = s.match(/^\[(.+)\]$/);
+    if (listM) {
+      return listM[1].split(',').map(e => {
+        e = e.trim();
+        const sm = e.match(/^"([^"]*)"$/) || e.match(/^'([^']*)'$/);
+        return sm ? sm[1] : e;
+      });
+    }
+    const strM = s.match(/^"([^"]*)"$/) || s.match(/^'([^']*)'$/);
+    if (strM) return strM[1];
+    if (/^-?\d+$/.test(s)) return Number(s);
+    if (/^-?\d+\.\d+$/.test(s)) return Number(s);
+    if (vars[s] !== undefined) return vars[s];
+    return s;
+  }
+
+  function evalPrint(inner, vars) {
+    if (inner === '') return '\n';
+    let sep = ' ', end = '\n';
+    const sepM = inner.match(/[,\s]sep\s*=\s*("([^"]*)"|'([^']*)')/);
+    const endM = inner.match(/[,\s]end\s*=\s*("([^"]*)"|'([^']*)')/);
+    if (sepM) { sep = sepM[2] !== undefined ? sepM[2] : sepM[3]; inner = inner.replace(sepM[0], ''); }
+    if (endM) { end = endM[2] !== undefined ? endM[2] : endM[3]; inner = inner.replace(endM[0], ''); }
+    const args = parseArgs(inner);
+    if (!args) return null;
+    const parts = args.map(a => evalArg(a, vars));
+    if (parts.includes(null)) return null;
+    return parts.join(sep) + end;
+  }
+
+  function parseArgs(s) {
+    const args = []; let depth = 0, cur = '', inStr = false, strChar = '';
+    for (let i = 0; i < s.length; i++) {
+      const c = s[i];
+      if (inStr) { cur += c; if (c === strChar && s[i-1] !== '\\') inStr = false; }
+      else if (c === '"' || c === "'") { inStr = true; strChar = c; cur += c; }
+      else if (c === '(' || c === '[') { depth++; cur += c; }
+      else if (c === ')' || c === ']') { depth--; cur += c; }
+      else if (c === ',' && depth === 0) { args.push(cur.trim()); cur = ''; }
+      else cur += c;
+    }
+    if (cur.trim()) args.push(cur.trim());
+    return args;
+  }
+
+  function evalArg(a, vars) {
+    a = a.trim();
+    if (!a) return '';
+
+    // 문자열 리터럴
+    const strM = a.match(/^"([^"]*)"$/) || a.match(/^'([^']*)'$/);
+    if (strM) return strM[1];
+
+    // 숫자 리터럴
+    if (/^-?\d+$/.test(a)) return String(Number(a));
+    if (/^-?\d+\.\d+$/.test(a)) return String(Number(a));
+
+    // True/False/None
+    if (a === 'True') return 'True';
+    if (a === 'False') return 'False';
+    if (a === 'None') return 'None';
+
+    // 문자열 * 숫자
+    const mulM = a.match(/^("([^"]*)"|'([^']*)')\s*\*\s*(\d+)$/);
+    if (mulM) { const str = mulM[2] !== undefined ? mulM[2] : mulM[3]; return str.repeat(Number(mulM[4])); }
+
+    // 변수 메서드 체인 처리 (기본)
+    if (vars) {
+      // 변수.메서드() 체인 평가
+      const chainResult = evalChain(a, vars);
+      if (chainResult !== null) return String(chainResult);
+    }
+
+    // len(변수 또는 문자열)
+    const lenM = a.match(/^len\((.+)\)$/);
+    if (lenM) {
+      const inner = lenM[1].trim();
+      const strLit = inner.match(/^"([^"]*)"$/) || inner.match(/^'([^']*)'$/);
+      if (strLit) return String(strLit[1].length);
+      if (vars && vars[inner] !== undefined) return String(String(vars[inner]).length);
+    }
+
+    // 산술식
+    if (/^[\d\s\+\-\*\/\.()]+$/.test(a)) {
+      try { return String(Function('"use strict";return (' + a + ')')()) } catch(e) {}
+    }
+
+    // 문자열 + 연결 (변수 포함)
+    if (a.includes('+') && vars) {
+      const concatResult = evalConcat(a, vars);
+      if (concatResult !== null) return concatResult;
+    }
+
+    // 단순 변수
+    if (vars && vars[a] !== undefined) return String(vars[a]);
+
+    return null;
+  }
+
+  function evalConcat(expr, vars) {
+    // 간단한 문자열 연결 평가
+    try {
+      const parts = splitByPlus(expr);
+      if (!parts) return null;
+      let result = '';
+      for (const p of parts) {
+        const t = p.trim();
+        const strM = t.match(/^"([^"]*)"$/) || t.match(/^'([^']*)'$/);
+        if (strM) { result += strM[1]; continue; }
+        if (vars && vars[t] !== undefined) { result += String(vars[t]); continue; }
+        // 변수.메서드() 체인
+        const cv = evalChain(t, vars);
+        if (cv !== null) { result += String(cv); continue; }
+        return null;
+      }
+      return result;
+    } catch(e) { return null; }
+  }
+
+  function splitByPlus(s) {
+    const parts = []; let cur = '', inStr = false, strChar = '', depth = 0;
+    for (let i = 0; i < s.length; i++) {
+      const c = s[i];
+      if (inStr) { cur += c; if (c === strChar && s[i-1] !== '\\') inStr = false; }
+      else if (c === '"' || c === "'") { inStr = true; strChar = c; cur += c; }
+      else if (c === '(' || c === '[') { depth++; cur += c; }
+      else if (c === ')' || c === ']') { depth--; cur += c; }
+      else if (c === '+' && depth === 0) { parts.push(cur); cur = ''; }
+      else cur += c;
+    }
+    parts.push(cur);
+    return parts;
+  }
+
+  function evalChain(expr, vars) {
+    // 간단한 변수.method() 체인 평가 (문자열 메서드 한정)
+    try {
+      // 변수로 시작하는지 확인
+      const baseM = expr.match(/^([a-zA-Z_]\w*)([\s\S]*)$/);
+      if (!baseM) return null;
+      const varName = baseM[1];
+      const chain   = baseM[2];
+      if (!chain) {
+        if (vars[varName] !== undefined) return vars[varName];
+        return null;
+      }
+      let val = vars[varName];
+      if (val === undefined) return null;
+      val = String(val);
+      // 메서드 체인 적용
+      return applyChain(val, chain);
+    } catch(e) { return null; }
+  }
+
+  function applyChain(s, chain) {
+    if (!chain) return s;
+    // 인덱싱/슬라이싱: [n] or [a:b] or [a:b:c] or [:n] or [n:]
+    const idxM = chain.match(/^\[(-?\d*):?(-?\d*):?(-?\d*)\]([\s\S]*)$/);
+    if (idxM) {
+      const a = idxM[1], b = idxM[2], c = idxM[3], rest = idxM[4];
+      let result;
+      if (b === '' && c === '') {
+        // 단순 인덱스
+        const idx = Number(a);
+        const realIdx = idx < 0 ? s.length + idx : idx;
+        if (realIdx < 0 || realIdx >= s.length) return null;
+        result = s[realIdx];
+      } else {
+        // 슬라이싱
+        const start = a !== '' ? (Number(a) < 0 ? Math.max(0, s.length + Number(a)) : Number(a)) : 0;
+        const end   = b !== '' ? (Number(b) < 0 ? Math.max(0, s.length + Number(b)) : Math.min(s.length, Number(b))) : s.length;
+        const step  = c !== '' ? Number(c) : 1;
+        result = '';
+        if (step > 0) { for (let i = start; i < end; i += step) result += s[i]; }
+        else          { const st = a !== '' ? (Number(a) < 0 ? s.length + Number(a) : Number(a)) : s.length - 1;
+                        const en = b !== '' ? (Number(b) < 0 ? s.length + Number(b) : Number(b)) : -1;
+                        for (let i = st; i > en; i += step) result += s[i]; }
+      }
+      return applyChain(result, rest);
+    }
+
+    // 메서드: .method(args)
+    const methM = chain.match(/^\.([a-z]\w*)\(([\s\S]*?)\)([\s\S]*)$/);
+    if (methM) {
+      const meth = methM[1], rawArgs = methM[2].trim(), rest = methM[3];
+      let result = applyMethod(s, meth, rawArgs);
+      if (result === null) return null;
+      if (typeof result !== 'string') result = String(result);
+      return applyChain(result, rest);
+    }
+
+    return null;
+  }
+
+  function applyMethod(s, meth, rawArgs) {
+    const getStr = (a) => { const m = a.match(/^"([^"]*)"$/) || a.match(/^'([^']*)'$/); return m ? m[1] : null; };
+    const args = rawArgs ? rawArgs.split(',').map(a => a.trim()) : [];
+    switch(meth) {
+      case 'upper':    return s.toUpperCase();
+      case 'lower':    return s.toLowerCase();
+      case 'strip':    return s.trim();
+      case 'lstrip':   return s.trimStart();
+      case 'rstrip':   return s.trimEnd();
+      case 'title':    return s.replace(/\b\w/g, c => c.toUpperCase());
+      case 'len':      return String(s.length);
+      case 'isdigit':  return /^\d+$/.test(s) ? 'True' : 'False';
+      case 'isalpha':  return /^[a-zA-Z]+$/.test(s) ? 'True' : 'False';
+      case 'isupper':  return s === s.toUpperCase() && /[A-Z]/.test(s) ? 'True' : 'False';
+      case 'islower':  return s === s.toLowerCase() && /[a-z]/.test(s) ? 'True' : 'False';
+      case 'isalnum':  return /^[a-zA-Z0-9]+$/.test(s) ? 'True' : 'False';
+      case 'startswith': {
+        const a0 = getStr(args[0]); if (!a0) return null;
+        return s.startsWith(a0) ? 'True' : 'False';
+      }
+      case 'endswith': {
+        const a0 = getStr(args[0]); if (!a0) return null;
+        return s.endsWith(a0) ? 'True' : 'False';
+      }
+      case 'find': {
+        const a0 = getStr(args[0]); if (!a0) return null;
+        return String(s.indexOf(a0));
+      }
+      case 'count': {
+        const a0 = getStr(args[0]); if (a0 === null) return null;
+        let cnt = 0, idx = 0;
+        while ((idx = s.indexOf(a0, idx)) !== -1) { cnt++; idx += a0.length || 1; }
+        return String(cnt);
+      }
+      case 'replace': {
+        const a0 = getStr(args[0]), a1 = args[1] ? getStr(args[1]) : '';
+        if (a0 === null || a1 === null) return null;
+        const maxReplace = args[2] ? Number(args[2]) : Infinity;
+        let result = '', remaining = s, count = 0;
+        while (true) {
+          const idx = remaining.indexOf(a0);
+          if (idx === -1 || count >= maxReplace) { result += remaining; break; }
+          result += remaining.slice(0, idx) + a1;
+          remaining = remaining.slice(idx + a0.length);
+          count++;
+        }
+        return result;
+      }
+      case 'split': {
+        const a0 = args[0] ? getStr(args[0]) : null;
+        const parts = a0 !== null ? s.split(a0) : s.trim().split(/\s+/);
+        return JSON.stringify(parts).replace(/"/g, "'");
+      }
+      case 'join': {
+        // sep.join(iterable) — handled at a higher level; fallback
+        return null;
+      }
+      case 'center': {
+        const width = Number(args[0]);
+        const fill  = args[1] ? (getStr(args[1]) || ' ') : ' ';
+        const total = width - s.length;
+        if (total <= 0) return s;
+        const left  = Math.floor(total / 2);
+        const right = total - left;
+        return fill.repeat(left) + s + fill.repeat(right);
+      }
+      default: return null;
+    }
+  }
+
+  /* join() 특별 처리 — 전체 expression 레벨에서 */
+  /* override evalArg to handle "sep".join(var) */
+  const _origEvalArg = evalArg;
+  /* We patch simulatePrint to pre-process join expressions */
+  const _origSimulate = simulatePrint;
+
+  // 전체 시뮬레이터에 join 지원 추가
+  window.simulatePrint = function(code) {
+    const lines = code.trim().split('\n');
+    let output = '';
+    const vars = {};
+    for (const raw of lines) {
+      const line = raw.trim();
+      if (!line || line.startsWith('#')) continue;
+      const assignM = line.match(/^([a-zA-Z_]\w*)\s*=\s*([\s\S]+)$/);
+      if (assignM && !line.startsWith('print')) {
+        const varName = assignM[1];
+        const valStr  = assignM[2].trim();
+        vars[varName] = evalValueFull(valStr, vars);
+        continue;
+      }
+      const m = line.match(/^print\(([\s\S]*)\)\s*(?:#.*)?$/);
+      if (!m) continue;
+      const result = evalPrintFull(m[1].trim(), vars);
+      if (result === null) return null;
+      output += result;
+    }
+    return output.replace(/\n$/, '');
+  };
+
+  function evalValueFull(s, vars) {
+    s = s.trim();
+    const listM = s.match(/^\[(.+)\]$/);
+    if (listM) {
+      return listM[1].split(',').map(e => {
+        e = e.trim();
+        const sm = e.match(/^"([^"]*)"$/) || e.match(/^'([^']*)'$/);
+        return sm ? sm[1] : evalArgFull(e, vars);
+      });
+    }
+    return evalArgFull(s, vars);
+  }
+
+  function evalPrintFull(inner, vars) {
+    if (inner === '') return '\n';
+    let sep = ' ', end = '\n';
+    const sepM = inner.match(/[,\s]sep\s*=\s*("([^"]*)"|'([^']*)')/);
+    const endM = inner.match(/[,\s]end\s*=\s*("([^"]*)"|'([^']*)')/);
+    if (sepM) { sep = sepM[2] !== undefined ? sepM[2] : sepM[3]; inner = inner.replace(sepM[0], ''); }
+    if (endM) { end = endM[2] !== undefined ? endM[2] : endM[3]; inner = inner.replace(endM[0], ''); }
+    const args = parseArgs(inner);
+    if (!args) return null;
+    const parts = args.map(a => evalArgFull(a, vars));
+    if (parts.includes(null)) return null;
+    return parts.join(sep) + end;
+  }
+
+  function evalArgFull(a, vars) {
+    a = a.trim();
+    if (!a) return '';
+
+    // 부울
+    if (a === 'True') return 'True';
+    if (a === 'False') return 'False';
+    if (a === 'None') return 'None';
+
+    // "sep".join(var_or_literal) 처리
+    const joinM = a.match(/^("([^"]*)"|'([^']*)')\s*\.\s*join\s*\(\s*(.+)\s*\)$/);
+    if (joinM) {
+      const sepChar = joinM[2] !== undefined ? joinM[2] : joinM[3];
+      const iterExpr = joinM[4].trim();
+      let items = null;
+      // 리스트 변수
+      if (vars && Array.isArray(vars[iterExpr])) {
+        items = vars[iterExpr];
+      } else {
+        // 문자열 리터럴 또는 변수 (문자 단위)
+        const strLit = iterExpr.match(/^"([^"]*)"$/) || iterExpr.match(/^'([^']*)'$/);
+        if (strLit) { items = strLit[1].split(''); }
+        else if (vars && typeof vars[iterExpr] === 'string') { items = vars[iterExpr].split(''); }
+        else {
+          // 체인 결과가 리스트 형태인지 확인
+          const chainRes = evalChain(iterExpr.split('.').slice(1).join('.') ? iterExpr : iterExpr, vars);
+          if (chainRes && typeof chainRes === 'string' && chainRes.startsWith('[')) {
+            // .split() 결과 파싱
+            try {
+              items = chainRes.slice(1, -1).split(',').map(s => {
+                s = s.trim();
+                const m = s.match(/^'([^']*)'$/) || s.match(/^"([^"]*)"$/);
+                return m ? m[1] : s;
+              });
+            } catch(e) {}
+          }
+        }
+        // 변수 메서드 체인 (e.g., s.split())
+        if (!items) {
+          const chainResult = evalChain(iterExpr, vars);
+          if (chainResult && typeof chainResult === 'string' && chainResult.startsWith('[')) {
+            items = chainResult.slice(1, -1).split(',').map(s => {
+              s = s.trim();
+              const m = s.match(/^'([^']*)'$/) || s.match(/^"([^"]*)"$/);
+              return m ? m[1] : s;
+            });
+          }
+        }
+      }
+      if (items) return items.join(sepChar);
+      return null;
+    }
+
+    // any() 처리
+    const anyM = a.match(/^any\((.+)\)$/);
+    if (anyM) {
+      // 간단 평가: any(c.isX() for c in var)
+      const genM = anyM[1].match(/^([a-z])\s*\.\s*(\w+)\s*\(\s*\)\s+for\s+\1\s+in\s+(\w+)$/);
+      if (genM && vars) {
+        const method = genM[2], varName = genM[3];
+        const s = vars[varName];
+        if (typeof s === 'string') {
+          for (const c of s) {
+            const r = applyMethod(c, method, '');
+            if (r === 'True') return 'True';
+          }
+          return 'False';
+        }
+      }
+      return null;
+    }
+
+    // len()
+    const lenM = a.match(/^len\((.+)\)$/);
+    if (lenM) {
+      const inner = lenM[1].trim();
+      const strLit = inner.match(/^"([^"]*)"$/) || inner.match(/^'([^']*)'$/);
+      if (strLit) return String(strLit[1].length);
+      if (vars && vars[inner] !== undefined) return String(String(vars[inner]).length);
+    }
+
+    // str() 변환
+    const strConvM = a.match(/^str\((.+)\)$/);
+    if (strConvM) {
+      const inner = strConvM[1].trim();
+      if (vars && vars[inner] !== undefined) return String(vars[inner]);
+      if (/^-?\d+$/.test(inner)) return inner;
+    }
+
+    // in 연산자 (간단)
+    const inM = a.match(/^"([^"]*)"\s+in\s+"([^"]*)"$/) || a.match(/^'([^']*)'\s+in\s+'([^']*)'$/) ||
+                a.match(/^"([^"]*)"\s+in\s+(\w+)$/) || a.match(/^'([^']*)'\s+in\s+(\w+)$/);
+    if (inM) {
+      const needle = inM[1];
+      let haystack = inM[2];
+      if (vars && vars[haystack] !== undefined) haystack = String(vars[haystack]);
+      return haystack.includes(needle) ? 'True' : 'False';
+    }
+
+    // 비교 연산자 (변수 == 변수)
+    const eqM = a.match(/^(\S+)\s*==\s*(\S+)$/);
+    if (eqM) {
+      const left  = evalArgFull(eqM[1], vars);
+      const right = evalArgFull(eqM[2], vars);
+      return (left !== null && right !== null && left === right) ? 'True' : 'False';
+    }
+
+    // and 연결
+    if (a.includes(' and ')) {
+      const parts = a.split(' and ');
+      for (const p of parts) {
+        const r = evalArgFull(p.trim(), vars);
+        if (r === 'False' || r === null) return 'False';
+      }
+      return 'True';
+    }
+
+    // 문자열 리터럴
+    const strM = a.match(/^"([^"]*)"$/) || a.match(/^'([^']*)'$/);
+    if (strM) return strM[1];
+
+    // 숫자
+    if (/^-?\d+$/.test(a)) return String(Number(a));
+    if (/^-?\d+\.\d+$/.test(a)) return String(Number(a));
+
+    // 변수 메서드 체인
+    if (vars) {
+      const chainResult = evalChain(a, vars);
+      if (chainResult !== null) return String(chainResult);
+    }
+
+    // 문자열 + 연결
+    if (a.includes('+')) {
+      const concatResult = evalConcat(a, vars);
+      if (concatResult !== null) return concatResult;
+    }
+
+    // 단순 변수
+    if (vars && vars[a] !== undefined) return String(vars[a]);
+
+    return null;
+  }
+</script>
+</body>
+</html>

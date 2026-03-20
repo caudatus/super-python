@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>미니 프로젝트 ⑦ — 브론즈 | 슈퍼파이썬</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#111111;--bg-nav:#0A0A0A;--bg-side:#0E0E0E;--bg-card:#181818;
+      --bg-code:#1A1A1A;--bg-tip:#131A13;--bg-warn:#1A1410;--bg-info:#101520;
+      --accent:#00CC70;--accent-dim:#007A42;--accent-bg:rgba(0,204,112,0.07);
+      --accent2:#C8A000;--accent3:#BB88FF;--text:#D8D8D8;--text-head:#EFEFEF;
+      --text2:#888888;--text3:#444444;--border:#222222;--border2:#2E2E2E;
+      --sy-kw:#C792EA;--sy-fn:#82AAFF;--sy-str:#C3E88D;
+      --sy-cm:#546E7A;--sy-num:#F78C6C;--sy-pn:#89DDFF;--sy-ln-t:#555555;
+      --sidebar-w:248px;--content-max:720px;--header-h:48px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:15px;line-height:1.8;overflow-x:hidden;}
+    ::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--bg);}
+    ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+    ::-webkit-scrollbar-thumb:hover{background:var(--accent-dim);}
+
+    .top-header{position:fixed;top:0;left:0;right:0;z-index:200;height:var(--header-h);background:var(--bg-nav);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;}
+    .header-open-btn{display:none;align-items:center;justify-content:center;width:28px;height:28px;flex-shrink:0;margin-right:12px;background:var(--bg-card);border:1px solid var(--border2);border-radius:4px;cursor:pointer;color:var(--text2);font-size:12px;transition:background .15s,color .15s;}
+    .header-open-btn:hover{background:var(--accent-bg);color:var(--accent);}
+    body.sidebar-closed .header-open-btn{display:flex;}
+    .header-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0;font-family:'JetBrains Mono',monospace;font-size:12px;overflow:hidden;}
+    .header-logo{color:var(--accent);text-decoration:none;font-weight:700;white-space:nowrap;}
+    .header-sep{color:var(--text3);flex-shrink:0;}
+    .header-grade{color:var(--text2);white-space:nowrap;}
+    .header-chap{color:var(--text-head);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .header-center{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);display:flex;align-items:center;gap:8px;flex-shrink:0;padding:0 16px;}
+    .progress-mini{width:80px;height:3px;background:var(--border2);border-radius:2px;overflow:hidden;}
+    .progress-mini-fill{height:100%;background:var(--accent);border-radius:2px;}
+    .header-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+    .nav-btn{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);background:transparent;border:1px solid var(--border2);padding:4px 12px;text-decoration:none;transition:border-color .15s,color .15s;white-space:nowrap;}
+    .nav-btn:hover{border-color:var(--accent);color:var(--accent);}
+    .nav-btn.primary{color:var(--bg-nav);background:var(--accent);border-color:var(--accent);font-weight:700;}
+    .nav-btn.primary:hover{filter:brightness(1.1);}
+
+    .layout{display:flex;padding-top:var(--header-h);min-height:100vh;}
+
+    .sidebar{width:var(--sidebar-w);flex-shrink:0;position:fixed;top:var(--header-h);bottom:0;left:0;background:var(--bg-side);border-right:1px solid var(--border);overflow-y:auto;overflow-x:hidden;transition:transform .22s ease;z-index:150;padding-top:8px;}
+    body.sidebar-closed .sidebar{transform:translateX(calc(-1 * var(--sidebar-w)));}
+    body.sidebar-closed .content{margin-left:0;}
+    .sidebar-toggle{position:absolute;top:10px;right:10px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:var(--bg-card);border:1px solid var(--border2);border-radius:4px;cursor:pointer;color:var(--text2);font-size:12px;z-index:10;transition:background .15s,color .15s;}
+    .sidebar-toggle:hover{background:var(--accent-bg);color:var(--accent);}
+    body.sidebar-closed .sidebar-toggle{display:none;}
+    .sidebar-progress{margin:44px 12px 12px;padding:12px 14px;background:var(--bg-card);border:1px solid var(--border);}
+    .sp-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);margin-bottom:6px;letter-spacing:.08em;}
+    .sp-bar{height:4px;background:var(--border2);border-radius:2px;overflow:hidden;margin-bottom:5px;}
+    .sp-fill{height:100%;background:var(--accent);border-radius:2px;}
+    .sp-text{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2);}
+    .sp-text span{color:var(--accent);}
+    .sb-group{border-bottom:1px solid var(--border);}
+    .sb-group-header{display:flex;align-items:center;justify-content:space-between;padding:9px 14px 9px 12px;cursor:pointer;user-select:none;transition:background .12s;gap:8px;}
+    .sb-group-header:hover{background:rgba(255,255,255,.03);}
+    .sb-group-title{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--text2);text-transform:uppercase;flex:1;}
+    .sb-group.current .sb-group-title{color:var(--accent);}
+    .sb-group-arrow{font-size:9px;color:var(--text3);transition:transform .2s;flex-shrink:0;}
+    .sb-group.open .sb-group-arrow{transform:rotate(90deg);color:var(--accent);}
+    .sb-items{overflow:hidden;max-height:0;transition:max-height .28s ease;}
+    .sb-group.open .sb-items{max-height:1200px;}
+    .sb-item{display:flex;align-items:baseline;gap:8px;padding:6px 14px 6px 20px;font-size:13px;color:var(--text2);text-decoration:none;border-left:2px solid transparent;transition:background .1s,color .1s,border-color .1s;line-height:1.45;}
+    .sb-item:hover{background:rgba(255,255,255,.03);color:var(--text);}
+    .sb-item.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-bg);font-weight:500;}
+    .sb-item.done{color:var(--text3);}
+    .sb-icon{font-size:9px;flex-shrink:0;font-family:'JetBrains Mono',monospace;width:10px;text-align:center;color:var(--text3);}
+    .sb-item.active .sb-icon{color:var(--accent);}
+    .sb-item.done .sb-icon{color:var(--accent-dim);}
+    .sb-num{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);flex-shrink:0;min-width:22px;}
+
+    .content{margin-left:var(--sidebar-w);flex:1;min-width:0;padding:48px 52px 96px;transition:margin-left .22s ease;}
+    .content-inner{max-width:var(--content-max);margin:0 auto;}
+
+    .chap-meta{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+    .badge{font-size:10px;padding:2px 8px;background:var(--accent-bg);color:var(--accent);border:1px solid rgba(0,204,112,.25);letter-spacing:.06em;}
+    .badge.project{background:rgba(187,136,255,.1);color:var(--accent3);border-color:rgba(187,136,255,.25);}
+    .chap-title{font-family:'JetBrains Mono',monospace;font-size:clamp(22px,3.5vw,30px);font-weight:700;color:var(--text-head);line-height:1.25;margin-bottom:8px;}
+    .chap-title .hl{color:var(--accent);}
+    .chap-title .hl2{color:var(--accent3);}
+    .chap-subtitle{font-size:15px;color:var(--text2);margin-bottom:32px;line-height:1.65;}
+    h2{font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:700;color:var(--text-head);margin:44px 0 16px;display:flex;align-items:baseline;gap:10px;}
+    h2 .n{color:var(--accent);font-size:13px;}
+    h3{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--accent);margin:28px 0 12px;}
+    p{color:var(--text);margin-bottom:16px;line-height:1.9;font-size:15px;}
+    code{font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--bg-code);color:var(--accent);padding:1px 6px;border:1px solid var(--border2);border-radius:2px;}
+    strong{color:var(--text-head);font-weight:700;}
+    ul{padding-left:20px;margin-bottom:16px;}
+    ul li{margin-bottom:6px;color:var(--text);line-height:1.75;}
+
+    .goal-box{background:var(--bg-card);border:1px solid var(--border2);border-left:3px solid var(--accent3);padding:18px 22px;margin-bottom:32px;}
+    .goal-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent3);letter-spacing:.08em;margin-bottom:12px;}
+    .goal-list{padding-left:18px;}
+    .goal-list li{color:var(--text);font-size:14px;margin-bottom:6px;line-height:1.7;}
+    .goal-list li::marker{color:var(--accent3);}
+
+    .concept-tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px;}
+    .concept-tag{font-family:'JetBrains Mono',monospace;font-size:11px;padding:4px 10px;background:var(--bg-code);border:1px solid var(--border2);color:var(--text2);}
+    .concept-tag.dict{color:var(--accent2);border-color:rgba(200,160,0,.3);}
+    .concept-tag.list{color:var(--sy-fn);border-color:rgba(130,170,255,.3);}
+    .concept-tag.set{color:#FF8C69;border-color:rgba(255,140,105,.3);}
+    .concept-tag.tuple{color:var(--accent3);border-color:rgba(187,136,255,.3);}
+
+    .code-block{background:var(--bg-code);border:1px solid var(--border2);margin:16px 0 24px;overflow:hidden;}
+    .code-header{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;border-bottom:1px solid var(--border2);background:var(--bg-card);}
+    .code-lang{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.08em;}
+    .code-copy{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);background:transparent;border:1px solid var(--border2);padding:3px 10px;cursor:pointer;transition:color .15s,border-color .15s;}
+    .code-copy:hover{color:var(--accent);border-color:var(--accent);}
+    .code-body{padding:16px 20px;overflow-x:auto;}
+    .code-body pre{font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.8;color:var(--text);white-space:pre;}
+    .ln{display:inline-block;width:28px;text-align:right;margin-right:16px;color:var(--sy-ln-t);user-select:none;font-size:12px;}
+    .kw{color:var(--sy-kw);}.fn{color:var(--sy-fn);}.str{color:var(--sy-str);}
+    .cm{color:var(--sy-cm);}.num{color:var(--sy-num);}.pn{color:var(--sy-pn);}
+
+    .output-box{background:#0A0F0A;border:1px solid var(--border2);border-left:3px solid var(--accent);margin:0 0 24px;padding:14px 20px;}
+    .output-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);margin-bottom:8px;letter-spacing:.08em;}
+    .output-body{font-family:'JetBrains Mono',monospace;font-size:13px;color:#A8D8A8;line-height:1.85;white-space:pre-wrap;}
+
+    .tip-box{background:var(--bg-tip);border:1px solid rgba(0,204,112,.15);border-left:3px solid var(--accent);padding:14px 18px;margin:16px 0 24px;}
+    .warn-box{background:var(--bg-warn);border:1px solid rgba(255,160,50,.15);border-left:3px solid var(--accent2);padding:14px 18px;margin:16px 0 24px;}
+    .info-box{background:var(--bg-info);border:1px solid rgba(100,140,255,.15);border-left:3px solid #6488FF;padding:14px 18px;margin:16px 0 24px;}
+    .box-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;margin-bottom:8px;}
+    .tip-box .box-label{color:var(--accent);}
+    .warn-box .box-label{color:var(--accent2);}
+    .info-box .box-label{color:#6488FF;}
+    .tip-box p,.warn-box p,.info-box p{margin-bottom:0;font-size:14px;color:var(--text2);line-height:1.8;}
+
+    /* STEP BLOCKS */
+    .step-block{margin-bottom:12px;border:1px solid var(--border2);}
+    .step-toggle{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;user-select:none;background:var(--bg-card);transition:background .12s;}
+    .step-toggle:hover{background:rgba(255,255,255,.03);}
+    .step-toggle-label{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+    .step-num{color:var(--accent3);}
+    .step-name{color:var(--text-head);}
+    .step-ds{font-size:10px;padding:2px 7px;border:1px solid;}
+    .step-ds.dict{color:var(--accent2);border-color:rgba(200,160,0,.4);background:rgba(200,160,0,.07);}
+    .step-ds.list{color:var(--sy-fn);border-color:rgba(130,170,255,.4);background:rgba(130,170,255,.07);}
+    .step-ds.set{color:#FF8C69;border-color:rgba(255,140,105,.4);background:rgba(255,140,105,.07);}
+    .step-ds.tuple{color:var(--accent3);border-color:rgba(187,136,255,.4);background:rgba(187,136,255,.07);}
+    .step-arrow{font-size:10px;color:var(--text3);transition:transform .2s;flex-shrink:0;}
+    .step-block.open .step-arrow{transform:rotate(90deg);color:var(--accent);}
+    .step-body{display:none;border-top:1px solid var(--border2);}
+    .step-block.open .step-body{display:block;}
+    .step-desc{padding:14px 18px;font-size:14px;color:var(--text2);line-height:1.8;border-bottom:1px solid var(--border);}
+    .step-desc p{margin-bottom:8px;color:var(--text2);font-size:14px;}
+    .step-desc p:last-child{margin-bottom:0;}
+
+    /* HINT/ANSWER TABS */
+    .hint-answer-tabs{display:flex;border-bottom:1px solid var(--border);}
+    .ha-tab{font-family:'JetBrains Mono',monospace;font-size:11px;padding:8px 16px;cursor:pointer;color:var(--text3);border:none;background:transparent;border-right:1px solid var(--border);transition:color .15s,background .15s;}
+    .ha-tab:hover{color:var(--text2);background:rgba(255,255,255,.02);}
+    .ha-tab.active{color:var(--accent);background:var(--accent-bg);}
+    .ha-panel{display:none;padding:14px 18px;background:var(--bg-code);}
+    .ha-panel.active{display:block;}
+    .ha-panel pre{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text2);line-height:1.8;white-space:pre-wrap;margin:0;}
+
+    /* FULL CODE collapsible */
+    .full-code-header{display:flex;align-items:center;gap:12px;margin:44px 0 0;padding:12px 16px;border:1px solid var(--border2);background:var(--bg-card);cursor:pointer;user-select:none;transition:background .12s,border-color .15s;}
+    .full-code-header:hover{background:rgba(255,255,255,.03);border-color:var(--accent3);}
+    .full-code-title{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--text-head);flex:1;}
+    .full-code-badge{font-family:'JetBrains Mono',monospace;font-size:10px;padding:3px 8px;background:rgba(187,136,255,.1);color:var(--accent3);border:1px solid rgba(187,136,255,.25);}
+    .full-code-hint{font-size:12px;color:var(--text3);}
+    .full-code-arrow{font-size:10px;color:var(--text3);transition:transform .2s;flex-shrink:0;}
+    .full-code-wrap.open .full-code-arrow{transform:rotate(90deg);color:var(--accent3);}
+    .full-code-wrap.open .full-code-header{border-bottom:none;border-color:var(--accent3);}
+    .full-code-body{display:none;border:1px solid var(--accent3);border-top:none;margin-bottom:24px;}
+    .full-code-wrap.open .full-code-body{display:block;}
+    .full-code-body .code-block{border:none;margin:0;}
+
+    /* CHALLENGE */
+    .challenge-box{background:var(--bg-card);border:1px solid var(--border2);border-top:2px solid var(--accent2);padding:20px 22px;margin:32px 0;}
+    .challenge-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent2);letter-spacing:.08em;margin-bottom:14px;}
+    .challenge-list{padding-left:0;list-style:none;}
+    .challenge-list li{display:flex;align-items:baseline;gap:10px;padding:6px 0;border-bottom:1px solid var(--border);font-size:14px;color:var(--text);}
+    .challenge-list li:last-child{border-bottom:none;}
+    .c-num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent2);flex-shrink:0;min-width:24px;}
+
+    .summary-box{background:var(--bg-card);border:1px solid var(--border2);padding:20px 24px;margin:32px 0;}
+    .summary-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.08em;margin-bottom:14px;}
+    .summary-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;}
+    .summary-item{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--text2);line-height:1.55;}
+    .summary-item::before{content:'✓';color:var(--accent);flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:12px;margin-top:2px;}
+
+    .section-divider{height:1px;background:var(--border);margin:44px 0;}
+    .cheer-box{border:1px solid var(--border);background:var(--bg);padding:18px 22px;margin-bottom:44px;display:flex;gap:14px;align-items:flex-start;}
+    .cheer-icon{font-size:18px;flex-shrink:0;line-height:1.5;}
+    .cheer-text{font-size:14px;color:var(--text2);line-height:1.85;}
+    .cheer-text strong{color:var(--text-head);}
+    .chap-nav{display:flex;justify-content:space-between;padding-top:32px;border-top:1px solid var(--border);gap:12px;flex-wrap:wrap;}
+    .chap-nav-btn{display:flex;flex-direction:column;gap:4px;text-decoration:none;padding:14px 18px;border:1px solid var(--border2);background:var(--bg-card);flex:1;max-width:300px;transition:border-color .15s;}
+    .chap-nav-btn:hover{border-color:var(--accent);}
+    .chap-nav-btn.next{text-align:right;}
+    .cnb-dir{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.07em;}
+    .cnb-title{font-size:13px;color:var(--text2);line-height:1.45;}
+    .cnb-title span{color:var(--accent);font-family:'JetBrains Mono',monospace;}
+
+    .sidebar-overlay{display:none;position:fixed;inset:0;top:var(--header-h);z-index:140;background:rgba(0,0,0,.65);}
+    @media(max-width:720px){
+      .sidebar-overlay.visible{display:block;}
+      .content{margin-left:0;padding:28px 20px 72px;}
+      .header-center{display:none;}
+      .summary-grid{grid-template-columns:1fr;}
+    }
+    @media(max-width:480px){
+      .header-grade{display:none;}
+      .chap-nav-btn{max-width:100%;}
+      .header-right .nav-btn:not(.primary){display:none;}
+    }
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important;}}
+  </style>
+</head>
+<body>
+
+<header class="top-header">
+  <button class="header-open-btn" onclick="toggleSidebar()">&#9658;</button>
+  <div class="header-left">
+    <a href="../index.html" class="header-logo">SUPERPYTHON</a>
+    <span class="header-sep">/</span>
+    <span class="header-grade">&#129412; BRONZE</span>
+    <span class="header-sep">/</span>
+    <span class="header-chap">41. &#127918; 미니 프로젝트 &#9319;</span>
+  </div>
+  <div class="header-center">
+    <span>41 / 48</span>
+    <div class="progress-mini"><div class="progress-mini-fill" style="width:85.42%"></div></div>
+    <span>85%</span>
+  </div>
+  <div class="header-right">
+    <a href="40-quiz-tuple-set.html" class="nav-btn">&#8592; 이전</a>
+    <a href="42-file-io.html" class="nav-btn primary">다음 &#8594;</a>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <button class="sidebar-toggle" onclick="toggleSidebar()">&#9664;</button>
+    <div class="sidebar-progress">
+      <div class="sp-label">BRONZE 진행률</div>
+      <div class="sp-bar"><div class="sp-fill" style="width:83.33%"></div></div>
+      <div class="sp-text"><span>40</span> / 48 챕터 완료</div>
+    </div>
+    <div class="sb-group" id="grp-env">
+      <div class="sb-group-header" onclick="toggleGroup('grp-env')"><span class="sb-group-title">환경 설정</span><span class="sb-group-arrow">&#9658;</span></div>
+      <div class="sb-items">
+        <a href="01-what-is-python.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">01</span>파이썬이란?</a>
+        <a href="02-setup.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">02</span>개발환경 설치</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-basic1">
+      <div class="sb-group-header" onclick="toggleGroup('grp-basic1')"><span class="sb-group-title">기초 문법 1</span><span class="sb-group-arrow">&#9658;</span></div>
+      <div class="sb-items">
+        <a href="03-print.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">03</span>print()란?</a>
+        <a href="04-quiz-print.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">04</span>연습문제</a>
+        <a href="05-variables.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">05</span>변수와 데이터 타입</a>
+        <a href="06-operators.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">06</span>연산자</a>
+        <a href="07-quiz-variables-operators.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">07</span>연습문제</a>
+        <a href="08-string.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">08</span>문자열 String</a>
+        <a href="09-quiz-string.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">09</span>연습문제</a>
+        <a href="10-fstring.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">10</span>f-string 완전정리</a>
+        <a href="11-quiz-fstring.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">11</span>연습문제</a>
+        <a href="12-mini-project-01.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">12</span>&#127918; 미니 프로젝트 ①</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-basic2">
+      <div class="sb-group-header" onclick="toggleGroup('grp-basic2')"><span class="sb-group-title">기초 문법 2</span><span class="sb-group-arrow">&#9658;</span></div>
+      <div class="sb-items">
+        <a href="13-list.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">13</span>리스트</a>
+        <a href="14-quiz-list.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">14</span>연습문제</a>
+        <a href="15-input.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">15</span>input() 함수</a>
+        <a href="16-quiz-input.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">16</span>연습문제</a>
+        <a href="17-mini-project-02.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">17</span>&#127918; 미니 프로젝트 ②</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-flow">
+      <div class="sb-group-header" onclick="toggleGroup('grp-flow')"><span class="sb-group-title">흐름 제어</span><span class="sb-group-arrow">&#9658;</span></div>
+      <div class="sb-items">
+        <a href="18-if.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">18</span>조건문 (if)</a>
+        <a href="19-quiz-if.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">19</span>연습문제</a>
+        <a href="20-mini-project-03.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">20</span>&#127918; 미니 프로젝트 ③</a>
+        <a href="21-for-range.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">21</span>for문과 range()</a>
+        <a href="22-quiz-for.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">22</span>연습문제</a>
+        <a href="23-while.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">23</span>while문</a>
+        <a href="24-quiz-while.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">24</span>연습문제</a>
+        <a href="25-mini-project-04.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">25</span>&#127918; 미니 프로젝트 ④</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-error">
+      <div class="sb-group-header" onclick="toggleGroup('grp-error')"><span class="sb-group-title">에러 &amp; 디버깅</span><span class="sb-group-arrow">&#9658;</span></div>
+      <div class="sb-items">
+        <a href="26-error-types.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">26</span>에러 읽는 법</a>
+        <a href="27-debugging.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">27</span>기초 디버깅 실습</a>
+        <a href="28-quiz-debugging.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">28</span>연습문제</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-func">
+      <div class="sb-group-header" onclick="toggleGroup('grp-func')"><span class="sb-group-title">함수</span><span class="sb-group-arrow">&#9658;</span></div>
+      <div class="sb-items">
+        <a href="29-function-basic.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">29</span>함수 기초</a>
+        <a href="30-quiz-function-basic.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">30</span>연습문제</a>
+        <a href="31-mini-project-05.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">31</span>&#127918; 미니 프로젝트 ⑤</a>
+        <a href="32-function-advanced.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">32</span>함수 심화</a>
+        <a href="33-quiz-function-advanced.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">33</span>연습문제</a>
+        <a href="34-module.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">34</span>모듈</a>
+        <a href="35-quiz-module.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">35</span>연습문제</a>
+        <a href="36-mini-project-06.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">36</span>&#127918; 미니 프로젝트 ⑥</a>
+      </div>
+    </div>
+    <div class="sb-group current open" id="grp-ds">
+      <div class="sb-group-header" onclick="toggleGroup('grp-ds')"><span class="sb-group-title">자료구조</span><span class="sb-group-arrow">&#9658;</span></div>
+      <div class="sb-items">
+        <a href="37-dictionary.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">37</span>딕셔너리</a>
+        <a href="38-quiz-dictionary.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">38</span>연습문제</a>
+        <a href="39-tuple-set.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">39</span>튜플과 셋</a>
+        <a href="40-quiz-tuple-set.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">40</span>연습문제</a>
+        <a href="41-mini-project-07.html" class="sb-item active"><span class="sb-icon">&#9658;</span><span class="sb-num">41</span>&#127918; 미니 프로젝트 ⑦</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-file">
+      <div class="sb-group-header" onclick="toggleGroup('grp-file')"><span class="sb-group-title">파일 &amp; 예외처리</span><span class="sb-group-arrow">&#9658;</span></div>
+      <div class="sb-items">
+        <a href="42-file-io.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">42</span>파일 입출력</a>
+        <a href="43-quiz-file-io.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">43</span>연습문제</a>
+        <a href="44-exception-basic.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">44</span>예외처리 기초</a>
+        <a href="45-quiz-exception.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">45</span>연습문제</a>
+        <a href="46-mini-project-08.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">46</span>&#127918; 미니 프로젝트 ⑧</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-end">
+      <div class="sb-group-header" onclick="toggleGroup('grp-end')"><span class="sb-group-title">마무리</span><span class="sb-group-arrow">&#9658;</span></div>
+      <div class="sb-items">
+        <a href="47-final-project.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">47</span>★ 최종 프로젝트</a>
+        <a href="48-next-step.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">48</span>다음 단계 미리보기</a>
+      </div>
+    </div>
+  </aside>
+
+  <main class="content" id="mainContent">
+    <div class="content-inner">
+
+      <div class="chap-meta">
+        <span class="badge project">PROJECT</span>
+        <span>자료구조</span>
+        <span style="color:var(--text3)">·</span>
+        <span>챕터 41 / 48</span>
+      </div>
+      <h1 class="chap-title">&#127918; 미니 프로젝트 &#9319;<br><span class="hl2">도서관</span> <span class="hl">대출 관리 시스템</span></h1>
+      <p class="chap-subtitle">딕셔너리·리스트·셋·튜플 — 네 가지 자료구조를 모두 투입해 실제로 동작하는 도서관 시스템을 만들어봅니다. 어떤 자료구조가 어떤 역할에 가장 잘 맞는지 직접 느껴보세요.</p>
+
+      <div class="goal-box">
+        <div class="goal-label">&#9658; 이 프로젝트를 마치면</div>
+        <ul class="goal-list">
+          <li><strong>딕셔너리</strong>로 도서 정보(ISBN → 제목·저자·재고)를 구조화할 수 있다</li>
+          <li><strong>셋</strong>으로 대출 중인 도서를 중복 없이 추적할 수 있다</li>
+          <li><strong>리스트</strong>로 대출 이력을 순서대로 기록할 수 있다</li>
+          <li><strong>튜플</strong>로 변경되면 안 되는 반납 기한 정보를 안전하게 보관할 수 있다</li>
+          <li>네 가지 자료구조가 협력하는 실전 패턴을 이해할 수 있다</li>
+        </ul>
+      </div>
+
+      <!-- 1. 사용 개념 -->
+      <h2><span class="n">1.</span>사용할 개념들</h2>
+      <p>이 프로젝트는 <strong>지금까지 배운 것만</strong> 사용합니다. 자료구조 4총사가 각자 맡은 역할을 보세요.</p>
+      <div class="concept-tags">
+        <span class="concept-tag dict">딕셔너리 — 도서 정보 저장</span>
+        <span class="concept-tag set">셋 — 대출 중인 도서 추적</span>
+        <span class="concept-tag list">리스트 — 대출 이력 기록</span>
+        <span class="concept-tag tuple">튜플 — 반납 기한 (불변 데이터)</span>
+        <span class="concept-tag">for / if</span>
+        <span class="concept-tag">f-string</span>
+        <span class="concept-tag">함수</span>
+      </div>
+
+      <div class="tip-box">
+        <div class="box-label">&#128161; 미니 프로젝트 공략법</div>
+        <p>정답을 바로 보지 마세요. <strong>기능 명세 읽기 → 혼자 시도 → 막히면 힌트 → 최후의 수단으로 정답 코드</strong> 순서로 진행하면 실력이 가장 빠르게 늡니다.</p>
+      </div>
+
+      <!-- 2. 완성 결과물 -->
+      <h2><span class="n">2.</span>완성 결과물 미리보기</h2>
+      <div class="output-box">
+        <div class="output-label">&#9658; 실행 결과</div>
+        <div class="output-body">========================================
+  📚  도서관 대출 관리 시스템
+========================================
+
+[도서 목록]
+  ISBN-001  파이썬 완전정복    김파이썬 저  재고: 3
+  ISBN-002  알고리즘 입문      이알고리 저  재고: 2
+  ISBN-003  데이터 사이언스    박데이터 저  재고: 1
+
+[대출 처리]
+  ✅ '파이썬 완전정복' 대출 완료 — 반납 기한: 2026-03-19
+  ✅ '알고리즘 입문' 대출 완료 — 반납 기한: 2026-03-19
+  ✅ '데이터 사이언스' 대출 완료 — 반납 기한: 2026-03-19
+  ⚠️  '데이터 사이언스' 는 이미 대출 중입니다
+
+[반납 처리]
+  ✅ '파이썬 완전정복' 반납 완료
+
+[현재 상태]
+  대출 중인 도서 수: 2권
+  전체 대출 이력:    4건
+
+[장르별 도서]
+  프로그래밍: 파이썬 완전정복, 알고리즘 입문
+  데이터: 데이터 사이언스</div>
+      </div>
+
+      <!-- 3. 기능 명세 -->
+      <h2><span class="n">3.</span>기능 명세서</h2>
+      <div class="info-box">
+        <div class="box-label">&#128203; 데이터 구조 설계</div>
+        <p>
+          <strong>① <code>books</code> (딕셔너리)</strong> — <code>{"ISBN": {"title": ..., "author": ..., "stock": ..., "genre": ...}}</code><br>
+          <strong>② <code>borrowed_set</code> (셋)</strong> — 현재 대출 중인 ISBN 목록 (중복 불가)<br>
+          <strong>③ <code>history</code> (리스트)</strong> — <code>(ISBN, "대출"/"반납", 날짜)</code> 튜플을 순서대로 기록<br>
+          <strong>④ 반납 기한 (튜플)</strong> — <code>(연, 월, 일)</code> 형태로 반환, 변경 불가
+        </p>
+      </div>
+      <div class="info-box">
+        <div class="box-label">&#128203; 구현할 함수 목록</div>
+        <p>
+          <strong>① <code>show_books(books)</code></strong> — 전체 도서 목록 출력<br>
+          <strong>② <code>get_due_date()</code></strong> — 오늘부터 14일 후 반납 기한을 <strong>튜플</strong>로 반환<br>
+          <strong>③ <code>borrow_book(books, borrowed_set, history, isbn)</code></strong> — 대출 처리<br>
+          <strong>④ <code>return_book(books, borrowed_set, history, isbn)</code></strong> — 반납 처리<br>
+          <strong>⑤ <code>show_status(borrowed_set, history)</code></strong> — 현재 대출 현황 출력<br>
+          <strong>⑥ <code>books_by_genre(books)</code></strong> — 장르별로 묶어 출력
+        </p>
+      </div>
+
+      <!-- 4. 단계별 구현 -->
+      <h2><span class="n">4.</span>단계별 구현 가이드</h2>
+
+      <!-- STEP 1 -->
+      <div class="step-block" id="step1">
+        <div class="step-toggle" onclick="toggleStep('step1')">
+          <span class="step-toggle-label">
+            <span class="step-num">STEP 1</span>
+            <span class="step-name">도서 데이터 구성</span>
+            <span class="step-ds dict">딕셔너리</span>
+          </span>
+          <span class="step-arrow">&#9658;</span>
+        </div>
+        <div class="step-body">
+          <div class="step-desc">
+            <p><code>books</code> 딕셔너리를 만드세요. 키는 ISBN 문자열, 값은 <code>title</code>·<code>author</code>·<code>stock</code>·<code>genre</code> 네 항목을 담은 딕셔너리입니다.</p>
+            <p>도서 3권 이상을 등록하고, <code>show_books(books)</code> 함수를 만들어 <code>items()</code>로 순회하며 출력하세요.</p>
+          </div>
+          <div class="hint-answer-tabs">
+            <button class="ha-tab active" onclick="switchTab(this,'s1-hint')">&#128161; 힌트</button>
+            <button class="ha-tab" onclick="switchTab(this,'s1-ans')">&#10003; 정답 코드</button>
+          </div>
+          <div class="ha-panel active" id="s1-hint">
+            <pre>books = {
+    "ISBN-001": {"title": "파이썬 완전정복", "author": "김파이썬",
+                 "stock": 3, "genre": "프로그래밍"},
+    "ISBN-002": ...
+}
+
+def show_books(books):
+    print("\n[도서 목록]")
+    for isbn, info in books.items():
+        print(f"  {isbn}  {info['title']}  {info['author']} 저  재고: {info['stock']}")</pre>
+          </div>
+          <div class="ha-panel" id="s1-ans">
+            <pre><span class="kw">def</span> <span class="fn">show_books</span><span class="pn">(</span>books<span class="pn">):</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"\n[도서 목록]"</span><span class="pn">)</span>
+    <span class="kw">for</span> isbn<span class="pn">,</span> info <span class="kw">in</span> books<span class="pn">.</span><span class="fn">items</span><span class="pn">():</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">f"  {isbn}  {info['title']:<14} {info['author']} 저  재고: {info['stock']}"</span><span class="pn">)</span>
+
+books <span class="pn">=</span> <span class="pn">{</span>
+    <span class="str">"ISBN-001"</span><span class="pn">:</span> <span class="pn">{</span><span class="str">"title"</span><span class="pn">:</span><span class="str">"파이썬 완전정복"</span><span class="pn">,</span>  <span class="str">"author"</span><span class="pn">:</span><span class="str">"김파이썬"</span><span class="pn">,</span> <span class="str">"stock"</span><span class="pn">:</span><span class="num">3</span><span class="pn">,</span> <span class="str">"genre"</span><span class="pn">:</span><span class="str">"프로그래밍"</span><span class="pn">},</span>
+    <span class="str">"ISBN-002"</span><span class="pn">:</span> <span class="pn">{</span><span class="str">"title"</span><span class="pn">:</span><span class="str">"알고리즘 입문"</span><span class="pn">,</span>    <span class="str">"author"</span><span class="pn">:</span><span class="str">"이알고리"</span><span class="pn">,</span> <span class="str">"stock"</span><span class="pn">:</span><span class="num">2</span><span class="pn">,</span> <span class="str">"genre"</span><span class="pn">:</span><span class="str">"프로그래밍"</span><span class="pn">},</span>
+    <span class="str">"ISBN-003"</span><span class="pn">:</span> <span class="pn">{</span><span class="str">"title"</span><span class="pn">:</span><span class="str">"데이터 사이언스"</span><span class="pn">,</span>  <span class="str">"author"</span><span class="pn">:</span><span class="str">"박데이터"</span><span class="pn">,</span> <span class="str">"stock"</span><span class="pn">:</span><span class="num">1</span><span class="pn">,</span> <span class="str">"genre"</span><span class="pn">:</span><span class="str">"데이터"</span><span class="pn">},</span>
+<span class="pn">}</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="step-block" id="step2">
+        <div class="step-toggle" onclick="toggleStep('step2')">
+          <span class="step-toggle-label">
+            <span class="step-num">STEP 2</span>
+            <span class="step-name">반납 기한 생성</span>
+            <span class="step-ds tuple">튜플</span>
+          </span>
+          <span class="step-arrow">&#9658;</span>
+        </div>
+        <div class="step-body">
+          <div class="step-desc">
+            <p><code>get_due_date()</code> 함수를 만드세요. 반납 기한을 <strong>튜플 <code>(연, 월, 일)</code> 형태</strong>로 반환합니다.</p>
+            <p>날짜 계산은 직접 구현하지 않아도 됩니다. 고정값 튜플 <code>(2026, 3, 19)</code>을 반환해도 OK입니다. 핵심은 반납 기한이 <strong>튜플</strong>(수정 불가)로 관리된다는 점입니다.</p>
+          </div>
+          <div class="hint-answer-tabs">
+            <button class="ha-tab active" onclick="switchTab(this,'s2-hint')">&#128161; 힌트</button>
+            <button class="ha-tab" onclick="switchTab(this,'s2-ans')">&#10003; 정답 코드</button>
+          </div>
+          <div class="ha-panel active" id="s2-hint">
+            <pre># 간단 버전 — 고정 튜플 반환
+def get_due_date():
+    return (2026, 3, 19)
+
+# 활용 — 튜플 언패킹
+year, month, day = get_due_date()
+print(f"반납 기한: {year}-{month:02d}-{day:02d}")</pre>
+          </div>
+          <div class="ha-panel" id="s2-ans">
+            <pre><span class="kw">def</span> <span class="fn">get_due_date</span><span class="pn">():</span>
+    <span class="str">"""반납 기한을 (연, 월, 일) 튜플로 반환합니다."""</span>
+    <span class="kw">return</span> <span class="pn">(</span><span class="num">2026</span><span class="pn">,</span> <span class="num">3</span><span class="pn">,</span> <span class="num">19</span><span class="pn">)</span>  <span class="cm"># 실습용 고정값</span>
+
+<span class="cm"># 출력 형식 확인</span>
+year<span class="pn">,</span> month<span class="pn">,</span> day <span class="pn">=</span> <span class="fn">get_due_date</span><span class="pn">()</span>   <span class="cm"># 튜플 언패킹</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"반납 기한: {year}-{month:02d}-{day:02d}"</span><span class="pn">)</span>
+<span class="cm"># 반납 기한: 2026-03-19</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="step-block" id="step3">
+        <div class="step-toggle" onclick="toggleStep('step3')">
+          <span class="step-toggle-label">
+            <span class="step-num">STEP 3</span>
+            <span class="step-name">대출 처리 함수</span>
+            <span class="step-ds set">셋</span>
+            <span class="step-ds list">리스트</span>
+          </span>
+          <span class="step-arrow">&#9658;</span>
+        </div>
+        <div class="step-body">
+          <div class="step-desc">
+            <p><code>borrow_book(books, borrowed_set, history, isbn)</code> 함수를 만드세요.</p>
+            <p>조건: ① ISBN이 books에 없으면 "없는 도서" 메시지 ② 이미 <code>borrowed_set</code>에 있으면 "이미 대출 중" 메시지 ③ 재고(<code>stock</code>)가 0이면 "재고 없음" 메시지 ④ 모두 통과하면 — <code>borrowed_set</code>에 <code>add()</code>, <code>stock</code> 1 감소, <code>history</code>에 <code>(isbn, "대출", 반납기한)</code> 튜플 추가</p>
+          </div>
+          <div class="hint-answer-tabs">
+            <button class="ha-tab active" onclick="switchTab(this,'s3-hint')">&#128161; 힌트</button>
+            <button class="ha-tab" onclick="switchTab(this,'s3-ans')">&#10003; 정답 코드</button>
+          </div>
+          <div class="ha-panel active" id="s3-hint">
+            <pre>def borrow_book(books, borrowed_set, history, isbn):
+    if isbn not in books:
+        print("  없는 도서입니다")
+        return
+    if isbn in borrowed_set:          # 셋으로 O(1) 검색
+        print("  이미 대출 중")
+        return
+    if books[isbn]["stock"] == 0:
+        print("  재고 없음")
+        return
+    # 대출 처리
+    borrowed_set.add(isbn)            # 셋에 추가
+    books[isbn]["stock"] -= 1
+    year, month, day = get_due_date() # 튜플 언패킹
+    due = f"{year}-{month:02d}-{day:02d}"
+    history.append((isbn, "대출", due))  # 리스트에 튜플 추가</pre>
+          </div>
+          <div class="ha-panel" id="s3-ans">
+            <pre><span class="kw">def</span> <span class="fn">borrow_book</span><span class="pn">(</span>books<span class="pn">,</span> borrowed_set<span class="pn">,</span> history<span class="pn">,</span> isbn<span class="pn">):</span>
+    <span class="kw">if</span> isbn <span class="kw">not in</span> books<span class="pn">:</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">"  ❌ 없는 도서입니다"</span><span class="pn">)</span>
+        <span class="kw">return</span>
+    title <span class="pn">=</span> books<span class="pn">[</span>isbn<span class="pn">][</span><span class="str">"title"</span><span class="pn">]</span>
+    <span class="kw">if</span> isbn <span class="kw">in</span> borrowed_set<span class="pn">:</span>          <span class="cm"># 셋 — O(1) 검색</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">f"  ⚠️  '{title}' 는 이미 대출 중입니다"</span><span class="pn">)</span>
+        <span class="kw">return</span>
+    <span class="kw">if</span> books<span class="pn">[</span>isbn<span class="pn">][</span><span class="str">"stock"</span><span class="pn">]</span> <span class="pn">==</span> <span class="num">0</span><span class="pn">:</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">f"  ❌ '{title}' 재고가 없습니다"</span><span class="pn">)</span>
+        <span class="kw">return</span>
+    borrowed_set<span class="pn">.</span><span class="fn">add</span><span class="pn">(</span>isbn<span class="pn">)</span>             <span class="cm"># 셋에 추가</span>
+    books<span class="pn">[</span>isbn<span class="pn">][</span><span class="str">"stock"</span><span class="pn">]</span> <span class="pn">-=</span> <span class="num">1</span>
+    year<span class="pn">,</span> month<span class="pn">,</span> day <span class="pn">=</span> <span class="fn">get_due_date</span><span class="pn">()</span>  <span class="cm"># 튜플 언패킹</span>
+    due <span class="pn">=</span> <span class="str">f"{year}-{month:02d}-{day:02d}"</span>
+    history<span class="pn">.</span><span class="fn">append</span><span class="pn">((</span>isbn<span class="pn">,</span> <span class="str">"대출"</span><span class="pn">,</span> due<span class="pn">))</span>  <span class="cm"># 리스트에 튜플 추가</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">f"  ✅ '{title}' 대출 완료 — 반납 기한: {due}"</span><span class="pn">)</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4 -->
+      <div class="step-block" id="step4">
+        <div class="step-toggle" onclick="toggleStep('step4')">
+          <span class="step-toggle-label">
+            <span class="step-num">STEP 4</span>
+            <span class="step-name">반납 처리 함수</span>
+            <span class="step-ds set">셋</span>
+            <span class="step-ds list">리스트</span>
+          </span>
+          <span class="step-arrow">&#9658;</span>
+        </div>
+        <div class="step-body">
+          <div class="step-desc">
+            <p><code>return_book(books, borrowed_set, history, isbn)</code> 함수를 만드세요.</p>
+            <p>조건: ① <code>borrowed_set</code>에 없으면 "대출 기록 없음" 메시지 ② 있으면 — <code>borrowed_set</code>에서 <code>discard()</code>로 제거, <code>stock</code> 1 증가, <code>history</code>에 <code>(isbn, "반납", "—")</code> 추가</p>
+          </div>
+          <div class="hint-answer-tabs">
+            <button class="ha-tab active" onclick="switchTab(this,'s4-hint')">&#128161; 힌트</button>
+            <button class="ha-tab" onclick="switchTab(this,'s4-ans')">&#10003; 정답 코드</button>
+          </div>
+          <div class="ha-panel active" id="s4-hint">
+            <pre>def return_book(books, borrowed_set, history, isbn):
+    if isbn not in borrowed_set:
+        print("  대출 기록이 없습니다")
+        return
+    borrowed_set.discard(isbn)   # 셋에서 안전하게 삭제
+    books[isbn]["stock"] += 1
+    history.append((isbn, "반납", "—"))
+    print(f"  '{books[isbn]['title']}' 반납 완료")</pre>
+          </div>
+          <div class="ha-panel" id="s4-ans">
+            <pre><span class="kw">def</span> <span class="fn">return_book</span><span class="pn">(</span>books<span class="pn">,</span> borrowed_set<span class="pn">,</span> history<span class="pn">,</span> isbn<span class="pn">):</span>
+    <span class="kw">if</span> isbn <span class="kw">not in</span> borrowed_set<span class="pn">:</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">"  ❌ 대출 기록이 없습니다"</span><span class="pn">)</span>
+        <span class="kw">return</span>
+    title <span class="pn">=</span> books<span class="pn">[</span>isbn<span class="pn">][</span><span class="str">"title"</span><span class="pn">]</span>
+    borrowed_set<span class="pn">.</span><span class="fn">discard</span><span class="pn">(</span>isbn<span class="pn">)</span>      <span class="cm"># 셋에서 삭제</span>
+    books<span class="pn">[</span>isbn<span class="pn">][</span><span class="str">"stock"</span><span class="pn">]</span> <span class="pn">+=</span> <span class="num">1</span>
+    history<span class="pn">.</span><span class="fn">append</span><span class="pn">((</span>isbn<span class="pn">,</span> <span class="str">"반납"</span><span class="pn">,</span> <span class="str">"—"</span><span class="pn">))</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">f"  ✅ '{title}' 반납 완료"</span><span class="pn">)</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 5 -->
+      <div class="step-block" id="step5">
+        <div class="step-toggle" onclick="toggleStep('step5')">
+          <span class="step-toggle-label">
+            <span class="step-num">STEP 5</span>
+            <span class="step-name">현황 출력 + 장르별 분류</span>
+            <span class="step-ds dict">딕셔너리</span>
+            <span class="step-ds set">셋</span>
+          </span>
+          <span class="step-arrow">&#9658;</span>
+        </div>
+        <div class="step-body">
+          <div class="step-desc">
+            <p><code>show_status(borrowed_set, history)</code> — 현재 대출 중 권수와 전체 이력 건수를 출력하세요.</p>
+            <p><code>books_by_genre(books)</code> — 장르를 키로, 도서 제목 리스트를 값으로 하는 딕셔너리를 동적으로 만들어 출력하세요. 빈 딕셔너리에서 시작해 순회하면서 채워가는 패턴이 핵심입니다.</p>
+          </div>
+          <div class="hint-answer-tabs">
+            <button class="ha-tab active" onclick="switchTab(this,'s5-hint')">&#128161; 힌트</button>
+            <button class="ha-tab" onclick="switchTab(this,'s5-ans')">&#10003; 정답 코드</button>
+          </div>
+          <div class="ha-panel active" id="s5-hint">
+            <pre>def books_by_genre(books):
+    genre_dict = {}            # 빈 딕셔너리 시작
+    for isbn, info in books.items():
+        genre = info["genre"]
+        if genre not in genre_dict:
+            genre_dict[genre] = []     # 처음 보는 장르면 빈 리스트 생성
+        genre_dict[genre].append(info["title"])
+    for genre, titles in genre_dict.items():
+        print(f"  {genre}: {', '.join(titles)}")</pre>
+          </div>
+          <div class="ha-panel" id="s5-ans">
+            <pre><span class="kw">def</span> <span class="fn">show_status</span><span class="pn">(</span>borrowed_set<span class="pn">,</span> history<span class="pn">):</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"\n[현재 상태]"</span><span class="pn">)</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">f"  대출 중인 도서 수: {len(borrowed_set)}권"</span><span class="pn">)</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">f"  전체 대출 이력:    {len(history)}건"</span><span class="pn">)</span>
+
+<span class="kw">def</span> <span class="fn">books_by_genre</span><span class="pn">(</span>books<span class="pn">):</span>
+    genre_dict <span class="pn">=</span> <span class="pn">{}</span>
+    <span class="kw">for</span> isbn<span class="pn">,</span> info <span class="kw">in</span> books<span class="pn">.</span><span class="fn">items</span><span class="pn">():</span>
+        genre <span class="pn">=</span> info<span class="pn">[</span><span class="str">"genre"</span><span class="pn">]</span>
+        <span class="kw">if</span> genre <span class="kw">not in</span> genre_dict<span class="pn">:</span>
+            genre_dict<span class="pn">[</span>genre<span class="pn">]</span> <span class="pn">=</span> <span class="pn">[]</span>
+        genre_dict<span class="pn">[</span>genre<span class="pn">].</span><span class="fn">append</span><span class="pn">(</span>info<span class="pn">[</span><span class="str">"title"</span><span class="pn">])</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"\n[장르별 도서]"</span><span class="pn">)</span>
+    <span class="kw">for</span> genre<span class="pn">,</span> titles <span class="kw">in</span> genre_dict<span class="pn">.</span><span class="fn">items</span><span class="pn">():</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">f"  {genre}: {', '.join(titles)}"</span><span class="pn">)</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. FULL CODE -->
+      <div class="full-code-wrap" id="fullCodeWrap">
+        <div class="full-code-header" onclick="toggleFullCode()">
+          <span class="full-code-title">5. 최종 완성 코드</span>
+          <span class="full-code-badge">FULL CODE</span>
+          <span class="full-code-hint" id="fullCodeHint">클릭해서 펼치기</span>
+          <span class="full-code-arrow">&#9658;</span>
+        </div>
+        <div class="full-code-body">
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">PYTHON — 도서관 대출 관리 시스템 (완성본)</span>
+              <button class="code-copy" onclick="copyCode(this)">복사</button>
+            </div>
+            <div class="code-body"><pre><span class="ln"> 1</span><span class="cm"># ── 데이터 ────────────────────────────────────</span>
+<span class="ln"> 2</span>books <span class="pn">=</span> <span class="pn">{</span>
+<span class="ln"> 3</span>    <span class="str">"ISBN-001"</span><span class="pn">:</span> <span class="pn">{</span><span class="str">"title"</span><span class="pn">:</span><span class="str">"파이썬 완전정복"</span><span class="pn">,</span>  <span class="str">"author"</span><span class="pn">:</span><span class="str">"김파이썬"</span><span class="pn">,</span> <span class="str">"stock"</span><span class="pn">:</span><span class="num">3</span><span class="pn">,</span> <span class="str">"genre"</span><span class="pn">:</span><span class="str">"프로그래밍"</span><span class="pn">},</span>
+<span class="ln"> 4</span>    <span class="str">"ISBN-002"</span><span class="pn">:</span> <span class="pn">{</span><span class="str">"title"</span><span class="pn">:</span><span class="str">"알고리즘 입문"</span><span class="pn">,</span>    <span class="str">"author"</span><span class="pn">:</span><span class="str">"이알고리"</span><span class="pn">,</span> <span class="str">"stock"</span><span class="pn">:</span><span class="num">2</span><span class="pn">,</span> <span class="str">"genre"</span><span class="pn">:</span><span class="str">"프로그래밍"</span><span class="pn">},</span>
+<span class="ln"> 5</span>    <span class="str">"ISBN-003"</span><span class="pn">:</span> <span class="pn">{</span><span class="str">"title"</span><span class="pn">:</span><span class="str">"데이터 사이언스"</span><span class="pn">,</span>  <span class="str">"author"</span><span class="pn">:</span><span class="str">"박데이터"</span><span class="pn">,</span> <span class="str">"stock"</span><span class="pn">:</span><span class="num">1</span><span class="pn">,</span> <span class="str">"genre"</span><span class="pn">:</span><span class="str">"데이터"</span><span class="pn">},</span>
+<span class="ln"> 6</span><span class="pn">}</span>
+<span class="ln"> 7</span>borrowed_set <span class="pn">=</span> <span class="fn">set</span><span class="pn">()</span>   <span class="cm"># 현재 대출 중 ISBN — 셋</span>
+<span class="ln"> 8</span>history      <span class="pn">=</span> <span class="pn">[]</span>       <span class="cm"># 대출/반납 이력 — 리스트</span>
+<span class="ln"> 9</span>
+<span class="ln">10</span><span class="cm"># ── 함수 ────────────────────────────────────</span>
+<span class="ln">11</span><span class="kw">def</span> <span class="fn">get_due_date</span><span class="pn">():</span>
+<span class="ln">12</span>    <span class="kw">return</span> <span class="pn">(</span><span class="num">2026</span><span class="pn">,</span> <span class="num">3</span><span class="pn">,</span> <span class="num">19</span><span class="pn">)</span>  <span class="cm"># 반납 기한 튜플로 반환</span>
+<span class="ln">13</span>
+<span class="ln">14</span><span class="kw">def</span> <span class="fn">show_books</span><span class="pn">(</span>books<span class="pn">):</span>
+<span class="ln">15</span>    <span class="fn">print</span><span class="pn">(</span><span class="str">"\n[도서 목록]"</span><span class="pn">)</span>
+<span class="ln">16</span>    <span class="kw">for</span> isbn<span class="pn">,</span> info <span class="kw">in</span> books<span class="pn">.</span><span class="fn">items</span><span class="pn">():</span>
+<span class="ln">17</span>        <span class="fn">print</span><span class="pn">(</span><span class="str">f"  {isbn}  {info['title']:<14} {info['author']} 저  재고: {info['stock']}"</span><span class="pn">)</span>
+<span class="ln">18</span>
+<span class="ln">19</span><span class="kw">def</span> <span class="fn">borrow_book</span><span class="pn">(</span>books<span class="pn">,</span> borrowed_set<span class="pn">,</span> history<span class="pn">,</span> isbn<span class="pn">):</span>
+<span class="ln">20</span>    <span class="kw">if</span> isbn <span class="kw">not in</span> books<span class="pn">:</span>
+<span class="ln">21</span>        <span class="fn">print</span><span class="pn">(</span><span class="str">"  ❌ 없는 도서입니다"</span><span class="pn">)</span>
+<span class="ln">22</span>        <span class="kw">return</span>
+<span class="ln">23</span>    title <span class="pn">=</span> books<span class="pn">[</span>isbn<span class="pn">][</span><span class="str">"title"</span><span class="pn">]</span>
+<span class="ln">24</span>    <span class="kw">if</span> isbn <span class="kw">in</span> borrowed_set<span class="pn">:</span>
+<span class="ln">25</span>        <span class="fn">print</span><span class="pn">(</span><span class="str">f"  ⚠️  '{title}' 는 이미 대출 중입니다"</span><span class="pn">)</span>
+<span class="ln">26</span>        <span class="kw">return</span>
+<span class="ln">27</span>    <span class="kw">if</span> books<span class="pn">[</span>isbn<span class="pn">][</span><span class="str">"stock"</span><span class="pn">]</span> <span class="pn">==</span> <span class="num">0</span><span class="pn">:</span>
+<span class="ln">28</span>        <span class="fn">print</span><span class="pn">(</span><span class="str">f"  ❌ '{title}' 재고가 없습니다"</span><span class="pn">)</span>
+<span class="ln">29</span>        <span class="kw">return</span>
+<span class="ln">30</span>    borrowed_set<span class="pn">.</span><span class="fn">add</span><span class="pn">(</span>isbn<span class="pn">)</span>
+<span class="ln">31</span>    books<span class="pn">[</span>isbn<span class="pn">][</span><span class="str">"stock"</span><span class="pn">]</span> <span class="pn">-=</span> <span class="num">1</span>
+<span class="ln">32</span>    year<span class="pn">,</span> month<span class="pn">,</span> day <span class="pn">=</span> <span class="fn">get_due_date</span><span class="pn">()</span>       <span class="cm"># 튜플 언패킹</span>
+<span class="ln">33</span>    due <span class="pn">=</span> <span class="str">f"{year}-{month:02d}-{day:02d}"</span>
+<span class="ln">34</span>    history<span class="pn">.</span><span class="fn">append</span><span class="pn">((</span>isbn<span class="pn">,</span> <span class="str">"대출"</span><span class="pn">,</span> due<span class="pn">))</span>       <span class="cm"># 리스트에 튜플</span>
+<span class="ln">35</span>    <span class="fn">print</span><span class="pn">(</span><span class="str">f"  ✅ '{title}' 대출 완료 — 반납 기한: {due}"</span><span class="pn">)</span>
+<span class="ln">36</span>
+<span class="ln">37</span><span class="kw">def</span> <span class="fn">return_book</span><span class="pn">(</span>books<span class="pn">,</span> borrowed_set<span class="pn">,</span> history<span class="pn">,</span> isbn<span class="pn">):</span>
+<span class="ln">38</span>    <span class="kw">if</span> isbn <span class="kw">not in</span> borrowed_set<span class="pn">:</span>
+<span class="ln">39</span>        <span class="fn">print</span><span class="pn">(</span><span class="str">"  ❌ 대출 기록이 없습니다"</span><span class="pn">)</span>
+<span class="ln">40</span>        <span class="kw">return</span>
+<span class="ln">41</span>    title <span class="pn">=</span> books<span class="pn">[</span>isbn<span class="pn">][</span><span class="str">"title"</span><span class="pn">]</span>
+<span class="ln">42</span>    borrowed_set<span class="pn">.</span><span class="fn">discard</span><span class="pn">(</span>isbn<span class="pn">)</span>
+<span class="ln">43</span>    books<span class="pn">[</span>isbn<span class="pn">][</span><span class="str">"stock"</span><span class="pn">]</span> <span class="pn">+=</span> <span class="num">1</span>
+<span class="ln">44</span>    history<span class="pn">.</span><span class="fn">append</span><span class="pn">((</span>isbn<span class="pn">,</span> <span class="str">"반납"</span><span class="pn">,</span> <span class="str">"—"</span><span class="pn">))</span>
+<span class="ln">45</span>    <span class="fn">print</span><span class="pn">(</span><span class="str">f"  ✅ '{title}' 반납 완료"</span><span class="pn">)</span>
+<span class="ln">46</span>
+<span class="ln">47</span><span class="kw">def</span> <span class="fn">show_status</span><span class="pn">(</span>borrowed_set<span class="pn">,</span> history<span class="pn">):</span>
+<span class="ln">48</span>    <span class="fn">print</span><span class="pn">(</span><span class="str">"\n[현재 상태]"</span><span class="pn">)</span>
+<span class="ln">49</span>    <span class="fn">print</span><span class="pn">(</span><span class="str">f"  대출 중인 도서 수: {len(borrowed_set)}권"</span><span class="pn">)</span>
+<span class="ln">50</span>    <span class="fn">print</span><span class="pn">(</span><span class="str">f"  전체 대출 이력:    {len(history)}건"</span><span class="pn">)</span>
+<span class="ln">51</span>
+<span class="ln">52</span><span class="kw">def</span> <span class="fn">books_by_genre</span><span class="pn">(</span>books<span class="pn">):</span>
+<span class="ln">53</span>    genre_dict <span class="pn">=</span> <span class="pn">{}</span>
+<span class="ln">54</span>    <span class="kw">for</span> isbn<span class="pn">,</span> info <span class="kw">in</span> books<span class="pn">.</span><span class="fn">items</span><span class="pn">():</span>
+<span class="ln">55</span>        genre <span class="pn">=</span> info<span class="pn">[</span><span class="str">"genre"</span><span class="pn">]</span>
+<span class="ln">56</span>        <span class="kw">if</span> genre <span class="kw">not in</span> genre_dict<span class="pn">:</span>
+<span class="ln">57</span>            genre_dict<span class="pn">[</span>genre<span class="pn">]</span> <span class="pn">=</span> <span class="pn">[]</span>
+<span class="ln">58</span>        genre_dict<span class="pn">[</span>genre<span class="pn">].</span><span class="fn">append</span><span class="pn">(</span>info<span class="pn">[</span><span class="str">"title"</span><span class="pn">])</span>
+<span class="ln">59</span>    <span class="fn">print</span><span class="pn">(</span><span class="str">"\n[장르별 도서]"</span><span class="pn">)</span>
+<span class="ln">60</span>    <span class="kw">for</span> genre<span class="pn">,</span> titles <span class="kw">in</span> genre_dict<span class="pn">.</span><span class="fn">items</span><span class="pn">():</span>
+<span class="ln">61</span>        <span class="fn">print</span><span class="pn">(</span><span class="str">f"  {genre}: {', '.join(titles)}"</span><span class="pn">)</span>
+<span class="ln">62</span>
+<span class="ln">63</span><span class="cm"># ── 실행 ────────────────────────────────────</span>
+<span class="ln">64</span><span class="fn">print</span><span class="pn">(</span><span class="str">"=" </span><span class="pn">*</span> <span class="num">40</span><span class="pn">)</span>
+<span class="ln">65</span><span class="fn">print</span><span class="pn">(</span><span class="str">"  📚  도서관 대출 관리 시스템"</span><span class="pn">)</span>
+<span class="ln">66</span><span class="fn">print</span><span class="pn">(</span><span class="str">"=" </span><span class="pn">*</span> <span class="num">40</span><span class="pn">)</span>
+<span class="ln">67</span><span class="fn">show_books</span><span class="pn">(</span>books<span class="pn">)</span>
+<span class="ln">68</span>
+<span class="ln">69</span><span class="fn">print</span><span class="pn">(</span><span class="str">"\n[대출 처리]"</span><span class="pn">)</span>
+<span class="ln">70</span><span class="fn">borrow_book</span><span class="pn">(</span>books<span class="pn">,</span> borrowed_set<span class="pn">,</span> history<span class="pn">,</span> <span class="str">"ISBN-001"</span><span class="pn">)</span>
+<span class="ln">71</span><span class="fn">borrow_book</span><span class="pn">(</span>books<span class="pn">,</span> borrowed_set<span class="pn">,</span> history<span class="pn">,</span> <span class="str">"ISBN-002"</span><span class="pn">)</span>
+<span class="ln">72</span><span class="fn">borrow_book</span><span class="pn">(</span>books<span class="pn">,</span> borrowed_set<span class="pn">,</span> history<span class="pn">,</span> <span class="str">"ISBN-003"</span><span class="pn">)</span>
+<span class="ln">73</span><span class="fn">borrow_book</span><span class="pn">(</span>books<span class="pn">,</span> borrowed_set<span class="pn">,</span> history<span class="pn">,</span> <span class="str">"ISBN-003"</span><span class="pn">)</span>  <span class="cm"># 중복 시도</span>
+<span class="ln">74</span>
+<span class="ln">75</span><span class="fn">print</span><span class="pn">(</span><span class="str">"\n[반납 처리]"</span><span class="pn">)</span>
+<span class="ln">76</span><span class="fn">return_book</span><span class="pn">(</span>books<span class="pn">,</span> borrowed_set<span class="pn">,</span> history<span class="pn">,</span> <span class="str">"ISBN-001"</span><span class="pn">)</span>
+<span class="ln">77</span>
+<span class="ln">78</span><span class="fn">show_status</span><span class="pn">(</span>borrowed_set<span class="pn">,</span> history<span class="pn">)</span>
+<span class="ln">79</span><span class="fn">books_by_genre</span><span class="pn">(</span>books<span class="pn">)</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. CHALLENGE -->
+      <h2><span class="n">6.</span>도전 과제</h2>
+      <div class="challenge-box">
+        <div class="challenge-label">&#9733; CHALLENGE — 기능을 더 추가해보세요</div>
+        <ul class="challenge-list">
+          <li><span class="c-num">01</span>대출 이력을 <code>for</code>문으로 순회해 각 항목을 <code>(isbn, 구분, 날짜)</code>로 언패킹해서 출력하는 <code>show_history(history)</code> 함수를 만드세요</li>
+          <li><span class="c-num">02</span>현재 대출 중인 도서들의 제목을 출력하는 <code>show_borrowed(books, borrowed_set)</code> 함수를 추가하세요 (셋 순회 + 딕셔너리 조회)</li>
+          <li><span class="c-num">03</span>특정 저자의 모든 도서를 찾아 출력하는 <code>search_by_author(books, author_name)</code> 함수를 만드세요</li>
+          <li><span class="c-num">04</span><code>input()</code>으로 사용자가 직접 ISBN을 입력해 대출·반납할 수 있는 메뉴 시스템을 <code>while True</code> 루프로 구현하세요</li>
+        </ul>
+      </div>
+
+      <!-- SUMMARY -->
+      <div class="summary-box">
+        <div class="summary-label">&#128204; 이 프로젝트에서 사용한 패턴</div>
+        <div class="summary-grid">
+          <div class="summary-item">중첩 딕셔너리로 도서 정보 구조화</div>
+          <div class="summary-item">셋으로 O(1) 대출 중복 검사</div>
+          <div class="summary-item">리스트로 시간순 이력 보존</div>
+          <div class="summary-item">튜플로 불변 날짜 데이터 관리</div>
+          <div class="summary-item">튜플 언패킹으로 날짜 분리</div>
+          <div class="summary-item">빈 딕셔너리 동적 그루핑 패턴</div>
+          <div class="summary-item"><code>add()</code> / <code>discard()</code> 셋 조작</div>
+          <div class="summary-item"><code>stock -= 1</code> 딕셔너리 값 갱신</div>
+          <div class="summary-item">early return으로 조건 검사</div>
+          <div class="summary-item">4개 자료구조 역할 분담 협력</div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="cheer-box">
+        <span class="cheer-icon">&#127881;</span>
+        <div class="cheer-text">
+          <strong>자료구조 섹션 완주!</strong><br>
+          딕셔너리·셋·리스트·튜플이 각자 역할을 나눠 하나의 시스템으로 동작하는 것을 느꼈나요? 이제 "어떤 자료구조를 쓸까?" 라는 질문에 스스로 답할 수 있게 됐습니다. 다음 섹션은 파일 입출력 — 프로그램의 데이터를 파일로 저장하고 불러오는 방법을 배웁니다!
+        </div>
+      </div>
+
+      <div class="chap-nav">
+        <a href="40-quiz-tuple-set.html" class="chap-nav-btn">
+          <span class="cnb-dir">&#8592; 이전 챕터</span>
+          <span class="cnb-title"><span>40.</span> 연습문제 — 튜플과 셋</span>
+        </a>
+        <a href="42-file-io.html" class="chap-nav-btn next">
+          <span class="cnb-dir">다음 챕터 &#8594;</span>
+          <span class="cnb-title"><span>42.</span> 파일 입출력</span>
+        </a>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    const text = pre.innerText.split('\n').map(l => l.replace(/^\s*\d+\s{1,2}/, '')).join('\n').trim();
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '복사됨!';
+      setTimeout(() => btn.textContent = '복사', 1800);
+    });
+  }
+
+  function toggleStep(id) {
+    document.getElementById(id).classList.toggle('open');
+  }
+
+  function switchTab(btn, panelId) {
+    const container = btn.closest('.step-body') || btn.closest('.full-code-body') || btn.parentElement.parentElement;
+    container.querySelectorAll('.ha-tab').forEach(t => t.classList.remove('active'));
+    container.querySelectorAll('.ha-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(panelId).classList.add('active');
+  }
+
+  function toggleFullCode() {
+    const wrap = document.getElementById('fullCodeWrap');
+    wrap.classList.toggle('open');
+    const hint = document.getElementById('fullCodeHint');
+    if (hint) hint.textContent = wrap.classList.contains('open') ? '클릭해서 접기' : '클릭해서 펼치기';
+  }
+
+  const isMobile = () => window.innerWidth <= 720;
+  const overlay = document.getElementById('sidebarOverlay');
+  function toggleSidebar() {
+    document.body.classList.toggle('sidebar-closed');
+    if (isMobile()) overlay.classList.toggle('visible', !document.body.classList.contains('sidebar-closed'));
+    localStorage.setItem('sp-sidebar', document.body.classList.contains('sidebar-closed') ? 'closed' : 'open');
+  }
+  function closeSidebar() {
+    document.body.classList.add('sidebar-closed');
+    overlay.classList.remove('visible');
+    localStorage.setItem('sp-sidebar', 'closed');
+  }
+  function toggleGroup(id) { document.getElementById(id).classList.toggle('open'); }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    if (isMobile()) document.body.classList.add('sidebar-closed');
+    else if (localStorage.getItem('sp-sidebar') === 'closed') document.body.classList.add('sidebar-closed');
+  });
+  window.addEventListener('resize', () => { if (!isMobile()) overlay.classList.remove('visible'); });
+</script>
+</body>
+</html>

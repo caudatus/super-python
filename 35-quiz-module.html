@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<!--
+  슈퍼파이썬 (SuperPython) — 브론즈 챕터 35
+  연습문제 — 모듈 (import · random · math · os)
+  QUIZ 뱃지 | 30문제 | 하 9 / 중 9 / 상 12
+-->
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>연습문제 — 모듈 · 브론즈 | 슈퍼파이썬</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#111111; --bg-nav:#0A0A0A; --bg-side:#0E0E0E; --bg-card:#181818;
+      --bg-code:#1A1A1A; --bg-tip:#131A13; --bg-warn:#1A1410; --bg-info:#101520;
+      --accent:#00CC70; --accent-dim:#007A42; --accent-bg:rgba(0,204,112,0.07);
+      --accent2:#C8A000; --text:#D8D8D8; --text-head:#EFEFEF;
+      --text2:#888888; --text3:#444444; --border:#222222; --border2:#2E2E2E;
+      --sy-kw:#C792EA; --sy-fn:#82AAFF; --sy-str:#C3E88D;
+      --sy-cm:#546E7A; --sy-num:#F78C6C; --sy-pn:#89DDFF;
+      --sidebar-w:248px; --content-max:720px; --header-h:48px;
+      font-variant-ligatures: none;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Noto Sans KR', sans-serif; font-size: 15px; line-height: 1.8; overflow-x: hidden; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent-dim); }
+
+    /* HEADER */
+    .top-header { position: fixed; top: 0; left: 0; right: 0; z-index: 200; height: var(--header-h); background: var(--bg-nav); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 16px; }
+    .header-open-btn { display: none; align-items: center; justify-content: center; width: 28px; height: 28px; flex-shrink: 0; margin-right: 12px; background: var(--bg-card); border: 1px solid var(--border2); border-radius: 4px; cursor: pointer; color: var(--text2); font-size: 12px; transition: background .15s, color .15s, border-color .15s; }
+    .header-open-btn:hover { background: var(--accent-bg); color: var(--accent); border-color: var(--accent); }
+    body.sidebar-closed .header-open-btn { display: flex; }
+    .header-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; font-family: 'JetBrains Mono', monospace; font-size: 12px; overflow: hidden; }
+    .header-logo  { color: var(--accent); text-decoration: none; font-weight: 700; white-space: nowrap; }
+    .header-sep   { color: var(--text3); flex-shrink: 0; }
+    .header-grade { color: var(--text2); white-space: nowrap; }
+    .header-chap  { color: var(--text-head); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .header-center { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text3); display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding: 0 16px; }
+    .progress-mini { width: 80px; height: 3px; background: var(--border2); border-radius: 2px; overflow: hidden; }
+    .progress-mini-fill { height: 100%; background: var(--accent); border-radius: 2px; }
+    .header-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .nav-btn { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text2); background: transparent; border: 1px solid var(--border2); padding: 4px 12px; text-decoration: none; transition: border-color .15s, color .15s; white-space: nowrap; }
+    .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .nav-btn.primary { color: var(--bg-nav); background: var(--accent); border-color: var(--accent); font-weight: 700; }
+    .nav-btn.primary:hover { filter: brightness(1.1); }
+
+    /* LAYOUT */
+    .layout { display: flex; padding-top: var(--header-h); min-height: 100vh; }
+
+    /* SIDEBAR */
+    .sidebar { width: var(--sidebar-w); flex-shrink: 0; position: fixed; top: var(--header-h); bottom: 0; left: 0; background: var(--bg-side); border-right: 1px solid var(--border); overflow-y: auto; overflow-x: hidden; transition: transform .22s ease; z-index: 150; padding-top: 8px; }
+    body.sidebar-closed .sidebar { transform: translateX(calc(-1 * var(--sidebar-w))); }
+    body.sidebar-closed .content { margin-left: 0; }
+    .sidebar-toggle { position: absolute; top: 10px; right: 10px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: var(--bg-card); border: 1px solid var(--border2); border-radius: 4px; cursor: pointer; color: var(--text2); font-size: 12px; z-index: 10; transition: background .15s, color .15s, border-color .15s; }
+    .sidebar-toggle:hover { background: var(--accent-bg); color: var(--accent); border-color: var(--accent); }
+    body.sidebar-closed .sidebar-toggle { display: none; }
+    .sidebar-progress { margin: 44px 12px 12px; padding: 12px 14px; background: var(--bg-card); border: 1px solid var(--border); }
+    .sp-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); margin-bottom: 6px; letter-spacing: .08em; }
+    .sp-bar   { height: 4px; background: var(--border2); border-radius: 2px; overflow: hidden; margin-bottom: 5px; }
+    .sp-fill  { height: 100%; background: var(--accent); border-radius: 2px; }
+    .sp-text  { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text2); }
+    .sp-text span { color: var(--accent); }
+    .sb-group { border-bottom: 1px solid var(--border); }
+    .sb-group-header { display: flex; align-items: center; justify-content: space-between; padding: 9px 14px 9px 12px; cursor: pointer; user-select: none; transition: background .12s; gap: 8px; }
+    .sb-group-header:hover { background: rgba(255,255,255,.03); }
+    .sb-group-title { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; letter-spacing: .06em; color: var(--text2); text-transform: uppercase; flex: 1; }
+    .sb-group.current .sb-group-title { color: var(--accent); }
+    .sb-group-arrow { font-size: 9px; color: var(--text3); transition: transform .2s; flex-shrink: 0; }
+    .sb-group.open .sb-group-arrow { transform: rotate(90deg); color: var(--accent); }
+    .sb-items { overflow: hidden; max-height: 0; transition: max-height .28s ease; }
+    .sb-group.open .sb-items { max-height: 1200px; }
+    .sb-item { display: flex; align-items: baseline; gap: 8px; padding: 6px 14px 6px 20px; font-size: 13px; color: var(--text2); text-decoration: none; border-left: 2px solid transparent; transition: background .1s, color .1s, border-color .1s; line-height: 1.45; }
+    .sb-item:hover  { background: rgba(255,255,255,.03); color: var(--text); }
+    .sb-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--accent-bg); font-weight: 500; }
+    .sb-item.done   { color: var(--text3); }
+    .sb-icon { font-size: 9px; flex-shrink: 0; font-family: 'JetBrains Mono', monospace; width: 10px; text-align: center; color: var(--text3); }
+    .sb-item.active .sb-icon { color: var(--accent); }
+    .sb-item.done   .sb-icon { color: var(--accent-dim); }
+    .sb-num { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); flex-shrink: 0; min-width: 22px; }
+
+    /* CONTENT */
+    .content { margin-left: var(--sidebar-w); flex: 1; min-width: 0; padding: 48px 52px 96px; transition: margin-left .22s ease; }
+    .content-inner { max-width: var(--content-max); margin: 0 auto; }
+
+    /* 챕터 헤더 */
+    .chap-meta { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text3); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .badge      { font-size: 10px; padding: 2px 8px; background: var(--accent-bg); color: var(--accent); border: 1px solid rgba(0,204,112,.25); letter-spacing: .06em; }
+    .badge.quiz { background: rgba(200,160,0,.1); color: var(--accent2); border-color: rgba(200,160,0,.25); }
+    .chap-title    { font-family: 'JetBrains Mono', monospace; font-size: clamp(22px,3.5vw,30px); font-weight: 700; color: var(--text-head); line-height: 1.25; margin-bottom: 8px; }
+    .chap-title .hl { color: var(--accent); }
+    .chap-subtitle  { font-size: 15px; color: var(--text2); margin-bottom: 32px; line-height: 1.65; }
+    p    { color: var(--text); margin-bottom: 16px; line-height: 1.9; font-size: 15px; }
+    code { font-family: 'JetBrains Mono', monospace; font-size: 13px; background: var(--bg-code); color: var(--accent); padding: 1px 6px; border: 1px solid var(--border2); border-radius: 2px; }
+    strong { color: var(--text-head); font-weight: 700; }
+
+    /* 스코어보드 */
+    .scoreboard { display: flex; gap: 12px; margin-bottom: 36px; flex-wrap: wrap; }
+    .score-card { flex: 1; min-width: 100px; background: var(--bg-card); border: 1px solid var(--border2); padding: 14px 18px; display: flex; flex-direction: column; gap: 4px; }
+    .score-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); letter-spacing: .08em; }
+    .score-val   { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; color: var(--accent); }
+    .score-val.total { color: var(--text2); }
+
+    /* 난이도 구분 헤더 */
+    .diff-header { display: flex; align-items: center; gap: 12px; margin: 44px 0 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+    .diff-badge  { font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 3px 10px; font-weight: 700; letter-spacing: .06em; }
+    .diff-badge.easy   { background: rgba(0,204,112,.12);  color: var(--accent);  border: 1px solid rgba(0,204,112,.25); }
+    .diff-badge.medium { background: rgba(200,160,0,.12);  color: var(--accent2); border: 1px solid rgba(200,160,0,.25); }
+    .diff-badge.hard   { background: rgba(255,80,80,.10);  color: #FF7070;        border: 1px solid rgba(255,80,80,.20); }
+    .diff-title  { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 700; color: var(--text-head); }
+    .diff-count  { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text3); margin-left: auto; }
+
+    /* 문제 카드 */
+    .q-card { background: var(--bg-card); border: 1px solid var(--border2); margin-bottom: 16px; overflow: hidden; transition: border-color .15s; }
+    .q-card.solved { border-left: 3px solid var(--accent); }
+    .q-card.wrong  { border-left: 3px solid #FF5555; }
+    .q-header { display: flex; align-items: flex-start; gap: 14px; padding: 16px 18px; }
+    .q-num    { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text3); flex-shrink: 0; min-width: 28px; padding-top: 1px; }
+    .q-body   { flex: 1; min-width: 0; }
+    .q-text   { font-size: 14px; color: var(--text); line-height: 1.8; }
+    .q-text code { font-size: 12px; }
+    .q-code-block { margin: 10px 0; background: var(--bg-code); border: 1px solid var(--border2); padding: 10px 16px; }
+    .q-code-block pre { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text); line-height: 1.7; }
+    .q-error-code { margin: 10px 0; background: #160A0A; border: 1px solid #3A1A1A; border-left: 3px solid #FF5555; padding: 10px 16px; }
+    .q-error-code pre { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #FF8080; line-height: 1.7; }
+    .kw{color:var(--sy-kw);} .fn{color:var(--sy-fn);} .str{color:var(--sy-str);}
+    .cm{color:var(--sy-cm);} .num{color:var(--sy-num);} .pn{color:var(--sy-pn);}
+
+    /* 입력 영역 */
+    .q-input-area { padding: 0 18px 14px 60px; }
+    .q-textarea { width: 100%; min-height: 60px; background: var(--bg-code); color: var(--text); border: 1px solid var(--border2); font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.7; padding: 10px 14px; resize: vertical; outline: none; transition: border-color .15s; }
+    .q-textarea:focus { border-color: var(--accent); }
+    .q-textarea::placeholder { color: var(--text3); }
+    .q-actions { display: flex; gap: 8px; margin-top: 8px; align-items: center; flex-wrap: wrap; }
+    .btn-check  { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; padding: 6px 16px; background: var(--accent); color: var(--bg-nav); border: none; cursor: pointer; transition: filter .15s; }
+    .btn-check:hover { filter: brightness(1.1); }
+    .btn-hint   { font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 6px 14px; background: transparent; color: var(--text3); border: 1px solid var(--border2); cursor: pointer; transition: color .15s, border-color .15s; }
+    .btn-hint:hover { color: var(--accent2); border-color: var(--accent2); }
+    .btn-answer { font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 6px 14px; background: transparent; color: var(--text3); border: 1px solid var(--border2); cursor: pointer; transition: color .15s, border-color .15s; margin-left: auto; }
+    .btn-answer:hover { color: var(--text2); border-color: var(--border); }
+    .q-result { font-family: 'JetBrains Mono', monospace; font-size: 12px; margin-top: 6px; display: none; }
+    .q-result.ok  { color: var(--accent); }
+    .q-result.err { color: #FF7070; }
+
+    /* 힌트 / 정답 드롭다운 */
+    .q-dropdown { display: none; margin: 0 18px 14px 60px; border: 1px solid var(--border2); }
+    .q-dropdown.visible { display: block; }
+    .q-dropdown-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; padding: 7px 14px; border-bottom: 1px solid var(--border); letter-spacing: .08em; }
+    .q-hint-label   { color: var(--accent2); background: rgba(200,160,0,.05); }
+    .q-answer-label { color: var(--accent);  background: var(--accent-bg); }
+    .q-dropdown-body     { padding: 12px 14px; background: var(--bg-code); }
+    .q-dropdown-body pre { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text2); line-height: 1.7; white-space: pre-wrap; margin: 0; }
+
+    /* 격려 / 네비 */
+    .section-divider { height: 1px; background: var(--border); margin: 44px 0; }
+    .cheer-box { border: 1px solid var(--border); background: var(--bg); padding: 18px 22px; margin-bottom: 44px; display: flex; gap: 14px; align-items: flex-start; }
+    .cheer-icon { font-size: 18px; flex-shrink: 0; line-height: 1.5; }
+    .cheer-text { font-size: 14px; color: var(--text2); line-height: 1.85; }
+    .cheer-text strong { color: var(--text-head); }
+    .chap-nav { display: flex; justify-content: space-between; padding-top: 32px; border-top: 1px solid var(--border); gap: 12px; flex-wrap: wrap; }
+    .chap-nav-btn { display: flex; flex-direction: column; gap: 4px; text-decoration: none; padding: 14px 18px; border: 1px solid var(--border2); background: var(--bg-card); flex: 1; max-width: 300px; transition: border-color .15s; }
+    .chap-nav-btn:hover { border-color: var(--accent); }
+    .chap-nav-btn.next  { text-align: right; }
+    .cnb-dir   { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); letter-spacing: .07em; }
+    .cnb-title { font-size: 13px; color: var(--text2); line-height: 1.45; }
+    .cnb-title span { color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+
+    /* 반응형 */
+    .sidebar-overlay { display: none; position: fixed; inset: 0; top: var(--header-h); z-index: 140; background: rgba(0,0,0,.65); }
+    @media (max-width: 720px) {
+      .sidebar-overlay.visible { display: block; }
+      .content { margin-left: 0; padding: 28px 20px 72px; }
+      .header-center { display: none; }
+      .q-input-area  { padding: 0 14px 14px; }
+      .q-dropdown    { margin: 0 14px 14px; }
+    }
+    @media (max-width: 480px) {
+      .header-grade { display: none; }
+      .chap-nav-btn { max-width: 100%; }
+      .header-right .nav-btn:not(.primary) { display: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition: none !important; animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="top-header">
+  <button class="header-open-btn" onclick="toggleSidebar()">▶</button>
+  <div class="header-left">
+    <a href="../index.html" class="header-logo">SUPERPYTHON</a>
+    <span class="header-sep">/</span>
+    <span class="header-grade">🟤 BRONZE</span>
+    <span class="header-sep">/</span>
+    <span class="header-chap">35. 연습문제 — 모듈</span>
+  </div>
+  <div class="header-center">
+    <span>35 / 48</span>
+    <div class="progress-mini"><div class="progress-mini-fill" style="width:72.92%"></div></div>
+    <span>72%</span>
+  </div>
+  <div class="header-right">
+    <a href="34-module.html" class="nav-btn">← 이전</a>
+    <a href="36-mini-project-06.html" class="nav-btn primary">다음 →</a>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <button class="sidebar-toggle" onclick="toggleSidebar()">◀</button>
+    <div class="sidebar-progress">
+      <div class="sp-label">BRONZE 진행률</div>
+      <div class="sp-bar"><div class="sp-fill" style="width:72.92%"></div></div>
+      <div class="sp-text"><span>34</span> / 48 챕터 완료</div>
+    </div>
+    <div class="sb-group" id="grp-env">
+      <div class="sb-group-header" onclick="toggleGroup('grp-env')"><span class="sb-group-title">환경 설정</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="01-what-is-python.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">01</span>파이썬이란?</a>
+        <a href="02-setup.html"          class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">02</span>개발환경 설치</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-basic1">
+      <div class="sb-group-header" onclick="toggleGroup('grp-basic1')"><span class="sb-group-title">기초 문법 1</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="03-print.html"                    class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">03</span>print()란?</a>
+        <a href="04-quiz-print.html"               class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">04</span>연습문제</a>
+        <a href="05-variables.html"                class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">05</span>변수와 데이터 타입</a>
+        <a href="06-operators.html"                class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">06</span>연산자</a>
+        <a href="07-quiz-variables-operators.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">07</span>연습문제</a>
+        <a href="08-string.html"                   class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">08</span>문자열 String</a>
+        <a href="09-quiz-string.html"              class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">09</span>연습문제</a>
+        <a href="10-fstring.html"                  class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">10</span>f-string 완전정리</a>
+        <a href="11-quiz-fstring.html"             class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">11</span>연습문제</a>
+        <a href="12-mini-project-01.html"          class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">12</span>🎮 미니 프로젝트 ①</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-basic2">
+      <div class="sb-group-header" onclick="toggleGroup('grp-basic2')"><span class="sb-group-title">기초 문법 2</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="13-list.html"            class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">13</span>리스트</a>
+        <a href="14-quiz-list.html"       class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">14</span>연습문제</a>
+        <a href="15-input.html"           class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">15</span>input() 함수</a>
+        <a href="16-quiz-input.html"      class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">16</span>연습문제</a>
+        <a href="17-mini-project-02.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">17</span>🎮 미니 프로젝트 ②</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-flow">
+      <div class="sb-group-header" onclick="toggleGroup('grp-flow')"><span class="sb-group-title">흐름 제어</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="18-if.html"              class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">18</span>조건문 (if)</a>
+        <a href="19-quiz-if.html"         class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">19</span>연습문제</a>
+        <a href="20-mini-project-03.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">20</span>🎮 미니 프로젝트 ③</a>
+        <a href="21-for-range.html"       class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">21</span>for문과 range()</a>
+        <a href="22-quiz-for.html"        class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">22</span>연습문제</a>
+        <a href="23-while.html"           class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">23</span>while문</a>
+        <a href="24-quiz-while.html"      class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">24</span>연습문제</a>
+        <a href="25-mini-project-04.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">25</span>🎮 미니 프로젝트 ④</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-error">
+      <div class="sb-group-header" onclick="toggleGroup('grp-error')"><span class="sb-group-title">에러 &amp; 디버깅</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="26-error-types.html"    class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">26</span>에러 읽는 법</a>
+        <a href="27-debugging.html"      class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">27</span>기초 디버깅 실습</a>
+        <a href="28-quiz-debugging.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">28</span>연습문제</a>
+      </div>
+    </div>
+    <div class="sb-group current open" id="grp-func">
+      <div class="sb-group-header" onclick="toggleGroup('grp-func')"><span class="sb-group-title">함수</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="29-function-basic.html"         class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">29</span>함수 기초</a>
+        <a href="30-quiz-function-basic.html"    class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">30</span>연습문제</a>
+        <a href="31-mini-project-05.html"        class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">31</span>🎮 미니 프로젝트 ⑤</a>
+        <a href="32-function-advanced.html"      class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">32</span>함수 심화</a>
+        <a href="33-quiz-function-advanced.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">33</span>연습문제</a>
+        <a href="34-module.html"                 class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">34</span>모듈</a>
+        <a href="35-quiz-module.html"            class="sb-item active"><span class="sb-icon">▶</span><span class="sb-num">35</span>연습문제</a>
+        <a href="36-mini-project-06.html"        class="sb-item"><span class="sb-icon"> </span><span class="sb-num">36</span>🎮 미니 프로젝트 ⑥</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-ds">
+      <div class="sb-group-header" onclick="toggleGroup('grp-ds')"><span class="sb-group-title">자료구조</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="37-dictionary.html"      class="sb-item"><span class="sb-icon"> </span><span class="sb-num">37</span>딕셔너리</a>
+        <a href="38-quiz-dictionary.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">38</span>연습문제</a>
+        <a href="39-tuple-set.html"       class="sb-item"><span class="sb-icon"> </span><span class="sb-num">39</span>튜플과 셋</a>
+        <a href="40-quiz-tuple-set.html"  class="sb-item"><span class="sb-icon"> </span><span class="sb-num">40</span>연습문제</a>
+        <a href="41-mini-project-07.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">41</span>🎮 미니 프로젝트 ⑦</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-file">
+      <div class="sb-group-header" onclick="toggleGroup('grp-file')"><span class="sb-group-title">파일 &amp; 예외처리</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="42-file-io.html"          class="sb-item"><span class="sb-icon"> </span><span class="sb-num">42</span>파일 입출력</a>
+        <a href="43-quiz-file-io.html"     class="sb-item"><span class="sb-icon"> </span><span class="sb-num">43</span>연습문제</a>
+        <a href="44-exception-basic.html"  class="sb-item"><span class="sb-icon"> </span><span class="sb-num">44</span>예외처리 기초</a>
+        <a href="45-quiz-exception.html"   class="sb-item"><span class="sb-icon"> </span><span class="sb-num">45</span>연습문제</a>
+        <a href="46-mini-project-08.html"  class="sb-item"><span class="sb-icon"> </span><span class="sb-num">46</span>🎮 미니 프로젝트 ⑧</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-end">
+      <div class="sb-group-header" onclick="toggleGroup('grp-end')"><span class="sb-group-title">마무리</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="47-final-project.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">47</span>★ 최종 프로젝트</a>
+        <a href="48-next-step.html"     class="sb-item"><span class="sb-icon"> </span><span class="sb-num">48</span>다음 단계 미리보기</a>
+      </div>
+    </div>
+  </aside>
+
+  <main class="content" id="mainContent">
+    <div class="content-inner">
+
+      <div class="chap-meta">
+        <span class="badge quiz">QUIZ</span>
+        <span>함수</span>
+        <span style="color:var(--text3)">·</span>
+        <span>챕터 35 / 48</span>
+      </div>
+      <h1 class="chap-title">연습문제 — <span class="hl">모듈</span></h1>
+      <p class="chap-subtitle">import 구문과 random, math, os — 세 표준 라이브러리를 직접 코드로 써보며 확실히 내 것으로 만드세요.</p>
+
+      <div class="scoreboard">
+        <div class="score-card"><div class="score-label">SOLVED</div><div class="score-val" id="solved-count">0</div></div>
+        <div class="score-card"><div class="score-label">TOTAL</div><div class="score-val total">30</div></div>
+        <div class="score-card"><div class="score-label">LEVEL</div><div class="score-val" id="level-text" style="font-size:13px;padding-top:4px;">도전 중...</div></div>
+      </div>
+
+      <!-- ══ 하 (Q1~9) ══ -->
+      <div class="diff-header">
+        <span class="diff-badge easy">하</span>
+        <span class="diff-title">import 기초 · random · math 입문</span>
+        <span class="diff-count">1 – 9번</span>
+      </div>
+
+      <!-- Q1 -->
+      <div class="q-card" id="q1">
+        <div class="q-header"><span class="q-num">Q1.</span><div class="q-body">
+          <p class="q-text"><code>random</code> 모듈을 불러와서 1부터 6까지 정수 중 하나를 무작위로 출력하는 코드를 작성하세요. (import 문 포함 두 줄)</p>
+        </div></div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q1-input" placeholder="import random&#10;print(random...)" rows="3" spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check" onclick="check(1)">확인</button>
+            <button class="btn-hint"  onclick="toggleHint(1)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(1)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q1-result"></div>
+        </div>
+        <div class="q-dropdown" id="q1-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>1~6 사이 정수는 randint(a, b)를 사용합니다. 양 끝값이 모두 포함됩니다.</pre></div></div>
+        <div class="q-dropdown" id="q1-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="kw">import</span> random
+<span class="fn">print</span><span class="pn">(</span>random<span class="pn">.</span><span class="fn">randint</span><span class="pn">(</span><span class="num">1</span><span class="pn">,</span> <span class="num">6</span><span class="pn">))</span>
+<span class="cm"># randint(1,6)은 1~6 중 하나를 반환합니다 (6 포함).</span></pre></div></div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="q-card" id="q2">
+        <div class="q-header"><span class="q-num">Q2.</span><div class="q-body">
+          <p class="q-text">다음 코드의 출력 결과를 적으세요.</p>
+          <div class="q-code-block"><pre><span class="kw">import</span> math
+<span class="fn">print</span><span class="pn">(</span>math<span class="pn">.</span><span class="fn">sqrt</span><span class="pn">(</span><span class="num">49</span><span class="pn">))</span></pre></div>
+        </div></div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q2-input" placeholder="출력 결과를 입력하세요..." rows="2" spellcheck="false"></textarea>
+          <div class="q-actions"><button class="btn-check" onclick="check(2)">확인</button><button class="btn-hint" onclick="toggleHint(2)">힌트</button><button class="btn-answer" onclick="toggleAnswer(2)">정답 보기</button></div>
+          <div class="q-result" id="q2-result"></div>
+        </div>
+        <div class="q-dropdown" id="q2-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>math.sqrt()는 정수를 입력해도 항상 float를 반환합니다.</pre></div></div>
+        <div class="q-dropdown" id="q2-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre>7.0
+<span class="cm"># sqrt()는 결과가 딱 떨어져도 float를 반환합니다.</span>
+<span class="cm"># 정수가 필요하면 int(math.sqrt(49))로 변환하세요.</span></pre></div></div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="q-card" id="q3">
+        <div class="q-header"><span class="q-num">Q3.</span><div class="q-body">
+          <p class="q-text"><code>from math import pi</code>로 불러온 뒤 원주율 값을 그대로 출력하는 코드를 두 줄로 작성하세요.</p>
+        </div></div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q3-input" placeholder="from math import pi&#10;print(...)" rows="3" spellcheck="false"></textarea>
+          <div class="q-actions"><button class="btn-check" onclick="check(3)">확인</button><button class="btn-hint" onclick="toggleHint(3)">힌트</button><button class="btn-answer" onclick="toggleAnswer(3)">정답 보기</button></div>
+          <div class="q-result" id="q3-result"></div>
+        </div>
+        <div class="q-dropdown" id="q3-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>from math import pi 로 가져오면 math. 없이 pi만으로 바로 사용할 수 있습니다.</pre></div></div>
+        <div class="q-dropdown" id="q3-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="kw">from</span> math <span class="kw">import</span> pi
+<span class="fn">print</span><span class="pn">(</span>pi<span class="pn">)</span>  <span class="cm"># 3.141592653589793</span></pre></div></div>
+      </div>
+
+      <!-- Q4 -->
+      <div class="q-card" id="q4">
+        <div class="q-header"><span class="q-num">Q4.</span><div class="q-body">
+          <p class="q-text">다음 코드의 출력 결과를 두 줄로 적으세요.</p>
+          <div class="q-code-block"><pre><span class="kw">import</span> math
+<span class="fn">print</span><span class="pn">(</span>math<span class="pn">.</span><span class="fn">ceil</span><span class="pn">(</span><span class="num">3.2</span><span class="pn">))</span>
+<span class="fn">print</span><span class="pn">(</span>math<span class="pn">.</span><span class="fn">floor</span><span class="pn">(</span><span class="num">3.9</span><span class="pn">))</span></pre></div>
+        </div></div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q4-input" placeholder="첫째 줄&#10;둘째 줄" rows="2" spellcheck="false"></textarea>
+          <div class="q-actions"><button class="btn-check" onclick="check(4)">확인</button><button class="btn-hint" onclick="toggleHint(4)">힌트</button><button class="btn-answer" onclick="toggleAnswer(4)">정답 보기</button></div>
+          <div class="q-result" id="q4-result"></div>
+        </div>
+        <div class="q-dropdown" id="q4-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>ceil은 올림(이상의 최솟값), floor는 내림(이하의 최댓값)입니다.</pre></div></div>
+        <div class="q-dropdown" id="q4-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre>4
+3
+<span class="cm"># ceil(3.2) → 3.2 이상의 가장 작은 정수 = 4</span>
+<span class="cm"># floor(3.9) → 3.9 이하의 가장 큰 정수 = 3</span></pre></div></div>
+      </div>
+
+      <!-- Q5 -->
+      <div class="q-card" id="q5">
+        <div class="q-header"><span class="q-num">Q5.</span><div class="q-body">
+          <p class="q-text"><code>import random as r</code>로 별명을 붙인 뒤, <code>["가위", "바위", "보"]</code> 중 하나를 무작위 선택해 출력하는 코드를 작성하세요.</p>
+        </div></div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q5-input" placeholder="import random as r&#10;..." rows="4" spellcheck="false"></textarea>
+          <div class="q-actions"><button class="btn-check" onclick="check(5)">확인</button><button class="btn-hint" onclick="toggleHint(5)">힌트</button><button class="btn-answer" onclick="toggleAnswer(5)">정답 보기</button></div>
+          <div class="q-result" id="q5-result"></div>
+        </div>
+        <div class="q-dropdown" id="q5-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>리스트에서 하나를 뽑을 때는 choice()를 사용합니다.
+별명 r로 접근하면 r.choice(...)입니다.</pre></div></div>
+        <div class="q-dropdown" id="q5-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="kw">import</span> random <span class="kw">as</span> r
+hands <span class="pn">=</span> <span class="pn">[</span><span class="str">"가위"</span><span class="pn">,</span> <span class="str">"바위"</span><span class="pn">,</span> <span class="str">"보"</span><span class="pn">]</span>
+<span class="fn">print</span><span class="pn">(</span>r<span class="pn">.</span><span class="fn">choice</span><span class="pn">(</span>hands<span class="pn">))</span>
+<span class="cm"># as로 별명을 붙이면 그 별명으로만 접근합니다.</span></pre></div></div>
+      </div>
+
+      <!-- Q6 -->
+      <div class="q-card" id="q6">
+        <div class="q-header"><span class="q-num">Q6.</span><div class="q-body">
+          <p class="q-text">다음 중 올바른 import 구문을 고르고, 그 이유를 설명하세요.</p>
+          <div class="q-code-block"><pre><span class="cm"># 보기 A</span>
+<span class="kw">import</span> math<span class="pn">.</span>sqrt
+
+<span class="cm"># 보기 B</span>
+<span class="kw">from</span> math <span class="kw">import</span> sqrt</pre></div>
+        </div></div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q6-input" placeholder="A 또는 B와 이유를 입력하세요..." rows="3" spellcheck="false"></textarea>
+          <div class="q-actions"><button class="btn-check" onclick="check(6)">확인</button><button class="btn-hint" onclick="toggleHint(6)">힌트</button><button class="btn-answer" onclick="toggleAnswer(6)">정답 보기</button></div>
+          <div class="q-result" id="q6-result"></div>
+        </div>
+        <div class="q-dropdown" id="q6-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>import 뒤에는 모듈 이름만 올 수 있습니다. 함수명을 직접 지정하려면 from을 씁니다.</pre></div></div>
+        <div class="q-dropdown" id="q6-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre>B — from math import sqrt
+<span class="cm"># import 뒤에는 모듈 이름만 올 수 있습니다.</span>
+<span class="cm"># import math.sqrt 처럼 함수명을 직접 쓸 수 없습니다.</span></pre></div></div>
+      </div>
+
+      <!-- Q7 -->
+      <div class="q-card" id="q7">
+        <div class="q-header"><span class="q-num">Q7.</span><div class="q-body">
+          <p class="q-text"><code>os.getcwd()</code>가 반환하는 값의 타입과 의미를 한 문장으로 설명하세요.</p>
+        </div></div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q7-input" placeholder="타입과 의미를 설명하세요..." rows="2" spellcheck="false"></textarea>
+          <div class="q-actions"><button class="btn-check" onclick="check(7)">확인</button><button class="btn-hint" onclick="toggleHint(7)">힌트</button><button class="btn-answer" onclick="toggleAnswer(7)">정답 보기</button></div>
+          <div class="q-result" id="q7-result"></div>
+        </div>
+        <div class="q-dropdown" id="q7-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>cwd = Current Working Directory. 현재 파이썬 파일이 실행되는 폴더의 경로입니다.</pre></div></div>
+        <div class="q-dropdown" id="q7-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre>문자열(str) — 현재 작업 디렉터리(폴더)의 절대 경로를 반환합니다.
+<span class="cm"># 예: '/Users/kim/projects'</span></pre></div></div>
+      </div>
+
+      <!-- Q8 -->
+      <div class="q-card" id="q8">
+        <div class="q-header"><span class="q-num">Q8.</span><div class="q-body">
+          <p class="q-text">다음 코드의 출력 결과를 적으세요.</p>
+          <div class="q-code-block"><pre><span class="kw">import</span> math
+<span class="fn">print</span><span class="pn">(</span>math<span class="pn">.</span><span class="fn">pow</span><span class="pn">(</span><span class="num">2</span><span class="pn">,</span> <span class="num">8</span><span class="pn">))</span></pre></div>
+        </div></div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q8-input" placeholder="출력 결과를 입력하세요..." rows="2" spellcheck="false"></textarea>
+          <div class="q-actions"><button class="btn-check" onclick="check(8)">확인</button><button class="btn-hint" onclick="toggleHint(8)">힌트</button><button class="btn-answer" onclick="toggleAnswer(8)">정답 보기</button></div>
+          <div class="q-result" id="q8-result"></div>
+        </div>
+        <div class="q-dropdown" id="q8-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>2의 8제곱은 256입니다. 단, math.pow()는 항상 float를 반환합니다.</pre></div></div>
+        <div class="q-dropdown" id="q8-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre>256.0
+<span class="cm"># math.pow()는 항상 float를 반환합니다.</span>
+<span class="cm"># 정수가 필요하면 2 ** 8 을 사용하세요. → 256 (int)</span></pre></div></div>
+      </div>
+
+      <!-- Q9 -->
+      <div class="q-card" id="q9">
+        <div class="q-header"><span class="q-num">Q9.</span><div class="q-body">
+          <p class="q-text"><code>random.shuffle()</code>의 특이한 점 두 가지를 적으세요. (반환값과 동작 방식)</p>
+        </div></div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q9-input" placeholder="특이한 점 두 가지를 입력하세요..." rows="3" spellcheck="false"></textarea>
+          <div class="q-actions"><button class="btn-check" onclick="check(9)">확인</button><button class="btn-hint" onclick="toggleHint(9)">힌트</button><button class="btn-answer" onclick="toggleAnswer(9)">정답 보기</button></div>
+          <div class="q-result" id="q9-result"></div>
+        </div>
+        <div class="q-dropdown" id="q9-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>result = random.shuffle(items) 했을 때 result는 무엇일까요?
+또, 섞인 결과는 어느 변수에서 확인해야 할까요?</pre></div></div>
+        <div class="q-dropdown" id="q9-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre>① 반환값이 None입니다.
+② 원본 리스트를 직접(in-place) 수정합니다.
+<span class="cm"># 올바른 사용법:</span>
+random<span class="pn">.</span><span class="fn">shuffle</span><span class="pn">(</span>items<span class="pn">)</span>   <span class="cm"># 반환값 사용 X</span>
+<span class="fn">print</span><span class="pn">(</span>items<span class="pn">)</span>            <span class="cm"># 원본 변수에서 확인</span></pre></div></div>
+      </div>
+
+      <!-- ══ 중 (Q10~18) ══ -->
+      <div class="diff-header">
+        <span class="diff-badge medium">중</span>
+        <span class="diff-title">random · math · os 응용 + 코드 분석</span>
+        <span class="diff-count">10 – 18번</span>
+      </div>
+
+      <!-- Q10 -->
+      <div class="q-card" id="q10">
+        <div class="q-header"><span class="q-num">Q10.</span><div class="q-body">
+          <p class="q-text">1~45 사이 숫자 중 중복 없이 6개를 뽑아 오름차순으로 정렬해 출력하는 로또 번호 생성 코드를 작성하세요.</p>
+        </div></div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q10-input" placeholder="import random&#10;..." rows="4" spellcheck="false"></textarea>
+          <div class="q-actions"><button class="btn-check" onclick="check(10)">확인</button><button class="btn-hint" onclick="toggleHint(10)">힌트</button><button class="btn-answer" onclick="toggleAnswer(10)">정답 보기</button></div>
+          <div class="q-result" id="q10-result"></div>
+        </div>
+        <div class="q-dropdown" id="q10-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>중복 없이 여러 개 뽑으려면 random.sample()을 사용합니다.</pre></div></div>
+        <div class="q-dropdown" id="q10-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="kw">import</span> random
+lotto <span class="pn">=</span> random<span class="pn">.</span><span class="fn">sample</span><span class="pn">(</span><span class="fn">range</span><span class="pn">(</span><span class="num">1</span><span class="pn">,</span> <span class="num">46</span><span class="pn">),</span> <span class="num">6</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="fn">sorted</span><span class="pn">(</span>lotto<span class="pn">))</span></pre></div></div>
+      </div>
+
+      <!-- Q11 -->
+      <div class="q-card" id="q11">
+        <div class="q-header"><span class="q-num">Q11.</span><div class="q-body">
+          <p class="q-text">다음 코드의 출력 결과를 예측하세요.</p>
+          <div class="q-code-block"><pre><span class="kw">import</span> math
+<span class="fn">print</span><span class="pn">(</span>math<span class="pn">.</span><span class="fn">floor</span><span class="pn">(</span><span class="pn">-</span><span class="num">2.3</span><span class="pn">))</span>
+<span class="fn">print</span><span class="pn">(</span>math<span class="pn">.</span><span class="fn">ceil</span><span class="pn">(</span><span class="pn">-</span><span class="num">2.7</span><span class="pn">))</span></pre></div>
+        </div></div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q11-input" placeholder="두 줄로 입력하세요..." rows="2" spellcheck="false"></textarea>
+          <div class="q-actions"><button class="btn-check" onclick="check(11)">확인</button><button class="btn-hint" onclick="toggleHint(11)">힌트</button><button class="btn-answer" onclick="toggleAnswer(11)">정답 보기</button></div>
+          <div class="q-result" id="q11-result"></div>
+        </div>
+        <div class="q-dropdown" id="q11-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>수직선에서 floor는 왼쪽(더 작은 쪽), ceil은 오른쪽(더 큰 쪽)으로 이동합니다.</pre></div></div>
+        <div class="q-dropdown" id="q11-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre>-3
+-2
+<span class="cm"># floor(-2.3) → -3 (수직선 왼쪽)</span>
+<span class="cm"># ceil(-2.7)  → -2 (수직선 오른쪽)</span></pre></div></div>
+      </div>
+
+      <!-- Q12 -->
+      <div class="q-card" id="q12">
+        <div class="q-header"><span class="q-num">Q12.</span><div class="q-body">
+          <p class="q-text">반지름을 받아 원의 넓이를 소수점 두 자리까지 출력하는 함수 <code>circle_area(r)</code>을 작성하세요. <code>circle_area(5)</code> → <code>78.54</code></p>
+        </div></div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q12-input" placeholder="import math&#10;def circle_area(r):&#10;    ..." rows="5" spellcheck="false"></textarea>
+          <div class="q-actions"><button class="btn-check" onclick="check(12)">확인</button><button class="btn-hint" onclick="toggleHint(12)">힌트</button><button class="btn-answer" onclick="toggleAnswer(12)">정답 보기</button></div>
+          <div class="q-result" id="q12-result"></div>
+        </div>
+        <div class="q-dropdown" id="q12-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>넓이 = π × r²  →  math.pi * r ** 2
+소수점 두 자리는 f-string에서 {값:.2f} 형식을 사용합니다.</pre></div></div>
+        <div class="q-dropdown" id="q12-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="kw">import</span> math
+<span class="kw">def</span> <span class="fn">circle_area</span><span class="pn">(</span>r<span class="pn">):</span>
+    area <span class="pn">=</span> math<span class="pn">.</span>pi <span class="pn">*</span> r <span class="pn">**</span> <span class="num">2</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">f"{area:.2f}"</span><span class="pn">)</span>
+<span class="fn">circle_area</span><span class="pn">(</span><span class="num">5</span><span class="pn">)</span>  <span class="cm"># 78.54</span></pre></div></div>
+      </div>
+
+      <!-- Q13 -->
+      <div class="q-card" id="q13">
+        <div class="q-header"><span class="q-num">Q13.</span><div class="q-body">
+          <p class="q-text">다음 코드의 오류 이유를 설명하고 두 가지 방법으로 수정하세요.</p>
+          <div class="q-error-code"><pre>import math
+print(sqrt(16))   # 오류 발생</pre></div>
+        </div></div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q13-input" placeholder="오류 이유와 수정 코드 두 가지를 작성하세요..." rows="5" spellcheck="false"></textarea>
+          <div class="q-actions"><button class="btn-check" onclick="check(13)">확인</button><button class="btn-hint" onclick="toggleHint(13)">힌트</button><button class="btn-answer" onclick="toggleAnswer(13)">정답 보기</button></div>
+          <div class="q-result" id="q13-result"></div>
+        </div>
+        <div class="q-dropdown" id="q13-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>import math 방식이면 반드시 math.sqrt()로 써야 합니다.</pre></div></div>
+        <div class="q-dropdown" id="q13-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="cm"># 오류: import math 방식은 math.sqrt()로 써야 합니다.</span>
+<span class="cm"># 수정 1 — 모듈명 붙이기</span>
+<span class="fn">print</span><span class="pn">(</span>math<span class="pn">.</span><span class="fn">sqrt</span><span class="pn">(</span><span class="num">16</span><span class="pn">))</span>
+<span class="cm"># 수정 2 — from으로 가져오기</span>
+<span class="kw">from</span> math <span class="kw">import</span> sqrt
+<span class="fn">print</span><span class="pn">(</span><span class="fn">sqrt</span><span class="pn">(</span><span class="num">16</span><span class="pn">))</span></pre></div></div>
+      </div>
+
+      <!-- Q14 -->
+      <div class="q-card" id="q14">
+        <div class="q-header"><span class="q-num">Q14.</span><div class="q-body">
+          <p class="q-text">카드 덱 리스트를 섞고 앞에서 5장을 출력하는 코드를 작성하세요. <code>shuffle</code>의 반환값 함정에 주의하세요.</p>
+          <div class="q-code-block"><pre>deck <span class="pn">=</span> <span class="pn">[</span><span class="str">"A"</span><span class="pn">,</span><span class="str">"2"</span><span class="pn">,</span><span class="str">"3"</span><span class="pn">,</span><span class="str">"4"</span><span class="pn">,</span><span class="str">"5"</span><span class="pn">,</span><span class="str">"6"</span><span class="pn">,</span><span class="str">"7"</span><span class="pn">,</span><span class="str">"8"</span><span class="pn">,</span><span class="str">"9"</span><span class="pn">,</span><span class="str">"10"</span><span class="pn">,</span><span class="str">"J"</span><span class="pn">,</span><span class="str">"Q"</span><span class="pn">,</span><span class="str">"K"</span><span class="pn">]</span></pre></div>
+        </div></div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q14-input" placeholder="import random&#10;# deck 섞고 앞 5장 출력..." rows="5" spellcheck="false"></textarea>
+          <div class="q-actions"><button class="btn-check" onclick="check(14)">확인</button><button class="btn-hint" onclick="toggleHint(14)">힌트</button><button class="btn-answer" onclick="toggleAnswer(14)">정답 보기</button></div>
+          <div class="q-result" id="q14-result"></div>
+        </div>
+        <div class="q-dropdown" id="q14-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>random.shuffle(deck)  # 반환값 무시
+print(deck[:5])       # 원본에서 슬라이싱</pre></div></div>
+        <div class="q-dropdown" id="q14-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="kw">import</span> random
+deck <span class="pn">=</span> <span class="pn">[</span><span class="str">"A"</span><span class="pn">,</span><span class="str">"2"</span><span class="pn">,</span><span class="str">"3"</span><span class="pn">,</span><span class="str">"4"</span><span class="pn">,</span><span class="str">"5"</span><span class="pn">,</span><span class="str">"6"</span><span class="pn">,</span><span class="str">"7"</span><span class="pn">,</span><span class="str">"8"</span><span class="pn">,</span><span class="str">"9"</span><span class="pn">,</span><span class="str">"10"</span><span class="pn">,</span><span class="str">"J"</span><span class="pn">,</span><span class="str">"Q"</span><span class="pn">,</span><span class="str">"K"</span><span class="pn">]</span>
+random<span class="pn">.</span><span class="fn">shuffle</span><span class="pn">(</span>deck<span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span>deck<span class="pn">[:</span><span class="num">5</span><span class="pn">])</span></pre></div></div>
+      </div>
+
+      <!-- Q15 -->
+      <div class="q-card" id="q15">
+        <div class="q-header"><span class="q-num">Q15.</span><div class="q-body">
+          <p class="q-text"><code>os.path.join()</code>으로 <code>"data"</code>, <code>"scores"</code>, <code>"result.txt"</code> 세 조각을 합쳐 경로를 출력하는 코드를 작성하세요.</p>
+        </div></div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q15-input" placeholder="import os&#10;..." rows="4" spellcheck="false"></textarea>
+          <div class="q-actions"><button class="btn-check" onclick="check(15)">확인</button><button class="btn-hint" onclick="toggleHint(15)">힌트</button><button class="btn-answer" onclick="toggleAnswer(15)">정답 보기</button></div>
+          <div class="q-result" id="q15-result"></div>
+        </div>
+        <div class="q-dropdown" id="q15-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>os.path.join()은 인수를 여러 개 받을 수 있습니다.</pre></div></div>
+        <div class="q-dropdown" id="q15-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="kw">import</span> os
+path <span class="pn">=</span> os<span class="pn">.</span>path<span class="pn">.</span><span class="fn">join</span><span class="pn">(</span><span class="str">"data"</span><span class="pn">,</span> <span class="str">"scores"</span><span class="pn">,</span> <span class="str">"result.txt"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span>path<span class="pn">)</span>  <span class="cm"># data/scores/result.txt</span></pre></div></div>
+      </div>
+
+      <!-- Q16 -->
+      <div class="q-card" id="q16">
+        <div class="q-header"><span class="q-num">Q16.</span><div class="q-body">
+          <p class="q-text"><code>random.random()</code>을 이용해 0~100 사이의 실수 난수를 생성해 출력하는 코드를 작성하세요.</p>
+        </div></div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q16-input" placeholder="import random&#10;..." rows="3" spellcheck="false"></textarea>
+          <div class="q-actions"><button class="btn-check" onclick="check(16)">확인</button><button class="btn-hint" onclick="toggleHint(16)">힌트</button><button class="btn-answer" onclick="toggleAnswer(16)">정답 보기</button></div>
+          <div class="q-result" id="q16-result"></div>
+        </div>
+        <div class="q-dropdown" id="q16-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>0.0~1.0 범위를 0~100으로 늘리려면 100을 곱하면 됩니다.</pre></div></div>
+        <div class="q-dropdown" id="q16-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="kw">import</span> random
+n <span class="pn">=</span> random<span class="pn">.</span><span class="fn">random</span><span class="pn">()</span> <span class="pn">*</span> <span class="num">100</span>
+<span class="fn">print</span><span class="pn">(</span>n<span class="pn">)</span>  <span class="cm"># 예: 73.42...</span></pre></div></div>
+      </div>
+
+      <!-- Q17 -->
+      <div class="q-card" id="q17">
+        <div class="q-header"><span class="q-num">Q17.</span><div class="q-body">
+          <p class="q-text">다음 코드의 출력 결과를 예측하세요.</p>
+          <div class="q-code-block"><pre><span class="kw">from</span> math <span class="kw">import</span> sqrt<span class="pn">,</span> pi
+<span class="kw">import</span> math <span class="kw">as</span> m
+<span class="fn">print</span><span class="pn">(</span><span class="fn">sqrt</span><span class="pn">(</span><span class="num">9</span><span class="pn">))</span>
+<span class="fn">print</span><span class="pn">(</span>m<span class="pn">.</span><span class="fn">floor</span><span class="pn">(</span>pi<span class="pn">))</span></pre></div>
+        </div></div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q17-input" placeholder="두 줄로 입력하세요..." rows="2" spellcheck="false"></textarea>
+          <div class="q-actions"><button class="btn-check" onclick="check(17)">확인</button><button class="btn-hint" onclick="toggleHint(17)">힌트</button><button class="btn-answer" onclick="toggleAnswer(17)">정답 보기</button></div>
+          <div class="q-result" id="q17-result"></div>
+        </div>
+        <div class="q-dropdown" id="q17-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>sqrt(9) = 3.0 (float), pi ≈ 3.14159 → floor(pi) = 3</pre></div></div>
+        <div class="q-dropdown" id="q17-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre>3.0
+3
+<span class="cm"># sqrt(9) = 3.0, m.floor(3.14159) = 3</span></pre></div></div>
+      </div>
+
+      <!-- Q18 -->
+      <div class="q-card" id="q18">
+        <div class="q-header"><span class="q-num">Q18.</span><div class="q-body">
+          <p class="q-text">두 변을 받아 빗변 길이를 반환하는 함수 <code>hypotenuse(a, b)</code>를 작성하세요. <code>hypotenuse(3, 4)</code> → <code>5.0</code></p>
+        </div></div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q18-input" placeholder="import math&#10;def hypotenuse(a, b):&#10;    ..." rows="4" spellcheck="false"></textarea>
+          <div class="q-actions"><button class="btn-check" onclick="check(18)">확인</button><button class="btn-hint" onclick="toggleHint(18)">힌트</button><button class="btn-answer" onclick="toggleAnswer(18)">정답 보기</button></div>
+          <div class="q-result" id="q18-result"></div>
+        </div>
+        <div class="q-dropdown" id="q18-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>피타고라스: c = √(a² + b²)  →  math.sqrt(a**2 + b**2)</pre></div></div>
+        <div class="q-dropdown" id="q18-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="kw">import</span> math
+<span class="kw">def</span> <span class="fn">hypotenuse</span><span class="pn">(</span>a<span class="pn">,</span> b<span class="pn">):</span>
+    <span class="kw">return</span> math<span class="pn">.</span><span class="fn">sqrt</span><span class="pn">(</span>a<span class="pn">**</span><span class="num">2</span> <span class="pn">+</span> b<span class="pn">**</span><span class="num">2</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="fn">hypotenuse</span><span class="pn">(</span><span class="num">3</span><span class="pn">,</span> <span class="num">4</span><span class="pn">))</span>  <span class="cm"># 5.0</span></pre></div></div>
+      </div>
+
+      <!-- ══ 상 (Q19~30) ══ -->
+      <div class="diff-header">
+        <span class="diff-badge hard">상</span>
+        <span class="diff-title">심화 응용 · 오류 분석 · 세 모듈 통합</span>
+        <span class="diff-count">19 – 30번</span>
+      </div>
+
+      <!-- Q19 -->
+      <div class="q-card" id="q19">
+        <div class="q-header"><span class="q-num">Q19.</span><div class="q-body">
+          <p class="q-text">다음 코드에서 <code>random.seed(42)</code>가 하는 역할을 설명하고, 이 기능이 실제로 어떤 상황에서 유용한지 한 가지 예를 드세요.</p>
+          <div class="q-code-block"><pre><span class="kw">import</span> random
+random<span class="pn">.</span><span class="fn">seed</span><span class="pn">(</span><span class="num">42</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span>random<span class="pn">.</span><span class="fn">randint</span><span class="pn">(</span><span class="num">1</span><span class="pn">,</span> <span class="num">10</span><span class="pn">))</span>
+<span class="fn">print</span><span class="pn">(</span>random<span class="pn">.</span><span class="fn">randint</span><span class="pn">(</span><span class="num">1</span><span class="pn">,</span> <span class="num">10</span><span class="pn">))</span></pre></div>
+        </div></div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q19-input" placeholder="seed()의 역할과 유용한 상황을 설명하세요..." rows="4" spellcheck="false"></textarea>
+          <div class="q-actions"><button class="btn-check" onclick="check(19)">확인</button><button class="btn-hint" onclick="toggleHint(19)">힌트</button><button class="btn-answer" onclick="toggleAnswer(19)">정답 보기</button></div>
+          <div class="q-result" id="q19-result"></div>
+        </div>
+        <div class="q-dropdown" id="q19-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>seed()는 난수 생성기의 시작점을 고정합니다.
+같은 seed 값이면 몇 번 실행해도 항상 같은 순서의 숫자가 나옵니다.</pre></div></div>
+        <div class="q-dropdown" id="q19-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="cm"># seed()는 난수 생성기의 시작점을 고정합니다.</span>
+<span class="cm"># 같은 seed 값이면 항상 동일한 순서의 난수가 생성됩니다.</span>
+<span class="cm"># → seed(42) 시 출력: 1 / 10</span>
+
+<span class="cm"># 유용한 상황:</span>
+<span class="cm"># 1. 테스트·디버깅: 실행마다 같은 결과로 버그를 재현할 때</span>
+<span class="cm"># 2. 머신러닝: 데이터 분할·초기화를 재현 가능하게 할 때</span>
+<span class="cm"># 3. 게임 개발: 같은 맵을 다시 생성해야 할 때 (프로시저럴 생성)</span></pre></div></div>
+      </div>
+
+      <!-- Q20 -->
+      <div class="q-card" id="q20">
+        <div class="q-header"><span class="q-num">Q20.</span><div class="q-body">
+          <p class="q-text">아래 코드에서 오류가 발생하는 이유를 설명하고, 두 가지 방법으로 수정하세요.</p>
+          <div class="q-error-code"><pre>import random as r
+print(random.choice([1, 2, 3]))   # 오류!</pre></div>
+        </div></div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q20-input" placeholder="오류 이유와 두 가지 수정 방법을 작성하세요..." rows="6" spellcheck="false"></textarea>
+          <div class="q-actions"><button class="btn-check" onclick="check(20)">확인</button><button class="btn-hint" onclick="toggleHint(20)">힌트</button><button class="btn-answer" onclick="toggleAnswer(20)">정답 보기</button></div>
+          <div class="q-result" id="q20-result"></div>
+        </div>
+        <div class="q-dropdown" id="q20-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>import random as r 로 별명을 붙이면 원래 이름 random은 더 이상 유효하지 않습니다.</pre></div></div>
+        <div class="q-dropdown" id="q20-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="cm"># 오류: as r로 별명을 붙이면 random 이름으로는 접근 불가</span>
+<span class="cm"># NameError: name 'random' is not defined</span>
+
+<span class="cm"># 수정 1 — 별명 r 사용</span>
+<span class="kw">import</span> random <span class="kw">as</span> r
+<span class="fn">print</span><span class="pn">(</span>r<span class="pn">.</span><span class="fn">choice</span><span class="pn">([</span><span class="num">1</span><span class="pn">,</span> <span class="num">2</span><span class="pn">,</span> <span class="num">3</span><span class="pn">]))</span>
+
+<span class="cm"># 수정 2 — 별명 없이 import</span>
+<span class="kw">import</span> random
+<span class="fn">print</span><span class="pn">(</span>random<span class="pn">.</span><span class="fn">choice</span><span class="pn">([</span><span class="num">1</span><span class="pn">,</span> <span class="num">2</span><span class="pn">,</span> <span class="num">3</span><span class="pn">]))</span></pre></div></div>
+      </div>
+
+      <!-- Q21 -->
+      <div class="q-card" id="q21">
+        <div class="q-header"><span class="q-num">Q21.</span><div class="q-body">
+          <p class="q-text"><code>random</code>과 <code>math</code>를 함께 활용해, 반지름이 1~10 사이의 무작위 정수인 원의 둘레(<code>2πr</code>)를 소수점 두 자리로 출력하는 코드를 작성하세요.</p>
+        </div></div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q21-input" placeholder="import random&#10;import math&#10;..." rows="5" spellcheck="false"></textarea>
+          <div class="q-actions"><button class="btn-check" onclick="check(21)">확인</button><button class="btn-hint" onclick="toggleHint(21)">힌트</button><button class="btn-answer" onclick="toggleAnswer(21)">정답 보기</button></div>
+          <div class="q-result" id="q21-result"></div>
+        </div>
+        <div class="q-dropdown" id="q21-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>r = random.randint(1, 10)
+둘레 = 2 * math.pi * r
+출력은 f"{둘레:.2f}"</pre></div></div>
+        <div class="q-dropdown" id="q21-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="kw">import</span> random
+<span class="kw">import</span> math
+r <span class="pn">=</span> random<span class="pn">.</span><span class="fn">randint</span><span class="pn">(</span><span class="num">1</span><span class="pn">,</span> <span class="num">10</span><span class="pn">)</span>
+c <span class="pn">=</span> <span class="num">2</span> <span class="pn">*</span> math<span class="pn">.</span>pi <span class="pn">*</span> r
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"반지름 {r}인 원의 둘레: {c:.2f}"</span><span class="pn">)</span></pre></div></div>
+      </div>
+
+      <!-- Q22 -->
+      <div class="q-card" id="q22">
+        <div class="q-header"><span class="q-num">Q22.</span><div class="q-body">
+          <p class="q-text"><code>os.path.exists()</code>를 활용해, 경로가 존재하면 <code>"경로가 존재합니다"</code>, 없으면 <code>"경로가 없습니다"</code>를 출력하는 함수 <code>check_path(path)</code>를 작성하세요.</p>
+        </div></div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q22-input" placeholder="import os&#10;def check_path(path):&#10;    ..." rows="5" spellcheck="false"></textarea>
+          <div class="q-actions"><button class="btn-check" onclick="check(22)">확인</button><button class="btn-hint" onclick="toggleHint(22)">힌트</button><button class="btn-answer" onclick="toggleAnswer(22)">정답 보기</button></div>
+          <div class="q-result" id="q22-result"></div>
+        </div>
+        <div class="q-dropdown" id="q22-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>os.path.exists()는 True 또는 False를 반환합니다.</pre></div></div>
+        <div class="q-dropdown" id="q22-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="kw">import</span> os
+<span class="kw">def</span> <span class="fn">check_path</span><span class="pn">(</span>path<span class="pn">):</span>
+    <span class="kw">if</span> os<span class="pn">.</span>path<span class="pn">.</span><span class="fn">exists</span><span class="pn">(</span>path<span class="pn">):</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">"경로가 존재합니다"</span><span class="pn">)</span>
+    <span class="kw">else</span><span class="pn">:</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">"경로가 없습니다"</span><span class="pn">)</span></pre></div></div>
+      </div>
+
+      <!-- Q23 -->
+      <div class="q-card" id="q23">
+        <div class="q-header"><span class="q-num">Q23.</span><div class="q-body">
+          <p class="q-text">숫자 맞추기 게임을 작성하세요. <code>random.randint(1, 100)</code>으로 정답을 정하고, <code>while</code>로 반복하면서 사용자 입력이 정답보다 크면 <code>"더 작게"</code>, 작으면 <code>"더 크게"</code>, 맞으면 <code>"정답!"</code>을 출력하고 종료합니다.</p>
+        </div></div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q23-input" placeholder="import random&#10;answer = random.randint(1, 100)&#10;while True:&#10;    ..." rows="9" spellcheck="false"></textarea>
+          <div class="q-actions"><button class="btn-check" onclick="check(23)">확인</button><button class="btn-hint" onclick="toggleHint(23)">힌트</button><button class="btn-answer" onclick="toggleAnswer(23)">정답 보기</button></div>
+          <div class="q-result" id="q23-result"></div>
+        </div>
+        <div class="q-dropdown" id="q23-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>while True:
+    guess = int(input("숫자 입력: "))
+    if guess > answer: ...
+    elif guess < answer: ...
+    else: print("정답!"); break</pre></div></div>
+        <div class="q-dropdown" id="q23-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="kw">import</span> random
+answer <span class="pn">=</span> random<span class="pn">.</span><span class="fn">randint</span><span class="pn">(</span><span class="num">1</span><span class="pn">,</span> <span class="num">100</span><span class="pn">)</span>
+<span class="kw">while</span> <span class="kw">True</span><span class="pn">:</span>
+    guess <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"1~100 숫자를 입력하세요: "</span><span class="pn">))</span>
+    <span class="kw">if</span> guess <span class="pn">&gt;</span> answer<span class="pn">:</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">"더 작게"</span><span class="pn">)</span>
+    <span class="kw">elif</span> guess <span class="pn">&lt;</span> answer<span class="pn">:</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">"더 크게"</span><span class="pn">)</span>
+    <span class="kw">else</span><span class="pn">:</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">"정답!"</span><span class="pn">)</span>
+        <span class="kw">break</span></pre></div></div>
+      </div>
+
+      <!-- Q24 -->
+      <div class="q-card" id="q24">
+        <div class="q-header"><span class="q-num">Q24.</span><div class="q-body">
+          <p class="q-text">다음 코드의 출력 결과를 세 줄로 예측하세요.</p>
+          <div class="q-code-block"><pre><span class="kw">import</span> math
+a <span class="pn">=</span> math<span class="pn">.</span><span class="fn">pow</span><span class="pn">(</span><span class="num">3</span><span class="pn">,</span> <span class="num">2</span><span class="pn">)</span>
+b <span class="pn">=</span> <span class="num">3</span> <span class="pn">**</span> <span class="num">2</span>
+<span class="fn">print</span><span class="pn">(</span><span class="fn">type</span><span class="pn">(</span>a<span class="pn">))</span>
+<span class="fn">print</span><span class="pn">(</span><span class="fn">type</span><span class="pn">(</span>b<span class="pn">))</span>
+<span class="fn">print</span><span class="pn">(</span>a <span class="pn">==</span> b<span class="pn">)</span></pre></div>
+        </div></div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q24-input" placeholder="세 줄로 입력하세요..." rows="3" spellcheck="false"></textarea>
+          <div class="q-actions"><button class="btn-check" onclick="check(24)">확인</button><button class="btn-hint" onclick="toggleHint(24)">힌트</button><button class="btn-answer" onclick="toggleAnswer(24)">정답 보기</button></div>
+          <div class="q-result" id="q24-result"></div>
+        </div>
+        <div class="q-dropdown" id="q24-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>math.pow()는 float 반환, ** 연산자는 int 반환.
+9.0 == 9 는 True입니다 (파이썬은 숫자 비교 시 타입 자동 변환).</pre></div></div>
+        <div class="q-dropdown" id="q24-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre>&lt;class 'float'&gt;
+&lt;class 'int'&gt;
+True
+<span class="cm"># math.pow(3,2) = 9.0 (float), 3**2 = 9 (int)</span>
+<span class="cm"># 9.0 == 9 → True (파이썬 수치 비교는 타입 자동 변환)</span></pre></div></div>
+      </div>
+
+      <!-- Q25 -->
+      <div class="q-card" id="q25">
+        <div class="q-header"><span class="q-num">Q25.</span><div class="q-body">
+          <p class="q-text"><code>*args</code>와 <code>math</code>를 활용해, 가변 개수의 숫자를 받아 각 숫자의 제곱근을 소수점 두 자리로 한 줄씩 출력하는 함수 <code>print_sqrts(*nums)</code>를 작성하세요.</p>
+        </div></div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q25-input" placeholder="import math&#10;def print_sqrts(*nums):&#10;    ..." rows="5" spellcheck="false"></textarea>
+          <div class="q-actions"><button class="btn-check" onclick="check(25)">확인</button><button class="btn-hint" onclick="toggleHint(25)">힌트</button><button class="btn-answer" onclick="toggleAnswer(25)">정답 보기</button></div>
+          <div class="q-result" id="q25-result"></div>
+        </div>
+        <div class="q-dropdown" id="q25-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>for n in nums:
+    print(f"{math.sqrt(n):.2f}")</pre></div></div>
+        <div class="q-dropdown" id="q25-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="kw">import</span> math
+<span class="kw">def</span> <span class="fn">print_sqrts</span><span class="pn">(*</span>nums<span class="pn">):</span>
+    <span class="kw">for</span> n <span class="kw">in</span> nums<span class="pn">:</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">f"{math.sqrt(n):.2f}"</span><span class="pn">)</span>
+<span class="fn">print_sqrts</span><span class="pn">(</span><span class="num">4</span><span class="pn">,</span> <span class="num">9</span><span class="pn">,</span> <span class="num">16</span><span class="pn">,</span> <span class="num">25</span><span class="pn">)</span>  <span class="cm"># 2.00 / 3.00 / 4.00 / 5.00</span></pre></div></div>
+      </div>
+
+      <!-- Q26 -->
+      <div class="q-card" id="q26">
+        <div class="q-header"><span class="q-num">Q26.</span><div class="q-body">
+          <p class="q-text">선수 이름 리스트를 받아 무작위로 섞은 뒤 절반씩 A팀/B팀으로 나눠 출력하는 함수 <code>assign_teams(players)</code>를 작성하세요. 원본 리스트가 변경되지 않아야 합니다.</p>
+        </div></div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q26-input" placeholder="import random&#10;def assign_teams(players):&#10;    ..." rows="6" spellcheck="false"></textarea>
+          <div class="q-actions"><button class="btn-check" onclick="check(26)">확인</button><button class="btn-hint" onclick="toggleHint(26)">힌트</button><button class="btn-answer" onclick="toggleAnswer(26)">정답 보기</button></div>
+          <div class="q-result" id="q26-result"></div>
+        </div>
+        <div class="q-dropdown" id="q26-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>shuffled = players.copy()  # 원본 보호
+random.shuffle(shuffled)
+mid = len(shuffled) // 2</pre></div></div>
+        <div class="q-dropdown" id="q26-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="kw">import</span> random
+<span class="kw">def</span> <span class="fn">assign_teams</span><span class="pn">(</span>players<span class="pn">):</span>
+    shuffled <span class="pn">=</span> players<span class="pn">.</span><span class="fn">copy</span><span class="pn">()</span>
+    random<span class="pn">.</span><span class="fn">shuffle</span><span class="pn">(</span>shuffled<span class="pn">)</span>
+    mid <span class="pn">=</span> <span class="fn">len</span><span class="pn">(</span>shuffled<span class="pn">)</span> <span class="pn">//</span> <span class="num">2</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">f"A팀: {shuffled[:mid]}"</span><span class="pn">)</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">f"B팀: {shuffled[mid:]}"</span><span class="pn">)</span>
+<span class="cm"># .copy()로 원본을 보존하는 습관이 중요합니다.</span></pre></div></div>
+      </div>
+
+      <!-- Q27 -->
+      <div class="q-card" id="q27">
+        <div class="q-header"><span class="q-num">Q27.</span><div class="q-body">
+          <p class="q-text">다음 코드의 출력 결과를 예측하세요. 파이썬 내장 <code>round()</code>의 "은행가 반올림" 특성에 주목하세요.</p>
+          <div class="q-code-block"><pre><span class="kw">import</span> math
+values <span class="pn">=</span> <span class="pn">[</span><span class="num">2.5</span><span class="pn">,</span> <span class="num">3.5</span><span class="pn">,</span> <span class="num">4.5</span><span class="pn">]</span>
+<span class="kw">for</span> v <span class="kw">in</span> values<span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="fn">round</span><span class="pn">(</span>v<span class="pn">),</span> math<span class="pn">.</span><span class="fn">floor</span><span class="pn">(</span>v <span class="pn">+</span> <span class="num">0.5</span><span class="pn">))</span></pre></div>
+        </div></div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q27-input" placeholder="세 줄의 출력 결과를 입력하세요..." rows="3" spellcheck="false"></textarea>
+          <div class="q-actions"><button class="btn-check" onclick="check(27)">확인</button><button class="btn-hint" onclick="toggleHint(27)">힌트</button><button class="btn-answer" onclick="toggleAnswer(27)">정답 보기</button></div>
+          <div class="q-result" id="q27-result"></div>
+        </div>
+        <div class="q-dropdown" id="q27-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>파이썬 round()는 0.5일 때 가장 가까운 짝수로 반올림합니다.
+round(2.5)=2, round(3.5)=4, round(4.5)=4</pre></div></div>
+        <div class="q-dropdown" id="q27-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre>2 3
+4 4
+4 5
+<span class="cm"># round(): 은행가 반올림 — .5에서 가장 가까운 짝수 방향</span>
+<span class="cm"># floor(v+0.5): 일반적인 반올림 (항상 올림 방향)</span></pre></div></div>
+      </div>
+
+      <!-- Q28 -->
+      <div class="q-card" id="q28">
+        <div class="q-header"><span class="q-num">Q28.</span><div class="q-body">
+          <p class="q-text"><code>os</code>와 <code>random</code>을 함께 써서, 현재 디렉터리에 <code>report_XXXX.txt</code>(XXXX는 1000~9999 난수) 형식의 파일 경로를 생성해 출력하는 코드를 작성하세요.</p>
+        </div></div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q28-input" placeholder="import os&#10;import random&#10;..." rows="6" spellcheck="false"></textarea>
+          <div class="q-actions"><button class="btn-check" onclick="check(28)">확인</button><button class="btn-hint" onclick="toggleHint(28)">힌트</button><button class="btn-answer" onclick="toggleAnswer(28)">정답 보기</button></div>
+          <div class="q-result" id="q28-result"></div>
+        </div>
+        <div class="q-dropdown" id="q28-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>num = random.randint(1000, 9999)
+filename = f"report_{num}.txt"
+path = os.path.join(os.getcwd(), filename)</pre></div></div>
+        <div class="q-dropdown" id="q28-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="kw">import</span> os
+<span class="kw">import</span> random
+num <span class="pn">=</span> random<span class="pn">.</span><span class="fn">randint</span><span class="pn">(</span><span class="num">1000</span><span class="pn">,</span> <span class="num">9999</span><span class="pn">)</span>
+filename <span class="pn">=</span> <span class="str">f"report_{num}.txt"</span>
+path <span class="pn">=</span> os<span class="pn">.</span>path<span class="pn">.</span><span class="fn">join</span><span class="pn">(</span>os<span class="pn">.</span><span class="fn">getcwd</span><span class="pn">(),</span> filename<span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span>path<span class="pn">)</span>  <span class="cm"># 예: /Users/kim/projects/report_4821.txt</span></pre></div></div>
+      </div>
+
+      <!-- Q29 -->
+      <div class="q-card" id="q29">
+        <div class="q-header"><span class="q-num">Q29.</span><div class="q-body">
+          <p class="q-text">아래 코드에 오류가 두 곳 있습니다. 모두 찾아 올바르게 수정하세요.</p>
+          <div class="q-error-code"><pre>from math import *sqrt*   # 오류 1
+
+result = shuffle([1, 2, 3, 4, 5])  # 오류 2
+print(result)</pre></div>
+        </div></div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q29-input" placeholder="오류 1, 오류 2의 내용과 수정 코드를 각각 작성하세요..." rows="7" spellcheck="false"></textarea>
+          <div class="q-actions"><button class="btn-check" onclick="check(29)">확인</button><button class="btn-hint" onclick="toggleHint(29)">힌트</button><button class="btn-answer" onclick="toggleAnswer(29)">정답 보기</button></div>
+          <div class="q-result" id="q29-result"></div>
+        </div>
+        <div class="q-dropdown" id="q29-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>오류 1: import 문에 *를 함수명 앞뒤에 쓸 수 없습니다.
+오류 2: shuffle은 import 없이 쓸 수 없고, 반환값이 None입니다.</pre></div></div>
+        <div class="q-dropdown" id="q29-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="cm"># 오류 1: *sqrt* → 별표(*) 사용 불가</span>
+<span class="kw">from</span> math <span class="kw">import</span> sqrt   <span class="cm"># 올바른 문법</span>
+
+<span class="cm"># 오류 2: import 없음 + 반환값을 변수에 저장</span>
+<span class="kw">import</span> random
+lst <span class="pn">=</span> <span class="pn">[</span><span class="num">1</span><span class="pn">,</span> <span class="num">2</span><span class="pn">,</span> <span class="num">3</span><span class="pn">,</span> <span class="num">4</span><span class="pn">,</span> <span class="num">5</span><span class="pn">]</span>
+random<span class="pn">.</span><span class="fn">shuffle</span><span class="pn">(</span>lst<span class="pn">)</span>    <span class="cm"># 반환값 받지 않음</span>
+<span class="fn">print</span><span class="pn">(</span>lst<span class="pn">)</span>            <span class="cm"># 원본 변수 출력</span></pre></div></div>
+      </div>
+
+      <!-- Q30 -->
+      <div class="q-card" id="q30">
+        <div class="q-header"><span class="q-num">Q30.</span><div class="q-body">
+          <p class="q-text">세 모듈을 모두 활용하는 <strong>BMI 계산기</strong>를 만드세요. <code>random</code>으로 키(150~190cm)와 몸무게(50~100kg)를 생성하고, <code>math</code>로 BMI를 소수점 한 자리로 계산하고, <code>os</code>로 저장 경로(<code>현재디렉터리/bmi_result.txt</code>)를 구성해 출력하세요. BMI = 몸무게 / 키(m)²</p>
+        </div></div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q30-input" placeholder="import random&#10;import math&#10;import os&#10;..." rows="10" spellcheck="false"></textarea>
+          <div class="q-actions"><button class="btn-check" onclick="check(30)">확인</button><button class="btn-hint" onclick="toggleHint(30)">힌트</button><button class="btn-answer" onclick="toggleAnswer(30)">정답 보기</button></div>
+          <div class="q-result" id="q30-result"></div>
+        </div>
+        <div class="q-dropdown" id="q30-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>height_cm = random.randint(150, 190)
+height_m  = height_cm / 100
+weight    = random.randint(50, 100)
+bmi       = weight / height_m ** 2
+path      = os.path.join(os.getcwd(), "bmi_result.txt")</pre></div></div>
+        <div class="q-dropdown" id="q30-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="kw">import</span> random
+<span class="kw">import</span> math
+<span class="kw">import</span> os
+
+height_cm <span class="pn">=</span> random<span class="pn">.</span><span class="fn">randint</span><span class="pn">(</span><span class="num">150</span><span class="pn">,</span> <span class="num">190</span><span class="pn">)</span>
+weight    <span class="pn">=</span> random<span class="pn">.</span><span class="fn">randint</span><span class="pn">(</span><span class="num">50</span><span class="pn">,</span> <span class="num">100</span><span class="pn">)</span>
+height_m  <span class="pn">=</span> height_cm <span class="pn">/</span> <span class="num">100</span>
+bmi       <span class="pn">=</span> weight <span class="pn">/</span> height_m <span class="pn">**</span> <span class="num">2</span>
+save_path <span class="pn">=</span> os<span class="pn">.</span>path<span class="pn">.</span><span class="fn">join</span><span class="pn">(</span>os<span class="pn">.</span><span class="fn">getcwd</span><span class="pn">(),</span> <span class="str">"bmi_result.txt"</span><span class="pn">)</span>
+
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"키: {height_cm}cm | 몸무게: {weight}kg"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"BMI: {bmi:.1f}"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"저장 경로: {save_path}"</span><span class="pn">)</span></pre></div></div>
+      </div>
+
+      <!-- 구분선 + 격려 -->
+      <div class="section-divider"></div>
+
+      <div class="cheer-box">
+        <span class="cheer-icon">📦</span>
+        <div class="cheer-text">
+          <strong>모듈 연습문제 완료!</strong><br>
+          random으로 우연을 만들고, math로 정밀하게 계산하고, os로 파일 경로를 다루는 법까지 — 이제 파이썬의 표준 도구함을 자유롭게 꺼내 쓸 수 있게 됐습니다. 다음은 지금까지 배운 함수와 모듈을 한데 모아 실제로 동작하는 프로그램을 만드는 <strong>미니 프로젝트 ⑥</strong>이 기다립니다!
+        </div>
+      </div>
+
+      <div class="chap-nav">
+        <a href="34-module.html" class="chap-nav-btn">
+          <span class="cnb-dir">← 이전 챕터</span>
+          <span class="cnb-title"><span>34.</span> 모듈</span>
+        </a>
+        <a href="36-mini-project-06.html" class="chap-nav-btn next">
+          <span class="cnb-dir">다음 챕터 →</span>
+          <span class="cnb-title"><span>36.</span> 🎮 미니 프로젝트 ⑥</span>
+        </a>
+      </div>
+
+    </div>
+  </main>
+</div><!-- /.layout -->
+
+<script>
+  const TOTAL = 30;
+  let solvedSet = new Set();
+
+  const answers = {
+    1:  { keywords: ['randint', 'random'] },
+    2:  { exact: '7.0' },
+    3:  { keywords: ['from math import pi', 'print(pi)'] },
+    4:  { exact: '4\n3' },
+    5:  { keywords: ['r.choice', 'choice'] },
+    6:  { keywords: ['b', 'from math import sqrt', 'import 뒤에는 모듈'] },
+    7:  { keywords: ['str', '문자열', '현재', '디렉터리', '경로'] },
+    8:  { exact: '256.0' },
+    9:  { keywords: ['none', 'in-place', '원본', '반환값'] },
+    10: { keywords: ['sample', 'sorted', 'range(1, 46)', 'range(1,46)'] },
+    11: { exact: '-3\n-2' },
+    12: { keywords: ['math.pi', 'r ** 2', 'r**2', ':.2f'] },
+    13: { keywords: ['math.sqrt', 'from math import sqrt', 'nameerror', '모듈명'] },
+    14: { keywords: ['shuffle(deck)', 'deck[:5]', 'deck[0:5]'] },
+    15: { keywords: ['os.path.join', 'data', 'scores', 'result.txt'] },
+    16: { keywords: ['random()', '* 100', '*100'] },
+    17: { exact: '3.0\n3' },
+    18: { keywords: ['sqrt', 'a**2', 'b**2', 'a ** 2'] },
+    19: { keywords: ['고정', '시작점', '동일', '재현', 'seed', '테스트', '디버깅'] },
+    20: { keywords: ['r.choice', 'nameerror', 'random', '별명', 'as r'] },
+    21: { keywords: ['randint', 'math.pi', '2 *', ':.2f'] },
+    22: { keywords: ['os.path.exists', 'if', '경로가 존재', '경로가 없'] },
+    23: { keywords: ['while', 'randint', '더 작게', '더 크게', '정답', 'break'] },
+    24: { keywords: ["<class 'float'>", "<class 'int'>", 'true'] },
+    25: { keywords: ['*nums', 'for', 'sqrt', ':.2f'] },
+    26: { keywords: ['copy()', 'shuffle', '// 2', 'mid'] },
+    27: { keywords: ['2 3', '4 4', '4 5'] },
+    28: { keywords: ['getcwd', 'path.join', 'randint', 'report_'] },
+    29: { keywords: ['from math import sqrt', 'random.shuffle', 'print(lst)', 'none'] },
+    30: { keywords: ['randint', 'height_m', '** 2', 'getcwd', 'path.join', ':.1f'] },
+  };
+
+  function normalize(s) { return s.trim().toLowerCase().replace(/\s+/g, ' '); }
+
+  function check(n) {
+    const input = normalize(document.getElementById(`q${n}-input`).value);
+    const ans   = answers[n];
+    const result = document.getElementById(`q${n}-result`);
+    const card   = document.getElementById(`q${n}`);
+    let ok = false;
+
+    if (ans.exact) {
+      ok = normalize(ans.exact) === input || input.includes(normalize(ans.exact));
+    } else if (ans.keywords) {
+      ok = ans.keywords.some(kw => input.includes(normalize(kw)));
+    }
+
+    result.style.display = 'block';
+    if (ok) {
+      result.className  = 'q-result ok';
+      result.textContent = '✓ 정답입니다!';
+      card.classList.add('solved');
+      card.classList.remove('wrong');
+      solvedSet.add(n);
+    } else {
+      result.className  = 'q-result err';
+      result.textContent = '✗ 다시 확인해보세요. 힌트를 참고하거나 정답을 확인하세요.';
+      card.classList.add('wrong');
+      card.classList.remove('solved');
+      solvedSet.delete(n);
+    }
+    updateScore();
+  }
+
+  function updateScore() {
+    const s = solvedSet.size;
+    document.getElementById('solved-count').textContent = s;
+    let lvl = '🌱 도전 중...';
+    if (s >= 30) lvl = '🏆 완벽!';
+    else if (s >= 24) lvl = '⚡ 거의 다!';
+    else if (s >= 15) lvl = '🔥 순항 중!';
+    else if (s >= 6)  lvl = '📈 성장 중!';
+    document.getElementById('level-text').textContent = lvl;
+  }
+
+  function toggleHint(n) {
+    const el = document.getElementById(`q${n}-hint`);
+    el.classList.toggle('visible');
+  }
+  function toggleAnswer(n) {
+    const el = document.getElementById(`q${n}-answer`);
+    el.classList.toggle('visible');
+  }
+
+  const isMobile = () => window.innerWidth <= 720;
+  const overlay  = document.getElementById('sidebarOverlay');
+  function toggleSidebar() {
+    document.body.classList.toggle('sidebar-closed');
+    if (isMobile()) overlay.classList.toggle('visible', !document.body.classList.contains('sidebar-closed'));
+    localStorage.setItem('sp-sidebar', document.body.classList.contains('sidebar-closed') ? 'closed' : 'open');
+  }
+  function closeSidebar() {
+    document.body.classList.add('sidebar-closed');
+    overlay.classList.remove('visible');
+    localStorage.setItem('sp-sidebar', 'closed');
+  }
+  function toggleGroup(id) { document.getElementById(id).classList.toggle('open'); }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    if (isMobile()) document.body.classList.add('sidebar-closed');
+    else if (localStorage.getItem('sp-sidebar') === 'closed') document.body.classList.add('sidebar-closed');
+  });
+  window.addEventListener('resize', () => { if (!isMobile()) overlay.classList.remove('visible'); });
+</script>
+</body>
+</html>

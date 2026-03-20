@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>31. 미니 프로젝트 ⑤ — 브론즈 | 슈퍼파이썬</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#111111;--bg-nav:#0A0A0A;--bg-side:#0E0E0E;--bg-card:#181818;
+      --bg-code:#1A1A1A;--bg-tip:#131A13;--bg-warn:#1A1410;--bg-info:#101520;
+      --accent:#00CC70;--accent-dim:#007A42;--accent-bg:rgba(0,204,112,0.07);
+      --accent2:#C8A000;--text:#D8D8D8;--text-head:#EFEFEF;
+      --text2:#888888;--text3:#444444;--border:#222222;--border2:#2E2E2E;
+      --sy-kw:#C792EA;--sy-fn:#82AAFF;--sy-str:#C3E88D;
+      --sy-cm:#546E7A;--sy-num:#F78C6C;--sy-pn:#89DDFF;
+      --proj:#BB88FF;--proj-bg:rgba(170,100,255,.08);--proj-border:rgba(170,100,255,.22);
+      --sidebar-w:248px;--content-max:740px;--header-h:48px;
+      font-variant-ligatures: none;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:15px;line-height:1.8;overflow-x:hidden}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}
+    ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+    ::-webkit-scrollbar-thumb:hover{background:var(--accent-dim)}
+
+    /* HEADER */
+    .top-header{position:fixed;top:0;left:0;right:0;z-index:200;height:var(--header-h);background:var(--bg-nav);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px}
+    .header-open-btn{display:none;align-items:center;justify-content:center;width:28px;height:28px;flex-shrink:0;margin-right:12px;background:var(--bg-card);border:1px solid var(--border2);border-radius:4px;cursor:pointer;color:var(--text2);font-size:12px;transition:background .15s,color .15s}
+    .header-open-btn:hover{background:var(--accent-bg);color:var(--accent)}
+    body.sidebar-closed .header-open-btn{display:flex}
+    .header-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0;font-family:'JetBrains Mono',monospace;font-size:12px;overflow:hidden}
+    .header-logo{color:var(--accent);text-decoration:none;font-weight:700;white-space:nowrap}
+    .header-sep{color:var(--text3);flex-shrink:0}
+    .header-grade{color:var(--text2);white-space:nowrap}
+    .header-chap{color:var(--text-head);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .header-center{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);display:flex;align-items:center;gap:8px;flex-shrink:0;padding:0 16px}
+    .progress-mini{width:80px;height:3px;background:var(--border2);border-radius:2px;overflow:hidden}
+    .progress-mini-fill{height:100%;background:var(--accent);border-radius:2px}
+    .header-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+    .nav-btn{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);background:transparent;border:1px solid var(--border2);padding:4px 12px;text-decoration:none;transition:border-color .15s,color .15s;white-space:nowrap}
+    .nav-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .nav-btn.primary{color:var(--bg-nav);background:var(--accent);border-color:var(--accent);font-weight:700}
+    .nav-btn.primary:hover{filter:brightness(1.1)}
+
+    /* LAYOUT */
+    .layout{display:flex;padding-top:var(--header-h);min-height:100vh}
+
+    /* SIDEBAR */
+    .sidebar{width:var(--sidebar-w);flex-shrink:0;position:fixed;top:var(--header-h);bottom:0;left:0;background:var(--bg-side);border-right:1px solid var(--border);overflow-y:auto;overflow-x:hidden;transition:transform .22s ease;z-index:150;padding-top:8px}
+    body.sidebar-closed .sidebar{transform:translateX(calc(-1 * var(--sidebar-w)))}
+    body.sidebar-closed .content{margin-left:0}
+    .sidebar-toggle{position:absolute;top:10px;right:10px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:var(--bg-card);border:1px solid var(--border2);border-radius:4px;cursor:pointer;color:var(--text2);font-size:12px;z-index:10;transition:background .15s,color .15s}
+    .sidebar-toggle:hover{background:var(--accent-bg);color:var(--accent);border-color:var(--accent)}
+    body.sidebar-closed .sidebar-toggle{display:none}
+    .sidebar-progress{margin:44px 12px 12px;padding:12px 14px;background:var(--bg-card);border:1px solid var(--border)}
+    .sp-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);margin-bottom:6px;letter-spacing:.08em}
+    .sp-bar{height:4px;background:var(--border2);border-radius:2px;overflow:hidden;margin-bottom:5px}
+    .sp-fill{height:100%;background:var(--accent);border-radius:2px}
+    .sp-text{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2)}
+    .sp-text span{color:var(--accent)}
+    .sb-group{border-bottom:1px solid var(--border)}
+    .sb-group-header{display:flex;align-items:center;justify-content:space-between;padding:9px 14px 9px 12px;cursor:pointer;user-select:none;transition:background .12s;gap:8px}
+    .sb-group-header:hover{background:rgba(255,255,255,.03)}
+    .sb-group-title{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--text2);text-transform:uppercase;flex:1}
+    .sb-group.current .sb-group-title{color:var(--accent)}
+    .sb-group-arrow{font-size:9px;color:var(--text3);transition:transform .2s;flex-shrink:0}
+    .sb-group.open .sb-group-arrow{transform:rotate(90deg);color:var(--accent)}
+    .sb-items{overflow:hidden;max-height:0;transition:max-height .28s ease}
+    .sb-group.open .sb-items{max-height:1200px}
+    .sb-item{display:flex;align-items:baseline;gap:8px;padding:6px 14px 6px 20px;font-size:13px;color:var(--text2);text-decoration:none;border-left:2px solid transparent;transition:background .1s,color .1s,border-color .1s;line-height:1.45}
+    .sb-item:hover{background:rgba(255,255,255,.03);color:var(--text)}
+    .sb-item.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-bg);font-weight:500}
+    .sb-item.done{color:var(--text3)}
+    .sb-icon{font-size:9px;flex-shrink:0;font-family:'JetBrains Mono',monospace;width:10px;text-align:center;color:var(--text3)}
+    .sb-item.active .sb-icon{color:var(--accent)}
+    .sb-item.done .sb-icon{color:var(--accent-dim)}
+    .sb-num{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);flex-shrink:0;min-width:22px}
+
+    /* CONTENT */
+    .content{margin-left:var(--sidebar-w);flex:1;min-width:0;padding:48px 52px 96px;transition:margin-left .22s ease}
+    .content-inner{max-width:var(--content-max);margin:0 auto}
+
+    /* TYPOGRAPHY */
+    .chap-meta{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .badge{font-size:10px;padding:2px 8px;letter-spacing:.06em;border:1px solid}
+    .badge.project{background:var(--proj-bg);color:var(--proj);border-color:var(--proj-border)}
+    .chap-title{font-family:'JetBrains Mono',monospace;font-size:clamp(20px,3.5vw,28px);font-weight:700;color:var(--text-head);line-height:1.25;margin-bottom:8px}
+    .chap-title .hl{color:var(--accent)}
+    .chap-subtitle{font-size:15px;color:var(--text2);margin-bottom:40px;line-height:1.65}
+    h2{font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:700;color:var(--text-head);margin:48px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+    h2 .n{color:var(--accent);font-size:13px}
+    h3{font-size:15px;font-weight:700;color:var(--text-head);margin:24px 0 10px}
+    p{color:var(--text);margin-bottom:16px;line-height:1.9;font-size:15px}
+    p:last-child{margin-bottom:0}
+    code{font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--bg-code);color:var(--accent);padding:1px 6px;border:1px solid var(--border2);border-radius:2px}
+    strong{color:var(--text-head);font-weight:700}
+    ul,ol{padding-left:20px;margin-bottom:16px}
+    li{color:var(--text);line-height:1.85;margin-bottom:4px;font-size:15px}
+
+    /* PROJECT BANNER */
+    .project-banner{background:linear-gradient(135deg,rgba(170,100,255,.07) 0%,rgba(0,204,112,.04) 100%);border:1px solid var(--proj-border);padding:26px 30px;margin-bottom:40px;position:relative;overflow:hidden}
+    .project-banner::before{content:'🧮';position:absolute;right:28px;top:50%;transform:translateY(-50%);font-size:56px;opacity:.18}
+    .pb-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--proj);letter-spacing:.1em;margin-bottom:8px}
+    .pb-title{font-size:21px;font-weight:700;color:var(--text-head);margin-bottom:6px;line-height:1.3}
+    .pb-desc{font-size:14px;color:var(--text2);line-height:1.7;max-width:520px}
+    .pb-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+    .pb-tag{font-family:'JetBrains Mono',monospace;font-size:11px;padding:3px 10px;background:var(--bg-card);border:1px solid var(--border2);color:var(--text3)}
+
+    /* LEARN GUIDE */
+    .learn-guide{background:var(--bg-card);border:1px solid var(--border2);border-left:3px solid var(--proj);padding:16px 20px;margin-bottom:32px}
+    .lg-title{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--proj);letter-spacing:.1em;margin-bottom:10px}
+    .lg-steps{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .lg-step{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);background:var(--bg-code);border:1px solid var(--border2);padding:5px 12px;display:flex;align-items:center;gap:6px}
+    .lg-step .lg-n{color:var(--accent);font-weight:700}
+    .lg-arrow{color:var(--text3);font-size:12px}
+
+    /* OUTPUT DEMO */
+    .output-demo{background:#0A0A0A;border:1px solid var(--border);margin:16px 0 24px;overflow:hidden}
+    .od-header{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);padding:7px 16px;border-bottom:1px solid var(--border);letter-spacing:.08em;display:flex;align-items:center;gap:8px}
+    .dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
+    .dot-r{background:#FF5F57}.dot-y{background:#FFBD2E}.dot-g{background:#28C840}
+    .od-body{padding:16px 20px}
+    .od-body pre{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text);line-height:1.85;white-space:pre-wrap}
+    .od-input{color:var(--accent2)}.od-output{color:var(--accent)}
+    .od-prompt{color:var(--text2)}.od-sep{color:var(--text3)}.od-hi{color:#BB88FF}
+
+    /* SPEC TABLE */
+    .spec-table{width:100%;border-collapse:collapse;margin:16px 0 24px;font-size:14px}
+    .spec-table th{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--text3);text-align:left;padding:8px 14px;border-bottom:2px solid var(--border2);background:var(--bg-card)}
+    .spec-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text2);line-height:1.6;vertical-align:top}
+    .spec-table td:first-child{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);white-space:nowrap}
+    .spec-table td:nth-child(2){color:var(--text-head);font-size:13px}
+    .spec-table tr:last-child td{border-bottom:none}
+
+    /* REVIEW GRID */
+    .review-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:16px 0 32px}
+    .review-card{background:var(--bg-card);border:1px solid var(--border2);padding:12px 16px}
+    .rc-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.07em;margin-bottom:5px}
+    .rc-code{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);line-height:1.6}
+    .rc-desc{font-size:12px;color:var(--text2);margin-top:3px;line-height:1.5}
+
+    /* STEP CARDS */
+    .step-list{display:flex;flex-direction:column;gap:12px;margin-bottom:32px}
+    .step-card{background:var(--bg-card);border:1px solid var(--border2);overflow:hidden}
+    .step-header{display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:1px solid var(--border)}
+    .step-num{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--bg-nav);background:var(--accent);padding:2px 8px;flex-shrink:0}
+    .step-title{font-size:14px;font-weight:700;color:var(--text-head);flex:1}
+    .step-concept{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);flex-shrink:0}
+    .step-body{padding:16px 18px}
+    .step-body p{font-size:14px;color:var(--text2);margin-bottom:10px;line-height:1.8}
+    .step-body p:last-child{margin-bottom:0}
+
+    /* CODE BLOCK */
+    .code-block{background:var(--bg-code);border:1px solid var(--border2);margin:12px 0;overflow:hidden}
+    .code-block-header{display:flex;align-items:center;justify-content:space-between;padding:7px 16px;background:var(--bg-card);border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.06em}
+    .cb-copy{background:transparent;border:none;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);transition:color .15s;padding:0}
+    .cb-copy:hover{color:var(--accent)}
+    .code-block pre{padding:14px 18px;line-height:1.75;overflow-x:auto}
+    .code-block code{background:none;border:none;padding:0;font-size:13px;color:var(--text)}
+    .kw{color:#C792EA}.fn{color:#82AAFF}.str{color:#C3E88D}
+    .cm{color:#546E7A}.num{color:#F78C6C}.pn{color:#89DDFF}
+
+    /* CALLOUTS */
+    .tip-box{background:var(--bg-tip);border:1px solid rgba(0,204,112,.2);border-left:3px solid var(--accent);padding:14px 18px;margin:16px 0}
+    .tip-box .box-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:.08em;margin-bottom:6px}
+    .warn-box{background:var(--bg-warn);border:1px solid rgba(200,160,0,.2);border-left:3px solid var(--accent2);padding:14px 18px;margin:16px 0}
+    .warn-box .box-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent2);letter-spacing:.08em;margin-bottom:6px}
+    .tip-box p,.warn-box p{margin:0;font-size:14px;line-height:1.75;color:var(--text2)}
+    .tip-box p+p,.warn-box p+p{margin-top:8px}
+
+    /* HINT ACCORDION */
+    .hint-list{display:flex;flex-direction:column;gap:8px;margin-bottom:32px}
+    .hint-item{background:var(--bg-card);border:1px solid var(--border2);overflow:hidden}
+    .hint-toggle{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;user-select:none;transition:background .12s;gap:12px}
+    .hint-toggle:hover{background:rgba(255,255,255,.03)}
+    .hint-toggle-label{font-size:14px;color:var(--text2);flex:1}
+    .hint-arrow{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);transition:transform .2s;flex-shrink:0}
+    .hint-item.open .hint-arrow{transform:rotate(180deg);color:var(--accent)}
+    .hint-body{max-height:0;overflow:hidden;transition:max-height .3s ease}
+    .hint-item.open .hint-body{max-height:1000px}
+    .hint-content{padding:14px 18px;border-top:1px solid var(--border);font-size:14px;color:var(--text2);line-height:1.8}
+    .hint-content code{font-size:12px}
+    .hint-content p{font-size:14px;color:var(--text2);margin-bottom:8px}
+    .hint-content p:last-child{margin-bottom:0}
+
+    /* ANSWER TOGGLE */
+    .answer-toggle-btn{display:flex;align-items:center;justify-content:space-between;width:100%;padding:14px 20px;background:var(--bg-card);border:1px solid var(--border2);cursor:pointer;transition:border-color .15s;text-align:left}
+    .answer-toggle-btn:hover{border-color:var(--accent)}
+    .answer-toggle-btn span{font-size:14px;color:var(--text2)}
+    .answer-toggle-btn .atb-icon{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3)}
+    .answer-body{display:none;background:var(--bg-code);border:1px solid var(--border2);border-top:none}
+    .answer-body.visible{display:block}
+    .answer-body pre{padding:20px 24px;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.75;color:var(--text);overflow-x:auto;white-space:pre}
+
+    /* CHALLENGE BOX */
+    .challenge-box{background:linear-gradient(135deg,rgba(200,160,0,.06) 0%,rgba(200,160,0,.02) 100%);border:1px solid rgba(200,160,0,.2);padding:22px 26px;margin:32px 0}
+    .challenge-title{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent2);letter-spacing:.1em;margin-bottom:12px}
+    .challenge-list{list-style:none;padding:0;margin:0}
+    .challenge-list li{font-size:14px;color:var(--text2);padding:8px 0;display:flex;align-items:baseline;gap:10px;border-bottom:1px solid rgba(200,160,0,.08);line-height:1.7}
+    .challenge-list li:last-child{border-bottom:none}
+    .challenge-list li::before{content:"★";color:var(--accent2);font-size:10px;flex-shrink:0}
+
+    /* SECTION DIVIDER & CHEER & NAV */
+    .section-divider{height:1px;background:var(--border);margin:48px 0}
+    .cheer-box{border:1px solid var(--border);background:var(--bg);padding:18px 22px;margin-bottom:44px;display:flex;gap:14px;align-items:flex-start}
+    .cheer-icon{font-size:18px;flex-shrink:0;line-height:1.5}
+    .cheer-text{font-size:14px;color:var(--text2);line-height:1.85}
+    .cheer-text strong{color:var(--text-head)}
+    .chap-nav{display:flex;justify-content:space-between;padding-top:32px;border-top:1px solid var(--border);gap:12px;flex-wrap:wrap}
+    .chap-nav-btn{display:flex;flex-direction:column;gap:4px;text-decoration:none;padding:14px 18px;border:1px solid var(--border2);background:var(--bg-card);flex:1;max-width:300px;transition:border-color .15s}
+    .chap-nav-btn:hover{border-color:var(--accent)}
+    .chap-nav-btn.next{text-align:right}
+    .cnb-dir{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.07em}
+    .cnb-title{font-size:13px;color:var(--text2);line-height:1.45}
+    .cnb-title span{color:var(--accent);font-family:'JetBrains Mono',monospace}
+
+    /* RESPONSIVE */
+    .sidebar-overlay{display:none;position:fixed;inset:0;top:var(--header-h);z-index:140;background:rgba(0,0,0,.65)}
+    @media(max-width:720px){.sidebar-overlay.visible{display:block}.content{margin-left:0;padding:28px 20px 72px}.header-center{display:none}.review-grid{grid-template-columns:1fr 1fr}}
+    @media(max-width:480px){.header-grade{display:none}.chap-nav-btn{max-width:100%}.header-right .nav-btn:not(.primary){display:none}.lg-steps{flex-direction:column}.review-grid{grid-template-columns:1fr}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important}}
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="top-header">
+  <button class="header-open-btn" onclick="toggleSidebar()">▶</button>
+  <div class="header-left">
+    <a href="../index.html" class="header-logo">SUPERPYTHON</a>
+    <span class="header-sep">/</span>
+    <span class="header-grade">🟤 BRONZE</span>
+    <span class="header-sep">/</span>
+    <span class="header-chap">31. 미니 프로젝트 ⑤</span>
+  </div>
+  <div class="header-center">
+    <span>31 / 48</span>
+    <div class="progress-mini"><div class="progress-mini-fill" style="width:64.58%"></div></div>
+    <span>64%</span>
+  </div>
+  <div class="header-right">
+    <a href="30-quiz-function-basic.html" class="nav-btn">← 이전</a>
+    <a href="32-function-advanced.html" class="nav-btn primary">다음 →</a>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<div class="layout">
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <button class="sidebar-toggle" onclick="toggleSidebar()">◀</button>
+  <div class="sidebar-progress">
+    <div class="sp-label">BRONZE 진행률</div>
+    <div class="sp-bar"><div class="sp-fill" style="width:64.58%"></div></div>
+    <div class="sp-text"><span>31</span> / 48 챕터 완료</div>
+  </div>
+
+  <div class="sb-group" id="grp-env">
+    <div class="sb-group-header" onclick="toggleGroup('grp-env')"><span class="sb-group-title">환경 설정</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="01-what-is-python.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">01</span>파이썬이란?</a>
+      <a href="02-setup.html"          class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">02</span>개발환경 설치</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-basic1">
+    <div class="sb-group-header" onclick="toggleGroup('grp-basic1')"><span class="sb-group-title">기초 문법 1</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="03-print.html"                    class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">03</span>print()란?</a>
+      <a href="04-quiz-print.html"               class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">04</span>연습문제</a>
+      <a href="05-variables.html"                class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">05</span>변수와 데이터 타입</a>
+      <a href="06-operators.html"                class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">06</span>연산자</a>
+      <a href="07-quiz-variables-operators.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">07</span>연습문제</a>
+      <a href="08-string.html"                   class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">08</span>문자열 String</a>
+      <a href="09-quiz-string.html"              class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">09</span>연습문제</a>
+      <a href="10-fstring.html"                  class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">10</span>f-string 완전정리</a>
+      <a href="11-quiz-fstring.html"             class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">11</span>연습문제</a>
+      <a href="12-mini-project-01.html"          class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">12</span>🎮 미니 프로젝트 ①</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-basic2">
+    <div class="sb-group-header" onclick="toggleGroup('grp-basic2')"><span class="sb-group-title">기초 문법 2</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="13-list.html"            class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">13</span>리스트</a>
+      <a href="14-quiz-list.html"       class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">14</span>연습문제</a>
+      <a href="15-input.html"           class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">15</span>input() 함수</a>
+      <a href="16-quiz-input.html"      class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">16</span>연습문제</a>
+      <a href="17-mini-project-02.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">17</span>🎮 미니 프로젝트 ②</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-flow">
+    <div class="sb-group-header" onclick="toggleGroup('grp-flow')"><span class="sb-group-title">흐름 제어</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="18-if.html"              class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">18</span>조건문 (if)</a>
+      <a href="19-quiz-if.html"         class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">19</span>연습문제</a>
+      <a href="20-mini-project-03.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">20</span>🎮 미니 프로젝트 ③</a>
+      <a href="21-for-range.html"       class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">21</span>for문과 range()</a>
+      <a href="22-quiz-for.html"        class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">22</span>연습문제</a>
+      <a href="23-while.html"           class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">23</span>while문, break, continue</a>
+      <a href="24-quiz-while.html"      class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">24</span>연습문제</a>
+      <a href="25-mini-project-04.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">25</span>🎮 미니 프로젝트 ④</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-error">
+    <div class="sb-group-header" onclick="toggleGroup('grp-error')"><span class="sb-group-title">에러 &amp; 디버깅</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="26-error-types.html"    class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">26</span>에러 읽는 법</a>
+      <a href="27-debugging.html"      class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">27</span>기초 디버깅 실습</a>
+      <a href="28-quiz-debugging.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">28</span>연습문제</a>
+    </div>
+  </div>
+  <div class="sb-group current open" id="grp-func">
+    <div class="sb-group-header" onclick="toggleGroup('grp-func')"><span class="sb-group-title">함수</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="29-function-basic.html"         class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">29</span>함수 기초</a>
+      <a href="30-quiz-function-basic.html"    class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">30</span>연습문제</a>
+      <a href="31-mini-project-05.html"        class="sb-item active"><span class="sb-icon">▶</span><span class="sb-num">31</span>🎮 미니 프로젝트 ⑤</a>
+      <a href="32-function-advanced.html"      class="sb-item"><span class="sb-icon"> </span><span class="sb-num">32</span>함수 심화</a>
+      <a href="33-quiz-function-advanced.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">33</span>연습문제</a>
+      <a href="34-module.html"                 class="sb-item"><span class="sb-icon"> </span><span class="sb-num">34</span>모듈</a>
+      <a href="35-quiz-module.html"            class="sb-item"><span class="sb-icon"> </span><span class="sb-num">35</span>연습문제</a>
+      <a href="36-mini-project-06.html"        class="sb-item"><span class="sb-icon"> </span><span class="sb-num">36</span>🎮 미니 프로젝트 ⑥</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-ds">
+    <div class="sb-group-header" onclick="toggleGroup('grp-ds')"><span class="sb-group-title">자료구조</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="37-dictionary.html"      class="sb-item"><span class="sb-icon"> </span><span class="sb-num">37</span>딕셔너리</a>
+      <a href="38-quiz-dictionary.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">38</span>연습문제</a>
+      <a href="39-tuple-set.html"       class="sb-item"><span class="sb-icon"> </span><span class="sb-num">39</span>튜플과 셋</a>
+      <a href="40-quiz-tuple-set.html"  class="sb-item"><span class="sb-icon"> </span><span class="sb-num">40</span>연습문제</a>
+      <a href="41-mini-project-07.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">41</span>🎮 미니 프로젝트 ⑦</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-file">
+    <div class="sb-group-header" onclick="toggleGroup('grp-file')"><span class="sb-group-title">파일 &amp; 예외처리</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="42-file-io.html"         class="sb-item"><span class="sb-icon"> </span><span class="sb-num">42</span>파일 입출력</a>
+      <a href="43-quiz-file-io.html"    class="sb-item"><span class="sb-icon"> </span><span class="sb-num">43</span>연습문제</a>
+      <a href="44-exception-basic.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">44</span>예외처리 기초</a>
+      <a href="45-quiz-exception.html"  class="sb-item"><span class="sb-icon"> </span><span class="sb-num">45</span>연습문제</a>
+      <a href="46-mini-project-08.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">46</span>🎮 미니 프로젝트 ⑧</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-end">
+    <div class="sb-group-header" onclick="toggleGroup('grp-end')"><span class="sb-group-title">마무리</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="47-final-project.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">47</span>★ 최종 프로젝트</a>
+      <a href="48-next-step.html"     class="sb-item"><span class="sb-icon"> </span><span class="sb-num">48</span>다음 단계 미리보기</a>
+    </div>
+  </div>
+</aside>
+
+<!-- CONTENT -->
+<main class="content" id="mainContent">
+<div class="content-inner">
+
+  <div class="chap-meta">
+    <span class="badge project">PROJECT</span>
+    <span>함수</span>
+    <span style="color:var(--text3)">·</span>
+    <span>챕터 31 / 48</span>
+  </div>
+  <h1 class="chap-title">미니 프로젝트 ⑤ — <span class="hl">성적 계산기</span></h1>
+  <p class="chap-subtitle">함수 기초에서 배운 def, 매개변수, return을 모두 활용해 실제로 동작하는 성적 분석 프로그램을 만들어봅니다.</p>
+
+  <!-- PROJECT BANNER -->
+  <div class="project-banner">
+    <div class="pb-label">MINI PROJECT 05</div>
+    <div class="pb-title">나만의 성적 계산기</div>
+    <div class="pb-desc">여러 과목의 점수를 입력받아 합계·평균·최고점·최저점·학점을 계산하고 보기 좋게 출력합니다. 각 기능을 별도의 함수로 만들어 조합하는 것이 이번 프로젝트의 핵심입니다.</div>
+    <div class="pb-tags">
+      <span class="pb-tag">def</span>
+      <span class="pb-tag">return</span>
+      <span class="pb-tag">매개변수</span>
+      <span class="pb-tag">for문</span>
+      <span class="pb-tag">리스트</span>
+      <span class="pb-tag">f-string</span>
+      <span class="pb-tag">if/elif</span>
+    </div>
+  </div>
+
+  <!-- LEARN GUIDE -->
+  <div class="learn-guide">
+    <div class="lg-title">이렇게 진행합니다</div>
+    <div class="lg-steps">
+      <div class="lg-step"><span class="lg-n">01</span>배운 개념 복습</div>
+      <span class="lg-arrow">›</span>
+      <div class="lg-step"><span class="lg-n">02</span>실행 예시 확인</div>
+      <span class="lg-arrow">›</span>
+      <div class="lg-step"><span class="lg-n">03</span>기능 명세서</div>
+      <span class="lg-arrow">›</span>
+      <div class="lg-step"><span class="lg-n">04</span>단계별 구현</div>
+      <span class="lg-arrow">›</span>
+      <div class="lg-step"><span class="lg-n">05</span>힌트 &amp; 정답</div>
+    </div>
+  </div>
+
+
+  <!-- ─── 01. 복습 ─── -->
+  <h2><span class="n">01</span>지금까지 배운 개념 복습</h2>
+  <p>이번 프로젝트에 필요한 개념들을 한눈에 정리합니다.</p>
+  <div class="review-grid">
+    <div class="review-card">
+      <div class="rc-label">함수 정의</div>
+      <div class="rc-code">def 이름(매개변수):</div>
+      <div class="rc-desc">기능을 이름으로 묶어 재사용</div>
+    </div>
+    <div class="review-card">
+      <div class="rc-label">return</div>
+      <div class="rc-code">return 값</div>
+      <div class="rc-desc">결과를 호출한 곳에 돌려줌</div>
+    </div>
+    <div class="review-card">
+      <div class="rc-label">for문</div>
+      <div class="rc-code">for x in 리스트:</div>
+      <div class="rc-desc">리스트 요소를 하나씩 순회</div>
+    </div>
+    <div class="review-card">
+      <div class="rc-label">if / elif</div>
+      <div class="rc-code">if 조건:</div>
+      <div class="rc-desc">조건에 따라 다른 코드 실행</div>
+    </div>
+    <div class="review-card">
+      <div class="rc-label">리스트</div>
+      <div class="rc-code">[88, 92, 75]</div>
+      <div class="rc-desc">여러 값을 하나로 묶어 저장</div>
+    </div>
+    <div class="review-card">
+      <div class="rc-label">f-string</div>
+      <div class="rc-code">f"평균: {avg:.1f}"</div>
+      <div class="rc-desc">변수를 문자열 안에 삽입</div>
+    </div>
+  </div>
+
+
+  <!-- ─── 02. 실행 예시 ─── -->
+  <h2><span class="n">02</span>실행 예시</h2>
+
+  <h3>예시 1 — 5과목 입력</h3>
+  <div class="output-demo">
+    <div class="od-header"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>&nbsp;Terminal</div>
+    <div class="od-body"><pre><span class="od-prompt">과목 수를 입력하세요: </span><span class="od-input">5</span>
+<span class="od-prompt">과목 1 이름: </span><span class="od-input">국어</span>
+<span class="od-prompt">국어 점수: </span><span class="od-input">88</span>
+<span class="od-prompt">과목 2 이름: </span><span class="od-input">수학</span>
+<span class="od-prompt">수학 점수: </span><span class="od-input">95</span>
+<span class="od-prompt">과목 3 이름: </span><span class="od-input">영어</span>
+<span class="od-prompt">영어 점수: </span><span class="od-input">72</span>
+<span class="od-prompt">과목 4 이름: </span><span class="od-input">과학</span>
+<span class="od-prompt">과학 점수: </span><span class="od-input">81</span>
+<span class="od-prompt">과목 5 이름: </span><span class="od-input">역사</span>
+<span class="od-prompt">역사 점수: </span><span class="od-input">90</span>
+
+<span class="od-sep">━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>
+<span class="od-output">        📊 성적 분석 결과</span>
+<span class="od-sep">━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>
+<span class="od-output">  국어 :  88점</span>
+<span class="od-output">  수학 :  95점  ← 최고점 🏆</span>
+<span class="od-output">  영어 :  72점  ← 최저점 📉</span>
+<span class="od-output">  과학 :  81점</span>
+<span class="od-output">  역사 :  90점</span>
+<span class="od-sep">----------------------------</span>
+<span class="od-output">  합 계 : 426점</span>
+<span class="od-output">  평 균 : 85.2점</span>
+<span class="od-output">  학 점 : B</span>
+<span class="od-sep">━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span></pre></div>
+  </div>
+
+  <h3>예시 2 — 3과목 입력</h3>
+  <div class="output-demo">
+    <div class="od-header"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>&nbsp;Terminal</div>
+    <div class="od-body"><pre><span class="od-prompt">과목 수를 입력하세요: </span><span class="od-input">3</span>
+<span class="od-prompt">과목 1 이름: </span><span class="od-input">파이썬</span>
+<span class="od-prompt">파이썬 점수: </span><span class="od-input">100</span>
+<span class="od-prompt">과목 2 이름: </span><span class="od-input">알고리즘</span>
+<span class="od-prompt">알고리즘 점수: </span><span class="od-input">55</span>
+<span class="od-prompt">과목 3 이름: </span><span class="od-input">데이터베이스</span>
+<span class="od-prompt">데이터베이스 점수: </span><span class="od-input">78</span>
+
+<span class="od-sep">━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>
+<span class="od-output">        📊 성적 분석 결과</span>
+<span class="od-sep">━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>
+<span class="od-output">  파이썬     : 100점  ← 최고점 🏆</span>
+<span class="od-output">  알고리즘   :  55점  ← 최저점 📉</span>
+<span class="od-output">  데이터베이스:  78점</span>
+<span class="od-sep">----------------------------</span>
+<span class="od-output">  합 계 : 233점</span>
+<span class="od-output">  평 균 : 77.7점</span>
+<span class="od-output">  학 점 : C</span>
+<span class="od-sep">━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span></pre></div>
+  </div>
+
+
+  <!-- ─── 03. 기능 명세서 ─── -->
+  <h2><span class="n">03</span>기능 명세서</h2>
+  <p>프로그램을 만들기 전에 어떤 함수가 필요한지 먼저 설계합니다. 함수 하나가 기능 하나를 담당하는 원칙을 지킵니다.</p>
+  <table class="spec-table">
+    <thead>
+      <tr><th>함수 이름</th><th>기능</th><th>사용 개념</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>get_input()</td>
+        <td>과목 수와 이름·점수를 입력받아 리스트 두 개로 반환</td>
+        <td>input(), for, int()</td>
+      </tr>
+      <tr>
+        <td>get_total(scores)</td>
+        <td>점수 리스트를 받아 합계를 반환</td>
+        <td>for문, +=</td>
+      </tr>
+      <tr>
+        <td>get_average(scores)</td>
+        <td>점수 리스트를 받아 평균을 반환</td>
+        <td>get_total(), len()</td>
+      </tr>
+      <tr>
+        <td>get_max_score(scores)</td>
+        <td>점수 리스트를 받아 최고점을 반환</td>
+        <td>for문, if 비교</td>
+      </tr>
+      <tr>
+        <td>get_min_score(scores)</td>
+        <td>점수 리스트를 받아 최저점을 반환</td>
+        <td>for문, if 비교</td>
+      </tr>
+      <tr>
+        <td>get_grade(average)</td>
+        <td>평균 점수를 받아 학점 문자를 반환</td>
+        <td>if / elif / else</td>
+      </tr>
+      <tr>
+        <td>print_report(...)</td>
+        <td>과목명·점수·통계를 보기 좋게 출력</td>
+        <td>for문, f-string, 최고/최저점 표시</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="tip-box">
+    <div class="box-label">💡 함수를 먼저 설계하는 습관</div>
+    <p>코드를 바로 작성하는 것보다 "어떤 함수가 필요할까?"를 먼저 생각하면 실수가 줄어듭니다. 실제 개발자들이 코딩 전에 설계를 먼저 하는 이유입니다. 이번 프로젝트에서 그 습관을 연습합니다.</p>
+  </div>
+
+
+  <!-- ─── 04. 단계별 구현 ─── -->
+  <h2><span class="n">04</span>단계별 구현 가이드</h2>
+  <div class="step-list">
+
+    <!-- STEP 1 -->
+    <div class="step-card">
+      <div class="step-header">
+        <span class="step-num">STEP 1</span>
+        <span class="step-title">입력 받기 — get_input()</span>
+        <span class="step-concept">input · for · int()</span>
+      </div>
+      <div class="step-body">
+        <p>먼저 과목 수를 입력받고, 그 수만큼 반복하며 과목 이름과 점수를 리스트에 저장합니다. 두 리스트를 함께 반환합니다.</p>
+        <div class="code-block">
+          <div class="code-block-header"><span>python</span><button class="cb-copy" onclick="copyCode(this)">복사</button></div>
+          <pre><code><span class="kw">def</span> <span class="fn">get_input</span><span class="pn">():</span>
+    <span class="cm">"""과목 수, 이름, 점수를 입력받아 두 리스트를 반환합니다."""</span>
+    <span class="fn">n</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"과목 수를 입력하세요: "</span><span class="pn">))</span>
+    <span class="fn">subjects</span> <span class="pn">=</span> <span class="pn">[]</span>   <span class="cm"># 과목명 리스트</span>
+    <span class="fn">scores</span>   <span class="pn">=</span> <span class="pn">[]</span>   <span class="cm"># 점수 리스트</span>
+
+    <span class="kw">for</span> <span class="fn">i</span> <span class="kw">in</span> <span class="fn">range</span><span class="pn">(</span><span class="fn">n</span><span class="pn">):</span>
+        <span class="fn">name</span>  <span class="pn">=</span> <span class="fn">input</span><span class="pn">(</span><span class="str">f"과목 {i+1} 이름: "</span><span class="pn">)</span>
+        <span class="fn">score</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">f"{name} 점수: "</span><span class="pn">))</span>
+        <span class="fn">subjects</span><span class="pn">.</span><span class="fn">append</span><span class="pn">(</span><span class="fn">name</span><span class="pn">)</span>
+        <span class="fn">scores</span><span class="pn">.</span><span class="fn">append</span><span class="pn">(</span><span class="fn">score</span><span class="pn">)</span>
+
+    <span class="kw">return</span> <span class="fn">subjects</span><span class="pn">,</span> <span class="fn">scores</span>   <span class="cm"># 두 리스트를 함께 반환</span></code></pre>
+        </div>
+        <div class="tip-box" style="margin-top:10px">
+          <div class="box-label">💡 두 값을 동시에 return</div>
+          <p><code>return subjects, scores</code>처럼 쉼표로 구분하면 두 값을 한 번에 반환할 수 있습니다. 호출할 때는 <code>subjects, scores = get_input()</code>처럼 받습니다. 이를 <strong>다중 반환(multiple return)</strong>이라 합니다.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="step-card">
+      <div class="step-header">
+        <span class="step-num">STEP 2</span>
+        <span class="step-title">통계 함수 4개 작성</span>
+        <span class="step-concept">for · if · return</span>
+      </div>
+      <div class="step-body">
+        <p>합계, 평균, 최고점, 최저점을 각각 별도 함수로 만듭니다. 각 함수는 점수 리스트를 받아 숫자를 하나 반환합니다.</p>
+        <div class="code-block">
+          <div class="code-block-header"><span>python</span><button class="cb-copy" onclick="copyCode(this)">복사</button></div>
+          <pre><code><span class="kw">def</span> <span class="fn">get_total</span><span class="pn">(</span><span class="fn">scores</span><span class="pn">):</span>
+    <span class="cm">"""합계 반환"""</span>
+    <span class="fn">total</span> <span class="pn">=</span> <span class="num">0</span>
+    <span class="kw">for</span> <span class="fn">s</span> <span class="kw">in</span> <span class="fn">scores</span><span class="pn">:</span>
+        <span class="fn">total</span> <span class="pn">+=</span> <span class="fn">s</span>
+    <span class="kw">return</span> <span class="fn">total</span>
+
+<span class="kw">def</span> <span class="fn">get_average</span><span class="pn">(</span><span class="fn">scores</span><span class="pn">):</span>
+    <span class="cm">"""평균 반환 — get_total()을 재활용합니다"""</span>
+    <span class="kw">return</span> <span class="fn">get_total</span><span class="pn">(</span><span class="fn">scores</span><span class="pn">)</span> <span class="pn">/</span> <span class="fn">len</span><span class="pn">(</span><span class="fn">scores</span><span class="pn">)</span>
+
+<span class="kw">def</span> <span class="fn">get_max_score</span><span class="pn">(</span><span class="fn">scores</span><span class="pn">):</span>
+    <span class="cm">"""최고점 반환"""</span>
+    <span class="fn">highest</span> <span class="pn">=</span> <span class="fn">scores</span><span class="pn">[</span><span class="num">0</span><span class="pn">]</span>   <span class="cm"># 첫 번째 값을 기준으로 시작</span>
+    <span class="kw">for</span> <span class="fn">s</span> <span class="kw">in</span> <span class="fn">scores</span><span class="pn">:</span>
+        <span class="kw">if</span> <span class="fn">s</span> <span class="pn">&gt;</span> <span class="fn">highest</span><span class="pn">:</span>
+            <span class="fn">highest</span> <span class="pn">=</span> <span class="fn">s</span>
+    <span class="kw">return</span> <span class="fn">highest</span>
+
+<span class="kw">def</span> <span class="fn">get_min_score</span><span class="pn">(</span><span class="fn">scores</span><span class="pn">):</span>
+    <span class="cm">"""최저점 반환"""</span>
+    <span class="fn">lowest</span> <span class="pn">=</span> <span class="fn">scores</span><span class="pn">[</span><span class="num">0</span><span class="pn">]</span>
+    <span class="kw">for</span> <span class="fn">s</span> <span class="kw">in</span> <span class="fn">scores</span><span class="pn">:</span>
+        <span class="kw">if</span> <span class="fn">s</span> <span class="pn">&lt;</span> <span class="fn">lowest</span><span class="pn">:</span>
+            <span class="fn">lowest</span> <span class="pn">=</span> <span class="fn">s</span>
+    <span class="kw">return</span> <span class="fn">lowest</span></code></pre>
+        </div>
+        <div class="tip-box" style="margin-top:10px">
+          <div class="box-label">💡 scores[0]부터 시작하는 이유</div>
+          <p>최고점을 찾을 때 처음엔 "기준값"이 필요합니다. 0이나 -999처럼 임의의 값보다, 리스트 첫 번째 요소(<code>scores[0]</code>)를 기준으로 시작하면 어떤 범위의 점수에도 올바르게 동작합니다.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="step-card">
+      <div class="step-header">
+        <span class="step-num">STEP 3</span>
+        <span class="step-title">학점 계산 — get_grade(average)</span>
+        <span class="step-concept">if · elif · else · return</span>
+      </div>
+      <div class="step-body">
+        <p>평균 점수를 받아 학점 문자열을 반환합니다. <code>return</code>을 만나면 즉시 함수가 종료되므로 <code>elif</code>를 깔끔하게 사용할 수 있습니다.</p>
+        <div class="code-block">
+          <div class="code-block-header"><span>python</span><button class="cb-copy" onclick="copyCode(this)">복사</button></div>
+          <pre><code><span class="kw">def</span> <span class="fn">get_grade</span><span class="pn">(</span><span class="fn">average</span><span class="pn">):</span>
+    <span class="cm">"""평균을 받아 학점(A~F)을 반환합니다."""</span>
+    <span class="kw">if</span> <span class="fn">average</span> <span class="pn">&gt;=</span> <span class="num">90</span><span class="pn">:</span>
+        <span class="kw">return</span> <span class="str">"A"</span>
+    <span class="kw">elif</span> <span class="fn">average</span> <span class="pn">&gt;=</span> <span class="num">80</span><span class="pn">:</span>
+        <span class="kw">return</span> <span class="str">"B"</span>
+    <span class="kw">elif</span> <span class="fn">average</span> <span class="pn">&gt;=</span> <span class="num">70</span><span class="pn">:</span>
+        <span class="kw">return</span> <span class="str">"C"</span>
+    <span class="kw">elif</span> <span class="fn">average</span> <span class="pn">&gt;=</span> <span class="num">60</span><span class="pn">:</span>
+        <span class="kw">return</span> <span class="str">"D"</span>
+    <span class="kw">else</span><span class="pn">:</span>
+        <span class="kw">return</span> <span class="str">"F"</span></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="step-card">
+      <div class="step-header">
+        <span class="step-num">STEP 4</span>
+        <span class="step-title">보고서 출력 — print_report()</span>
+        <span class="step-concept">for · f-string · 최고/최저 표시</span>
+      </div>
+      <div class="step-body">
+        <p>모든 통계를 받아 보기 좋게 출력합니다. 각 과목 뒤에 최고점·최저점 표시를 붙이는 것이 포인트입니다.</p>
+        <div class="code-block">
+          <div class="code-block-header"><span>python</span><button class="cb-copy" onclick="copyCode(this)">복사</button></div>
+          <pre><code><span class="kw">def</span> <span class="fn">print_report</span><span class="pn">(</span><span class="fn">subjects</span><span class="pn">,</span> <span class="fn">scores</span><span class="pn">,</span> <span class="fn">total</span><span class="pn">,</span> <span class="fn">average</span><span class="pn">,</span> <span class="fn">grade</span><span class="pn">):</span>
+    <span class="cm">"""성적 보고서를 출력합니다."""</span>
+    <span class="fn">highest</span> <span class="pn">=</span> <span class="fn">get_max_score</span><span class="pn">(</span><span class="fn">scores</span><span class="pn">)</span>
+    <span class="fn">lowest</span>  <span class="pn">=</span> <span class="fn">get_min_score</span><span class="pn">(</span><span class="fn">scores</span><span class="pn">)</span>
+
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━"</span><span class="pn">)</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"        📊 성적 분석 결과"</span><span class="pn">)</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"━━━━━━━━━━━━━━━━━━━━━━━━━━━━"</span><span class="pn">)</span>
+
+    <span class="kw">for</span> <span class="fn">i</span> <span class="kw">in</span> <span class="fn">range</span><span class="pn">(</span><span class="fn">len</span><span class="pn">(</span><span class="fn">subjects</span><span class="pn">)):</span>
+        <span class="fn">tag</span> <span class="pn">=</span> <span class="str">""</span>
+        <span class="kw">if</span> <span class="fn">scores</span><span class="pn">[</span><span class="fn">i</span><span class="pn">]</span> <span class="pn">==</span> <span class="fn">highest</span><span class="pn">:</span>
+            <span class="fn">tag</span> <span class="pn">=</span> <span class="str">"  ← 최고점 🏆"</span>
+        <span class="kw">elif</span> <span class="fn">scores</span><span class="pn">[</span><span class="fn">i</span><span class="pn">]</span> <span class="pn">==</span> <span class="fn">lowest</span><span class="pn">:</span>
+            <span class="fn">tag</span> <span class="pn">=</span> <span class="str">"  ← 최저점 📉"</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">f"  {subjects[i]:8s}: {scores[i]:3d}점{tag}"</span><span class="pn">)</span>
+
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"----------------------------"</span><span class="pn">)</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">f"  합 계 : {total}점"</span><span class="pn">)</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">f"  평 균 : {average:.1f}점"</span><span class="pn">)</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">f"  학 점 : {grade}"</span><span class="pn">)</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"━━━━━━━━━━━━━━━━━━━━━━━━━━━━"</span><span class="pn">)</span></code></pre>
+        </div>
+        <div class="tip-box" style="margin-top:10px">
+          <div class="box-label">💡 포맷 지정자 — 정렬과 소수점</div>
+          <p><code>f"{subjects[i]:8s}"</code>는 문자열을 8칸에 왼쪽 정렬합니다. <code>f"{scores[i]:3d}"</code>는 정수를 3칸에 오른쪽 정렬합니다. <code>f"{average:.1f}"</code>는 소수점 1자리까지 출력합니다. 이렇게 하면 숫자가 줄줄이 정렬됩니다.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 5 -->
+    <div class="step-card">
+      <div class="step-header">
+        <span class="step-num">STEP 5</span>
+        <span class="step-title">메인 코드 — 함수 조합하기</span>
+        <span class="step-concept">함수 호출 · 다중 반환</span>
+      </div>
+      <div class="step-body">
+        <p>지금까지 만든 함수들을 올바른 순서로 호출합니다. 이 부분이 프로그램의 "뼈대"입니다.</p>
+        <div class="code-block">
+          <div class="code-block-header"><span>python — 메인 코드</span><button class="cb-copy" onclick="copyCode(this)">복사</button></div>
+          <pre><code><span class="cm"># 1. 입력 받기</span>
+<span class="fn">subjects</span><span class="pn">,</span> <span class="fn">scores</span> <span class="pn">=</span> <span class="fn">get_input</span><span class="pn">()</span>
+
+<span class="cm"># 2. 통계 계산</span>
+<span class="fn">total</span>   <span class="pn">=</span> <span class="fn">get_total</span><span class="pn">(</span><span class="fn">scores</span><span class="pn">)</span>
+<span class="fn">average</span> <span class="pn">=</span> <span class="fn">get_average</span><span class="pn">(</span><span class="fn">scores</span><span class="pn">)</span>
+<span class="fn">grade</span>   <span class="pn">=</span> <span class="fn">get_grade</span><span class="pn">(</span><span class="fn">average</span><span class="pn">)</span>
+
+<span class="cm"># 3. 결과 출력</span>
+<span class="fn">print_report</span><span class="pn">(</span><span class="fn">subjects</span><span class="pn">,</span> <span class="fn">scores</span><span class="pn">,</span> <span class="fn">total</span><span class="pn">,</span> <span class="fn">average</span><span class="pn">,</span> <span class="fn">grade</span><span class="pn">)</span></code></pre>
+        </div>
+        <p>메인 코드는 단 세 단계로 읽힙니다. 입력 → 계산 → 출력. 각 단계가 함수 호출 한 줄로 표현되어 있어 코드 전체 흐름이 한눈에 들어옵니다. 이것이 함수를 쓰는 진짜 이유입니다.</p>
+      </div>
+    </div>
+
+  </div><!-- /step-list -->
+
+
+  <!-- ─── 05. 힌트 ─── -->
+  <h2><span class="n">05</span>막혔을 때 — 단계별 힌트</h2>
+  <div class="hint-list">
+
+    <div class="hint-item" id="hint1">
+      <div class="hint-toggle" onclick="toggleHint('hint1')">
+        <span class="hint-toggle-label">힌트 1 — 두 리스트를 어떻게 동시에 return 하나요?</span>
+        <span class="hint-arrow">▼</span>
+      </div>
+      <div class="hint-body">
+        <div class="hint-content">
+          <p><code>return a, b</code>처럼 쉼표로 구분하면 됩니다. 파이썬은 이를 <strong>튜플(tuple)</strong>로 묶어서 반환합니다.</p>
+          <div class="code-block">
+            <div class="code-block-header"><span>python</span></div>
+            <pre><code><span class="kw">def</span> <span class="fn">get_two</span><span class="pn">():</span>
+    <span class="kw">return</span> <span class="pn">[</span><span class="str">"국어"</span><span class="pn">,</span> <span class="str">"수학"</span><span class="pn">],</span> <span class="pn">[</span><span class="num">88</span><span class="pn">,</span> <span class="num">95</span><span class="pn">]</span>
+
+<span class="fn">names</span><span class="pn">,</span> <span class="fn">scores</span> <span class="pn">=</span> <span class="fn">get_two</span><span class="pn">()</span>   <span class="cm"># 각각 받기</span></code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hint-item" id="hint2">
+      <div class="hint-toggle" onclick="toggleHint('hint2')">
+        <span class="hint-toggle-label">힌트 2 — 최고점을 어떻게 찾나요?</span>
+        <span class="hint-arrow">▼</span>
+      </div>
+      <div class="hint-body">
+        <div class="hint-content">
+          <p>리스트의 첫 번째 값을 "현재까지 최고"라고 가정하고 시작합니다. 반복하면서 더 큰 값이 나오면 갱신합니다.</p>
+          <div class="code-block">
+            <div class="code-block-header"><span>python</span></div>
+            <pre><code><span class="fn">scores</span> <span class="pn">=</span> <span class="pn">[</span><span class="num">88</span><span class="pn">,</span> <span class="num">72</span><span class="pn">,</span> <span class="num">95</span><span class="pn">,</span> <span class="num">81</span><span class="pn">]</span>
+<span class="fn">highest</span> <span class="pn">=</span> <span class="fn">scores</span><span class="pn">[</span><span class="num">0</span><span class="pn">]</span>   <span class="cm"># 88 — 첫 번째 값으로 시작</span>
+<span class="kw">for</span> <span class="fn">s</span> <span class="kw">in</span> <span class="fn">scores</span><span class="pn">:</span>
+    <span class="kw">if</span> <span class="fn">s</span> <span class="pn">&gt;</span> <span class="fn">highest</span><span class="pn">:</span>
+        <span class="fn">highest</span> <span class="pn">=</span> <span class="fn">s</span>   <span class="cm"># 72는 통과, 95에서 갱신, 81은 통과</span>
+<span class="fn">print</span><span class="pn">(</span><span class="fn">highest</span><span class="pn">)</span>   <span class="cm"># 95</span></code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hint-item" id="hint3">
+      <div class="hint-toggle" onclick="toggleHint('hint3')">
+        <span class="hint-toggle-label">힌트 3 — f-string에서 소수점을 어떻게 맞추나요?</span>
+        <span class="hint-arrow">▼</span>
+      </div>
+      <div class="hint-body">
+        <div class="hint-content">
+          <p><code>{변수:.Nf}</code> 형식으로 소수점 자릿수를 지정합니다.</p>
+          <div class="code-block">
+            <div class="code-block-header"><span>python</span></div>
+            <pre><code><span class="fn">avg</span> <span class="pn">=</span> <span class="num">85.2</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"평균: {avg:.1f}"</span><span class="pn">)</span>   <span class="cm"># 평균: 85.2</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"평균: {avg:.2f}"</span><span class="pn">)</span>   <span class="cm"># 평균: 85.20</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"평균: {avg:.0f}"</span><span class="pn">)</span>   <span class="cm"># 평균: 85 (반올림)</span></code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hint-item" id="hint4">
+      <div class="hint-toggle" onclick="toggleHint('hint4')">
+        <span class="hint-toggle-label">힌트 4 — 전체 코드 구조 (의사 코드)</span>
+        <span class="hint-arrow">▼</span>
+      </div>
+      <div class="hint-body">
+        <div class="hint-content">
+          <p>코드를 작성하기 전에 구조를 글로 정리하면 막히는 곳이 줄어듭니다.</p>
+          <div class="code-block">
+            <div class="code-block-header"><span>pseudocode</span></div>
+            <pre><code><span class="cm"># 함수 정의 부분 (위쪽에 모두 모아서 작성)</span>
+def get_input()        → subjects 리스트, scores 리스트 반환
+def get_total(scores)  → 합계 숫자 반환
+def get_average(scores)→ 평균 숫자 반환
+def get_max_score(scores)→ 최고점 반환
+def get_min_score(scores)→ 최저점 반환
+def get_grade(average) → 학점 문자 반환
+def print_report(...)  → 출력만 (return 없음)
+
+<span class="cm"># 메인 코드 (아래에 작성)</span>
+subjects, scores = get_input()
+total   = get_total(scores)
+average = get_average(scores)
+grade   = get_grade(average)
+print_report(subjects, scores, total, average, grade)</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /hint-list -->
+
+
+  <!-- ─── 06. 전체 정답 ─── -->
+  <h2><span class="n">06</span>전체 정답 코드</h2>
+  <p>먼저 스스로 도전해보세요. 막히면 위의 힌트를 활용하고, 완성했다면 아래 정답과 비교해봅니다.</p>
+
+  <button class="answer-toggle-btn" onclick="toggleAnswer(this)">
+    <span>▼ 정답 코드 펼치기 — 스스로 먼저 풀어보세요</span>
+    <span class="atb-icon">CLICK</span>
+  </button>
+  <div class="answer-body" id="answerBody">
+    <pre><span class="cm"># ===================================
+#   미니 프로젝트 ⑤ — 성적 계산기
+# ===================================</span>
+
+<span class="kw">def</span> <span class="fn">get_input</span><span class="pn">():</span>
+    <span class="cm">"""과목 수, 이름, 점수를 입력받아 반환합니다."""</span>
+    <span class="fn">n</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"과목 수를 입력하세요: "</span><span class="pn">))</span>
+    <span class="fn">subjects</span> <span class="pn">=</span> <span class="pn">[]</span>
+    <span class="fn">scores</span>   <span class="pn">=</span> <span class="pn">[]</span>
+    <span class="kw">for</span> <span class="fn">i</span> <span class="kw">in</span> <span class="fn">range</span><span class="pn">(</span><span class="fn">n</span><span class="pn">):</span>
+        <span class="fn">name</span>  <span class="pn">=</span> <span class="fn">input</span><span class="pn">(</span><span class="str">f"과목 {i+1} 이름: "</span><span class="pn">)</span>
+        <span class="fn">score</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">f"{name} 점수: "</span><span class="pn">))</span>
+        <span class="fn">subjects</span><span class="pn">.</span><span class="fn">append</span><span class="pn">(</span><span class="fn">name</span><span class="pn">)</span>
+        <span class="fn">scores</span><span class="pn">.</span><span class="fn">append</span><span class="pn">(</span><span class="fn">score</span><span class="pn">)</span>
+    <span class="kw">return</span> <span class="fn">subjects</span><span class="pn">,</span> <span class="fn">scores</span>
+
+
+<span class="kw">def</span> <span class="fn">get_total</span><span class="pn">(</span><span class="fn">scores</span><span class="pn">):</span>
+    <span class="cm">"""합계를 반환합니다."""</span>
+    <span class="fn">total</span> <span class="pn">=</span> <span class="num">0</span>
+    <span class="kw">for</span> <span class="fn">s</span> <span class="kw">in</span> <span class="fn">scores</span><span class="pn">:</span>
+        <span class="fn">total</span> <span class="pn">+=</span> <span class="fn">s</span>
+    <span class="kw">return</span> <span class="fn">total</span>
+
+
+<span class="kw">def</span> <span class="fn">get_average</span><span class="pn">(</span><span class="fn">scores</span><span class="pn">):</span>
+    <span class="cm">"""평균을 반환합니다."""</span>
+    <span class="kw">return</span> <span class="fn">get_total</span><span class="pn">(</span><span class="fn">scores</span><span class="pn">)</span> <span class="pn">/</span> <span class="fn">len</span><span class="pn">(</span><span class="fn">scores</span><span class="pn">)</span>
+
+
+<span class="kw">def</span> <span class="fn">get_max_score</span><span class="pn">(</span><span class="fn">scores</span><span class="pn">):</span>
+    <span class="cm">"""최고점을 반환합니다."""</span>
+    <span class="fn">highest</span> <span class="pn">=</span> <span class="fn">scores</span><span class="pn">[</span><span class="num">0</span><span class="pn">]</span>
+    <span class="kw">for</span> <span class="fn">s</span> <span class="kw">in</span> <span class="fn">scores</span><span class="pn">:</span>
+        <span class="kw">if</span> <span class="fn">s</span> <span class="pn">&gt;</span> <span class="fn">highest</span><span class="pn">:</span>
+            <span class="fn">highest</span> <span class="pn">=</span> <span class="fn">s</span>
+    <span class="kw">return</span> <span class="fn">highest</span>
+
+
+<span class="kw">def</span> <span class="fn">get_min_score</span><span class="pn">(</span><span class="fn">scores</span><span class="pn">):</span>
+    <span class="cm">"""최저점을 반환합니다."""</span>
+    <span class="fn">lowest</span> <span class="pn">=</span> <span class="fn">scores</span><span class="pn">[</span><span class="num">0</span><span class="pn">]</span>
+    <span class="kw">for</span> <span class="fn">s</span> <span class="kw">in</span> <span class="fn">scores</span><span class="pn">:</span>
+        <span class="kw">if</span> <span class="fn">s</span> <span class="pn">&lt;</span> <span class="fn">lowest</span><span class="pn">:</span>
+            <span class="fn">lowest</span> <span class="pn">=</span> <span class="fn">s</span>
+    <span class="kw">return</span> <span class="fn">lowest</span>
+
+
+<span class="kw">def</span> <span class="fn">get_grade</span><span class="pn">(</span><span class="fn">average</span><span class="pn">):</span>
+    <span class="cm">"""평균으로 학점을 반환합니다."""</span>
+    <span class="kw">if</span> <span class="fn">average</span> <span class="pn">&gt;=</span> <span class="num">90</span><span class="pn">:</span>
+        <span class="kw">return</span> <span class="str">"A"</span>
+    <span class="kw">elif</span> <span class="fn">average</span> <span class="pn">&gt;=</span> <span class="num">80</span><span class="pn">:</span>
+        <span class="kw">return</span> <span class="str">"B"</span>
+    <span class="kw">elif</span> <span class="fn">average</span> <span class="pn">&gt;=</span> <span class="num">70</span><span class="pn">:</span>
+        <span class="kw">return</span> <span class="str">"C"</span>
+    <span class="kw">elif</span> <span class="fn">average</span> <span class="pn">&gt;=</span> <span class="num">60</span><span class="pn">:</span>
+        <span class="kw">return</span> <span class="str">"D"</span>
+    <span class="kw">else</span><span class="pn">:</span>
+        <span class="kw">return</span> <span class="str">"F"</span>
+
+
+<span class="kw">def</span> <span class="fn">print_report</span><span class="pn">(</span><span class="fn">subjects</span><span class="pn">,</span> <span class="fn">scores</span><span class="pn">,</span> <span class="fn">total</span><span class="pn">,</span> <span class="fn">average</span><span class="pn">,</span> <span class="fn">grade</span><span class="pn">):</span>
+    <span class="cm">"""성적 보고서를 출력합니다."""</span>
+    <span class="fn">highest</span> <span class="pn">=</span> <span class="fn">get_max_score</span><span class="pn">(</span><span class="fn">scores</span><span class="pn">)</span>
+    <span class="fn">lowest</span>  <span class="pn">=</span> <span class="fn">get_min_score</span><span class="pn">(</span><span class="fn">scores</span><span class="pn">)</span>
+
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━"</span><span class="pn">)</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"        📊 성적 분석 결과"</span><span class="pn">)</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"━━━━━━━━━━━━━━━━━━━━━━━━━━━━"</span><span class="pn">)</span>
+
+    <span class="kw">for</span> <span class="fn">i</span> <span class="kw">in</span> <span class="fn">range</span><span class="pn">(</span><span class="fn">len</span><span class="pn">(</span><span class="fn">subjects</span><span class="pn">)):</span>
+        <span class="fn">tag</span> <span class="pn">=</span> <span class="str">""</span>
+        <span class="kw">if</span> <span class="fn">scores</span><span class="pn">[</span><span class="fn">i</span><span class="pn">]</span> <span class="pn">==</span> <span class="fn">highest</span><span class="pn">:</span>
+            <span class="fn">tag</span> <span class="pn">=</span> <span class="str">"  ← 최고점 🏆"</span>
+        <span class="kw">elif</span> <span class="fn">scores</span><span class="pn">[</span><span class="fn">i</span><span class="pn">]</span> <span class="pn">==</span> <span class="fn">lowest</span><span class="pn">:</span>
+            <span class="fn">tag</span> <span class="pn">=</span> <span class="str">"  ← 최저점 📉"</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">f"  {subjects[i]:8s}: {scores[i]:3d}점{tag}"</span><span class="pn">)</span>
+
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"----------------------------"</span><span class="pn">)</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">f"  합 계 : {total}점"</span><span class="pn">)</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">f"  평 균 : {average:.1f}점"</span><span class="pn">)</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">f"  학 점 : {grade}"</span><span class="pn">)</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"━━━━━━━━━━━━━━━━━━━━━━━━━━━━"</span><span class="pn">)</span>
+
+
+<span class="cm"># ── 메인 코드 ──</span>
+<span class="fn">subjects</span><span class="pn">,</span> <span class="fn">scores</span> <span class="pn">=</span> <span class="fn">get_input</span><span class="pn">()</span>
+<span class="fn">total</span>   <span class="pn">=</span> <span class="fn">get_total</span><span class="pn">(</span><span class="fn">scores</span><span class="pn">)</span>
+<span class="fn">average</span> <span class="pn">=</span> <span class="fn">get_average</span><span class="pn">(</span><span class="fn">scores</span><span class="pn">)</span>
+<span class="fn">grade</span>   <span class="pn">=</span> <span class="fn">get_grade</span><span class="pn">(</span><span class="fn">average</span><span class="pn">)</span>
+<span class="fn">print_report</span><span class="pn">(</span><span class="fn">subjects</span><span class="pn">,</span> <span class="fn">scores</span><span class="pn">,</span> <span class="fn">total</span><span class="pn">,</span> <span class="fn">average</span><span class="pn">,</span> <span class="fn">grade</span><span class="pn">)</span></pre>
+  </div>
+
+
+  <!-- ─── 도전 과제 ─── -->
+  <div class="challenge-box">
+    <div class="challenge-title">★ 도전 과제 — 힌트 없음</div>
+    <ul class="challenge-list">
+      <li><strong>통과/미통과 판별:</strong> 60점 미만 과목이 있으면 "⚠ 미통과 과목이 있습니다"를 함께 출력하세요. 어떤 과목인지도 표시하면 좋습니다.</li>
+      <li><strong>점수 입력 검증:</strong> 점수가 0~100 범위를 벗어나면 "유효하지 않은 점수입니다. 다시 입력하세요."를 출력하고 재입력을 받으세요. (<code>while True</code>와 <code>break</code> 활용)</li>
+      <li><strong>순위 매기기:</strong> 점수 순서대로 1등~N등 순위를 함께 출력하는 <code>print_ranking(subjects, scores)</code> 함수를 만드세요.</li>
+      <li><strong>다시 계산:</strong> 결과 출력 후 "다른 성적을 입력하시겠습니까? (y/n)"을 물어보고 y이면 처음부터 다시 실행하세요.</li>
+    </ul>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <div class="cheer-box">
+    <span class="cheer-icon">🏗️</span>
+    <div class="cheer-text">
+      <strong>코드를 함수로 설계하는 개발자가 됐습니다!</strong><br>
+      이번 프로젝트에서 가장 중요한 것은 결과 출력이 아닙니다. <em>"기능 하나 = 함수 하나"</em> 원칙으로 코드를 나눈 경험입니다. 메인 코드가 단 세 줄로 읽히는 것, 느껴지시나요? 이것이 실무에서도 통하는 코드 설계 방식입니다. 다음 챕터에서는 기본값 매개변수와 *args를 배워 함수를 더 유연하게 만들어봅니다! 🚀
+    </div>
+  </div>
+
+  <div class="chap-nav">
+    <a href="30-quiz-function-basic.html" class="chap-nav-btn">
+      <span class="cnb-dir">← 이전 챕터</span>
+      <span class="cnb-title"><span>30.</span> 연습문제 — 함수 기초</span>
+    </a>
+    <a href="32-function-advanced.html" class="chap-nav-btn next">
+      <span class="cnb-dir">다음 챕터 →</span>
+      <span class="cnb-title"><span>32.</span> 함수 심화</span>
+    </a>
+  </div>
+
+</div>
+</main>
+</div>
+
+<script>
+  const isMobile = () => window.innerWidth <= 720;
+  const overlay  = document.getElementById('sidebarOverlay');
+
+  function toggleSidebar() {
+    document.body.classList.toggle('sidebar-closed');
+    if (isMobile()) overlay.classList.toggle('visible', !document.body.classList.contains('sidebar-closed'));
+    localStorage.setItem('sp-sidebar', document.body.classList.contains('sidebar-closed') ? 'closed' : 'open');
+  }
+  function closeSidebar() {
+    document.body.classList.add('sidebar-closed');
+    overlay.classList.remove('visible');
+    localStorage.setItem('sp-sidebar', 'closed');
+  }
+  function toggleGroup(id) { document.getElementById(id).classList.toggle('open'); }
+
+  function toggleHint(id) {
+    document.getElementById(id).classList.toggle('open');
+  }
+  function toggleAnswer(btn) {
+    const body = document.getElementById('answerBody');
+    const isVisible = body.classList.toggle('visible');
+    btn.querySelector('span:first-child').textContent = isVisible
+      ? '▲ 정답 코드 접기'
+      : '▼ 정답 코드 펼치기 — 스스로 먼저 풀어보세요';
+  }
+
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = '복사됨 ✓';
+      btn.style.color = 'var(--accent)';
+      setTimeout(() => { btn.textContent = '복사'; btn.style.color = ''; }, 2000);
+    });
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    if (isMobile()) document.body.classList.add('sidebar-closed');
+    else if (localStorage.getItem('sp-sidebar') === 'closed') document.body.classList.add('sidebar-closed');
+  });
+  window.addEventListener('resize', () => { if (!isMobile()) overlay.classList.remove('visible'); });
+</script>
+</body>
+</html>

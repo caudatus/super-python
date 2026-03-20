@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>18. 조건문 — 브론즈 | 슈퍼파이썬</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#111111;--bg-nav:#0A0A0A;--bg-side:#0E0E0E;--bg-card:#181818;
+      --bg-code:#1A1A1A;--bg-tip:#131A13;--bg-warn:#1A1410;--bg-info:#101520;
+      --accent:#00CC70;--accent-dim:#007A42;--accent-bg:rgba(0,204,112,0.07);
+      --accent2:#C8A000;--text:#D8D8D8;--text-head:#EFEFEF;
+      --text2:#888888;--text3:#444444;--border:#222222;--border2:#2E2E2E;
+      --sy-kw:#C792EA;--sy-fn:#82AAFF;--sy-str:#C3E88D;
+      --sy-cm:#546E7A;--sy-num:#F78C6C;--sy-pn:#89DDFF;--sy-ln-t:#555555;
+      --sidebar-w:248px;--content-max:720px;--header-h:48px;
+    }
+    /* 합자(ligature) 비활성화 — >=, <=, != 등이 하나의 기호로 합쳐지는 현상 방지 */
+    * { font-variant-ligatures: none; }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:15px;line-height:1.8;overflow-x:hidden}
+    ::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:var(--bg)}
+    ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+    ::-webkit-scrollbar-thumb:hover{background:var(--accent-dim)}
+    .top-header{position:fixed;top:0;left:0;right:0;z-index:200;height:var(--header-h);background:var(--bg-nav);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px}
+    .header-open-btn{display:none;align-items:center;justify-content:center;width:28px;height:28px;flex-shrink:0;margin-right:12px;background:var(--bg-card);border:1px solid var(--border2);border-radius:4px;cursor:pointer;color:var(--text2);font-size:12px;transition:background .15s,color .15s}
+    .header-open-btn:hover{background:var(--accent-bg);color:var(--accent);border-color:var(--accent)}
+    body.sidebar-closed .header-open-btn{display:flex}
+    .header-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0;font-family:'JetBrains Mono',monospace;font-size:12px;overflow:hidden}
+    .header-logo{color:var(--accent);text-decoration:none;font-weight:700;white-space:nowrap}
+    .header-sep{color:var(--text3);flex-shrink:0}
+    .header-grade{color:var(--text2);white-space:nowrap}
+    .header-chap{color:var(--text-head);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .header-center{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);display:flex;align-items:center;gap:8px;flex-shrink:0;padding:0 16px}
+    .progress-mini{width:80px;height:3px;background:var(--border2);border-radius:2px;overflow:hidden}
+    .progress-mini-fill{height:100%;background:var(--accent);border-radius:2px}
+    .header-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+    .nav-btn{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);background:transparent;border:1px solid var(--border2);padding:4px 12px;text-decoration:none;transition:border-color .15s,color .15s;white-space:nowrap}
+    .nav-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .nav-btn.primary{color:var(--bg-nav);background:var(--accent);border-color:var(--accent);font-weight:700}
+    .nav-btn.primary:hover{filter:brightness(1.1)}
+    .layout{display:flex;padding-top:var(--header-h);min-height:100vh}
+    .sidebar{width:var(--sidebar-w);flex-shrink:0;position:fixed;top:var(--header-h);bottom:0;left:0;background:var(--bg-side);border-right:1px solid var(--border);overflow-y:auto;overflow-x:hidden;transition:transform .22s ease;z-index:150;padding-top:8px}
+    body.sidebar-closed .sidebar{transform:translateX(calc(-1 * var(--sidebar-w)))}
+    body.sidebar-closed .content{margin-left:0}
+    .sidebar-toggle{position:absolute;top:10px;right:10px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:var(--bg-card);border:1px solid var(--border2);border-radius:4px;cursor:pointer;color:var(--text2);font-size:12px;z-index:10;transition:background .15s,color .15s}
+    .sidebar-toggle:hover{background:var(--accent-bg);color:var(--accent);border-color:var(--accent)}
+    body.sidebar-closed .sidebar-toggle{display:none}
+    .sidebar-progress{margin:44px 12px 12px;padding:12px 14px;background:var(--bg-card);border:1px solid var(--border)}
+    .sp-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);margin-bottom:6px;letter-spacing:.08em}
+    .sp-bar{height:4px;background:var(--border2);border-radius:2px;overflow:hidden;margin-bottom:5px}
+    .sp-fill{height:100%;background:var(--accent);border-radius:2px}
+    .sp-text{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2)}
+    .sp-text span{color:var(--accent)}
+    .sb-group{border-bottom:1px solid var(--border)}
+    .sb-group-header{display:flex;align-items:center;justify-content:space-between;padding:9px 14px 9px 12px;cursor:pointer;user-select:none;transition:background .12s;gap:8px}
+    .sb-group-header:hover{background:rgba(255,255,255,.03)}
+    .sb-group-title{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--text2);text-transform:uppercase;flex:1}
+    .sb-group.current .sb-group-title{color:var(--accent)}
+    .sb-group-arrow{font-size:9px;color:var(--text3);transition:transform .2s;flex-shrink:0}
+    .sb-group.open .sb-group-arrow{transform:rotate(90deg);color:var(--accent)}
+    .sb-items{overflow:hidden;max-height:0;transition:max-height .28s ease}
+    .sb-group.open .sb-items{max-height:1200px}
+    .sb-item{display:flex;align-items:baseline;gap:8px;padding:6px 14px 6px 20px;font-size:13px;color:var(--text2);text-decoration:none;border-left:2px solid transparent;transition:background .1s,color .1s,border-color .1s;line-height:1.45}
+    .sb-item:hover{background:rgba(255,255,255,.03);color:var(--text)}
+    .sb-item.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-bg);font-weight:500}
+    .sb-item.done{color:var(--text3)}
+    .sb-icon{font-size:9px;flex-shrink:0;font-family:'JetBrains Mono',monospace;width:10px;text-align:center;color:var(--text3)}
+    .sb-item.active .sb-icon{color:var(--accent)}
+    .sb-item.done .sb-icon{color:var(--accent-dim)}
+    .sb-num{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);flex-shrink:0;min-width:22px}
+    .content{margin-left:var(--sidebar-w);flex:1;min-width:0;padding:48px 52px 96px;transition:margin-left .22s ease}
+    .content-inner{max-width:var(--content-max);margin:0 auto}
+    .chap-meta{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .badge{font-size:10px;padding:2px 8px;background:var(--accent-bg);color:var(--accent);border:1px solid rgba(0,204,112,.25);letter-spacing:.06em}
+    .chap-title{font-family:'JetBrains Mono',monospace;font-size:clamp(22px,3.5vw,30px);font-weight:700;color:var(--text-head);line-height:1.25;margin-bottom:8px}
+    .chap-title .hl{color:var(--accent)}
+    .chap-subtitle{font-size:15px;color:var(--text2);margin-bottom:32px;line-height:1.65}
+    .goal-box{border:1px solid var(--border2);border-left:3px solid var(--accent);background:var(--bg-card);padding:16px 20px;margin-bottom:44px}
+    .goal-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:.1em;margin-bottom:12px}
+    .goal-list{list-style:none;display:flex;flex-direction:column;gap:7px}
+    .goal-list li{font-size:14px;color:var(--text2);display:flex;align-items:baseline;gap:10px;line-height:1.65}
+    .goal-list li::before{content:'▸';color:var(--accent);font-size:10px;flex-shrink:0;font-family:'JetBrains Mono',monospace}
+    .section-divider{height:1px;background:var(--border);margin:44px 0}
+    h2{font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:700;color:var(--text-head);margin:44px 0 16px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+    h2 .n{color:var(--text3);font-weight:400;margin-right:6px}
+    h3{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--accent);margin:28px 0 10px}
+    p{color:var(--text);margin-bottom:16px;line-height:1.9;font-size:15px}
+    p:last-child{margin-bottom:0}
+    code{font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--bg-code);color:var(--accent);padding:1px 6px;border:1px solid var(--border2);border-radius:2px}
+    strong{color:var(--text-head);font-weight:700}
+    ul,ol{padding-left:20px;margin-bottom:16px}
+    li{color:var(--text);line-height:1.85;margin-bottom:4px;font-size:15px}
+    .code-block{background:var(--bg-code);border:1px solid var(--border2);margin:16px 0;overflow:hidden}
+    .code-block-header{display:flex;align-items:center;justify-content:space-between;padding:7px 14px;background:#141414;border-bottom:1px solid var(--border)}
+    .cb-lang{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3)}
+    .cb-copy{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);background:transparent;border:none;cursor:pointer;transition:color .15s;padding:0}
+    .cb-copy:hover{color:var(--accent)}
+    .code-block-body{display:flex;overflow-x:auto;padding:12px 0}
+    .ln-col{min-width:40px;padding:0 10px;text-align:right;border-right:1px solid var(--border);user-select:none;flex-shrink:0}
+    .ln-col span{display:block;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.7;color:var(--sy-ln-t)}
+    .code-pre-col{padding:0 18px;flex:1}
+    .code-pre-col pre{font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.7;color:var(--text);white-space:pre;margin:0}
+    .kw{color:#C792EA}.fn{color:#82AAFF}.str{color:#C3E88D}.cm{color:#546E7A}.num{color:#F78C6C}.pn{color:#89DDFF}
+    .output-block{background:#0D0D0D;border:1px solid var(--border);border-top:none;padding:10px 18px}
+    .out-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.08em;margin-bottom:6px}
+    .output-block pre{font-family:'JetBrains Mono',monospace;font-size:13px;color:#AAAAAA;line-height:1.7;margin:0;white-space:pre}
+    .out-g{color:var(--accent)}
+    .error-block{background:#160A0A;border:1px solid #3A1A1A;border-left:3px solid #FF4444;margin:16px 0;padding:12px 18px}
+    .error-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:#FF4444;letter-spacing:.08em;margin-bottom:6px}
+    .error-block pre{font-family:'JetBrains Mono',monospace;font-size:12px;color:#FF8080;line-height:1.7;margin:0;white-space:pre-wrap}
+    .tip-box,.warn-box,.info-box{padding:14px 18px;margin:20px 0;border-left:3px solid}
+    .tip-box{background:var(--bg-tip);border-color:var(--accent)}
+    .warn-box{background:var(--bg-warn);border-color:var(--accent2)}
+    .info-box{background:var(--bg-info);border-color:#4FC3F7}
+    .box-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;margin-bottom:8px;font-weight:700}
+    .tip-box .box-label{color:var(--accent)}
+    .warn-box .box-label{color:var(--accent2)}
+    .info-box .box-label{color:#4FC3F7}
+    .tip-box p,.warn-box p,.info-box p{font-size:14px;color:var(--text2);margin-bottom:0;line-height:1.8}
+    .tip-box p+p,.warn-box p+p,.info-box p+p{margin-top:8px}
+    .try-section{border:1px solid var(--border2);background:var(--bg-card);margin:36px 0}
+    .try-header{padding:11px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+    .try-title{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--accent)}
+    .try-body{padding:18px 20px}
+    .try-body>p{font-size:14px;margin-bottom:16px;color:var(--text2)}
+    .try-step{display:flex;gap:12px;margin-bottom:10px;align-items:baseline}
+    .try-step-n{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);flex-shrink:0;min-width:26px}
+    .try-step-t{font-size:14px;color:var(--text2);line-height:1.75}
+    .summary-box{border:1px solid var(--border2);border-top:2px solid var(--accent);background:var(--bg-card);padding:20px 22px;margin:44px 0 32px}
+    .summary-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:.1em;margin-bottom:16px}
+    .summary-grid{display:grid;grid-template-columns:160px 1fr;gap:10px 18px}
+    .sg-key{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text3);padding-top:2px}
+    .sg-val{font-size:14px;color:var(--text2);line-height:1.65}
+    .cheer-box{border:1px solid var(--border);background:var(--bg);padding:18px 22px;margin-bottom:44px;display:flex;gap:14px;align-items:flex-start}
+    .cheer-icon{font-size:18px;flex-shrink:0;line-height:1.5}
+    .cheer-text{font-size:14px;color:var(--text2);line-height:1.85}
+    .cheer-text strong{color:var(--text-head)}
+    .chap-nav{display:flex;justify-content:space-between;padding-top:32px;border-top:1px solid var(--border);gap:12px;flex-wrap:wrap}
+    .chap-nav-btn{display:flex;flex-direction:column;gap:4px;text-decoration:none;padding:14px 18px;border:1px solid var(--border2);background:var(--bg-card);flex:1;max-width:300px;transition:border-color .15s}
+    .chap-nav-btn:hover{border-color:var(--accent)}
+    .chap-nav-btn.next{text-align:right}
+    .cnb-dir{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.07em}
+    .cnb-title{font-size:13px;color:var(--text2);line-height:1.45}
+    .cnb-title span{color:var(--accent);font-family:'JetBrains Mono',monospace}
+    /* 조건문 전용 컴포넌트 */
+    .flow-diagram{background:var(--bg-card);border:1px solid var(--border2);padding:28px 20px;margin:20px 0;display:flex;flex-direction:column;align-items:center;gap:0}
+    .fd-box{font-family:'JetBrains Mono',monospace;font-size:13px;padding:10px 24px;border:1px solid;text-align:center;min-width:160px}
+    .fd-box.start{border-color:var(--border2);color:var(--text2);background:var(--bg-code)}
+    .fd-box.cond{border-color:var(--accent);color:var(--accent);background:var(--accent-bg);transform:rotate(0deg)}
+    .fd-box.action{border-color:var(--sy-fn);color:var(--sy-fn);background:rgba(130,170,255,.06)}
+    .fd-box.skip{border-color:var(--text3);color:var(--text3);background:transparent;font-size:12px}
+    .fd-arrow{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);text-align:center;padding:4px 0;display:flex;flex-direction:column;align-items:center;gap:1px}
+    .fd-row{display:flex;align-items:center;gap:0;width:100%;justify-content:center}
+    .fd-branch{display:flex;align-items:flex-start;gap:24px;width:100%}
+    .fd-branch-side{display:flex;flex-direction:column;align-items:center;flex:1}
+    .fd-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);margin-bottom:4px}
+    .fd-label.yes{color:var(--accent)}
+    .fd-label.no{color:#FF7070}
+    /* 비교 연산자 테이블 */
+    .op-table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}
+    .op-table th{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--text3);text-align:left;padding:8px 14px;border-bottom:2px solid var(--border2);background:var(--bg-card)}
+    .op-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text2);line-height:1.6;vertical-align:top}
+    .op-table td:first-child{font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--sy-pn);font-weight:700;white-space:nowrap}
+    .op-table td:nth-child(2){font-size:13px;color:var(--text)}
+    .op-table tr:last-child td{border-bottom:none}
+    /* if/elif/else 구조 시각화 */
+    .if-anatomy{background:var(--bg-card);border:1px solid var(--border2);padding:20px 24px;margin:20px 0;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:2}
+    .ia-row{display:flex;align-items:baseline;gap:0}
+    .ia-kw{color:#C792EA;min-width:44px}
+    .ia-cond{color:#89DDFF}
+    .ia-colon{color:#89DDFF}
+    .ia-indent{display:inline-block;width:28px}
+    .ia-action{color:#C3E88D}
+    .ia-label{font-size:10px;color:var(--text3);margin-left:16px;font-family:'Noto Sans KR',sans-serif;letter-spacing:0}
+    /* 중첩 if 들여쓰기 시각화 */
+    .indent-visual{background:var(--bg-code);border:1px solid var(--border2);padding:16px 20px;margin:16px 0;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.9}
+    .iv-l0{color:var(--text)}
+    .iv-l1{padding-left:28px;color:var(--text)}
+    .iv-l2{padding-left:56px;color:var(--text)}
+    .iv-bar0{border-left:2px solid var(--accent);padding-left:12px}
+    .iv-bar1{border-left:2px solid var(--sy-fn);padding-left:12px}
+    .sidebar-overlay{display:none;position:fixed;inset:0;top:var(--header-h);z-index:140;background:rgba(0,0,0,.65)}
+    @media(max-width:720px){.sidebar-overlay.visible{display:block}.content{margin-left:0;padding:28px 20px 72px}.header-center{display:none}.summary-grid{grid-template-columns:1fr}}
+    @media(max-width:480px){.header-grade{display:none}.chap-nav-btn{max-width:100%}.header-right .nav-btn:not(.primary){display:none}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
+  </style>
+</head>
+<body>
+
+<header class="top-header">
+  <button class="header-open-btn" onclick="toggleSidebar()">▶</button>
+  <div class="header-left">
+    <a href="../index.html" class="header-logo">SUPERPYTHON</a>
+    <span class="header-sep">/</span>
+    <span class="header-grade">🟤 BRONZE</span>
+    <span class="header-sep">/</span>
+    <span class="header-chap">18. 조건문 — if, elif, else</span>
+  </div>
+  <div class="header-center">
+    <span>18 / 48</span>
+    <div class="progress-mini"><div class="progress-mini-fill" style="width:37.50%"></div></div>
+    <span>37%</span>
+  </div>
+  <div class="header-right">
+    <a href="17-mini-project-02.html" class="nav-btn">← 이전</a>
+    <a href="19-quiz-if.html" class="nav-btn primary">다음 →</a>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<div class="layout">
+<aside class="sidebar" id="sidebar">
+  <button class="sidebar-toggle" onclick="toggleSidebar()">◀</button>
+  <div class="sidebar-progress">
+    <div class="sp-label">BRONZE 진행률</div>
+    <div class="sp-bar"><div class="sp-fill" style="width:37.50%"></div></div>
+    <div class="sp-text"><span>18</span> / 48 챕터 완료</div>
+  </div>
+  <div class="sb-group" id="grp-env"><div class="sb-group-header" onclick="toggleGroup('grp-env')"><span class="sb-group-title">환경 설정</span><span class="sb-group-arrow">▶</span></div><div class="sb-items"><a href="01-what-is-python.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">01</span>파이썬이란?</a><a href="02-setup.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">02</span>개발환경 설치</a></div></div>
+  <div class="sb-group" id="grp-basic1"><div class="sb-group-header" onclick="toggleGroup('grp-basic1')"><span class="sb-group-title">기초 문법 1</span><span class="sb-group-arrow">▶</span></div><div class="sb-items"><a href="03-print.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">03</span>print()란?</a><a href="04-quiz-print.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">04</span>연습문제</a><a href="05-variables.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">05</span>변수와 데이터 타입</a><a href="06-operators.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">06</span>연산자</a><a href="07-quiz-variables-operators.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">07</span>연습문제</a><a href="08-string.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">08</span>문자열 String</a><a href="09-quiz-string.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">09</span>연습문제</a><a href="10-fstring.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">10</span>f-string 완전정리</a><a href="11-quiz-fstring.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">11</span>연습문제</a><a href="12-mini-project-01.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">12</span>🎮 미니 프로젝트 ①</a></div></div>
+  <div class="sb-group" id="grp-basic2"><div class="sb-group-header" onclick="toggleGroup('grp-basic2')"><span class="sb-group-title">기초 문법 2</span><span class="sb-group-arrow">▶</span></div><div class="sb-items"><a href="13-list.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">13</span>리스트</a><a href="14-quiz-list.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">14</span>연습문제</a><a href="15-input.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">15</span>input() 함수</a><a href="16-quiz-input.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">16</span>연습문제</a><a href="17-mini-project-02.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">17</span>🎮 미니 프로젝트 ②</a></div></div>
+  <div class="sb-group current open" id="grp-flow"><div class="sb-group-header" onclick="toggleGroup('grp-flow')"><span class="sb-group-title">흐름 제어</span><span class="sb-group-arrow">▶</span></div><div class="sb-items"><a href="18-if.html" class="sb-item active"><span class="sb-icon">▶</span><span class="sb-num">18</span>조건문 (if)</a><a href="19-quiz-if.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">19</span>연습문제</a><a href="20-mini-project-03.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">20</span>🎮 미니 프로젝트 ③</a><a href="21-for-range.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">21</span>for문과 range()</a><a href="22-quiz-for.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">22</span>연습문제</a><a href="23-while.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">23</span>while문</a><a href="24-quiz-while.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">24</span>연습문제</a><a href="25-mini-project-04.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">25</span>🎮 미니 프로젝트 ④</a></div></div>
+  <div class="sb-group" id="grp-error"><div class="sb-group-header" onclick="toggleGroup('grp-error')"><span class="sb-group-title">에러 &amp; 디버깅</span><span class="sb-group-arrow">▶</span></div><div class="sb-items"><a href="26-error-types.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">26</span>에러 읽는 법</a><a href="27-debugging.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">27</span>기초 디버깅 실습</a><a href="28-quiz-debugging.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">28</span>연습문제</a></div></div>
+  <div class="sb-group" id="grp-func"><div class="sb-group-header" onclick="toggleGroup('grp-func')"><span class="sb-group-title">함수</span><span class="sb-group-arrow">▶</span></div><div class="sb-items"><a href="29-function-basic.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">29</span>함수 기초</a><a href="30-quiz-function-basic.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">30</span>연습문제</a><a href="31-mini-project-05.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">31</span>🎮 미니 프로젝트 ⑤</a><a href="32-function-advanced.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">32</span>함수 심화</a><a href="33-quiz-function-advanced.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">33</span>연습문제</a><a href="34-module.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">34</span>모듈</a><a href="35-quiz-module.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">35</span>연습문제</a><a href="36-mini-project-06.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">36</span>🎮 미니 프로젝트 ⑥</a></div></div>
+  <div class="sb-group" id="grp-ds"><div class="sb-group-header" onclick="toggleGroup('grp-ds')"><span class="sb-group-title">자료구조</span><span class="sb-group-arrow">▶</span></div><div class="sb-items"><a href="37-dictionary.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">37</span>딕셔너리</a><a href="38-quiz-dictionary.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">38</span>연습문제</a><a href="39-tuple-set.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">39</span>튜플과 셋</a><a href="40-quiz-tuple-set.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">40</span>연습문제</a><a href="41-mini-project-07.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">41</span>🎮 미니 프로젝트 ⑦</a></div></div>
+  <div class="sb-group" id="grp-file"><div class="sb-group-header" onclick="toggleGroup('grp-file')"><span class="sb-group-title">파일 &amp; 예외처리</span><span class="sb-group-arrow">▶</span></div><div class="sb-items"><a href="42-file-io.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">42</span>파일 입출력</a><a href="43-quiz-file-io.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">43</span>연습문제</a><a href="44-exception-basic.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">44</span>예외처리 기초</a><a href="45-quiz-exception.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">45</span>연습문제</a><a href="46-mini-project-08.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">46</span>🎮 미니 프로젝트 ⑧</a></div></div>
+  <div class="sb-group" id="grp-end"><div class="sb-group-header" onclick="toggleGroup('grp-end')"><span class="sb-group-title">마무리</span><span class="sb-group-arrow">▶</span></div><div class="sb-items"><a href="47-final-project.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">47</span>★ 최종 프로젝트</a><a href="48-next-step.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">48</span>다음 단계 미리보기</a></div></div>
+</aside>
+
+<main class="content" id="mainContent">
+<div class="content-inner">
+
+  <div class="chap-meta">
+    <span class="badge">LESSON</span>
+    <span>흐름 제어</span>
+    <span style="color:var(--text3)">·</span>
+    <span>챕터 18 / 48</span>
+  </div>
+  <h1 class="chap-title"><span class="hl">조건문</span> — if, elif, else</h1>
+  <p class="chap-subtitle">프로그램이 스스로 판단하게 만드는 방법. 조건이 참이면 이걸 하고, 거짓이면 저걸 하라 — 이것이 모든 프로그램의 핵심입니다.</p>
+
+  <div class="goal-box">
+    <div class="goal-label">▸ 이 챕터를 마치면</div>
+    <ul class="goal-list">
+      <li><code>if</code> 문으로 조건이 참일 때만 코드를 실행할 수 있다</li>
+      <li><code>elif</code>와 <code>else</code>로 여러 경우를 순서대로 분기할 수 있다</li>
+      <li>비교 연산자(<code>==</code>, <code>!=</code>, <code>&gt;</code>, <code>&lt;</code>, <code>&gt;=</code>, <code>&lt;=</code>)를 정확히 사용할 수 있다</li>
+      <li><code>and</code>, <code>or</code>, <code>not</code>으로 조건을 조합할 수 있다</li>
+      <li>들여쓰기가 왜 중요한지 이해하고 올바르게 쓸 수 있다</li>
+    </ul>
+  </div>
+
+  <!-- ─────────────────────────────── -->
+  <h2><span class="n">1.</span>조건문이란?</h2>
+
+  <p>지금까지 작성한 코드는 위에서 아래로 <strong>순서대로</strong> 실행됐습니다. 하지만 현실의 프로그램은 항상 같은 행동만 하지 않습니다.</p>
+
+  <p>카페 앱을 생각해봅시다. 나이가 19세 이상이면 아메리카노를 주문할 수 있고, 미만이면 "성인만 가능합니다"라는 메시지를 보여줍니다. 이렇게 <strong>조건에 따라 다른 동작을 실행하는 것</strong>이 조건문입니다.</p>
+
+  <div class="flow-diagram">
+    <div class="fd-box start">나이 입력</div>
+    <div class="fd-arrow">│<br>▼</div>
+    <div class="fd-box cond">나이 &gt;= 19 ?</div>
+    <div style="display:flex;width:100%;justify-content:center;gap:0;margin-top:0">
+      <div style="display:flex;flex-direction:column;align-items:center;flex:1">
+        <div class="fd-arrow"><span style="color:var(--accent)">YES ✓</span><br>│<br>▼</div>
+        <div class="fd-box action">주문 완료!</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;flex:1">
+        <div class="fd-arrow"><span style="color:#FF7070">NO ✗</span><br>│<br>▼</div>
+        <div class="fd-box skip">성인만 가능합니다</div>
+      </div>
+    </div>
+  </div>
+
+  <p>파이썬에서는 이 로직을 <code>if</code>문 하나면 표현할 수 있습니다.</p>
+
+  <!-- ─────────────────────────────── -->
+  <h2><span class="n">2.</span>if 문 기본 구조</h2>
+
+  <p><code>if</code>는 "만약 ~라면"이라는 뜻입니다. 조건이 <code>True</code>일 때만 들여쓰기된 블록이 실행됩니다.</p>
+
+  <div class="if-anatomy">
+    <div class="ia-row"><span class="ia-kw">if </span><span class="ia-cond">조건식</span><span class="ia-colon">:</span><span class="ia-label">← 콜론(:) 필수!</span></div>
+    <div class="ia-row"><span class="ia-indent"></span><span class="ia-action">실행할 코드</span><span class="ia-label">← 반드시 들여쓰기(스페이스 4칸)</span></div>
+    <div class="ia-row"><span class="ia-indent"></span><span class="ia-action">실행할 코드 2</span><span class="ia-label">← 같은 들여쓰기 = 같은 블록</span></div>
+    <div class="ia-row" style="margin-top:8px"><span style="color:var(--text3)">다음 코드</span><span class="ia-label">← 들여쓰기 없음 = if 블록 밖</span></div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-block-header"><span class="cb-lang">python</span><button class="cb-copy" onclick="copyCode(this)">복사</button></div>
+    <div class="code-block-body">
+      <div class="ln-col"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+      <div class="code-pre-col"><pre><span class="fn">age</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"나이를 입력하세요: "</span><span class="pn">))</span>
+
+<span class="kw">if</span> age <span class="pn">&gt;=</span> <span class="num">19</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"어서오세요! 주문할 수 있습니다."</span><span class="pn">)</span>
+
+<span class="fn">print</span><span class="pn">(</span><span class="str">"프로그램 종료"</span><span class="pn">)</span>  <span class="cm"># 항상 실행됨</span></pre></div>
+    </div>
+  </div>
+  <div class="output-block">
+    <div class="out-label">실행 결과 (입력: 20)</div>
+    <pre><span class="out-g">어서오세요! 주문할 수 있습니다.</span>
+프로그램 종료</pre>
+  </div>
+  <div class="output-block" style="margin-top:4px">
+    <div class="out-label">실행 결과 (입력: 16)</div>
+    <pre>프로그램 종료</pre>
+  </div>
+
+  <p>나이가 16이면 <code>if</code> 블록 안의 print는 실행되지 않고, <strong>블록 밖의 "프로그램 종료"는 항상 실행</strong>됩니다.</p>
+
+  <div class="warn-box">
+    <div class="box-label">⚠ 들여쓰기 — 파이썬에서 가장 중요한 규칙</div>
+    <p>파이썬은 들여쓰기로 코드 블록을 구분합니다. <strong>스페이스 4칸</strong>이 표준입니다. 탭과 스페이스를 섞으면 오류가 납니다.</p>
+    <p>콜론(<code>:</code>) 뒤에 반드시 들여쓰기된 블록이 있어야 합니다. 없으면 <code>IndentationError</code>가 발생합니다.</p>
+  </div>
+
+  <!-- ─────────────────────────────── -->
+  <h2><span class="n">3.</span>else — 그렇지 않다면</h2>
+
+  <p><code>else</code>는 <code>if</code> 조건이 <code>False</code>일 때 실행되는 블록입니다. "아니면"이라고 생각하면 됩니다.</p>
+
+  <div class="code-block">
+    <div class="code-block-header"><span class="cb-lang">python</span><button class="cb-copy" onclick="copyCode(this)">복사</button></div>
+    <div class="code-block-body">
+      <div class="ln-col"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span></div>
+      <div class="code-pre-col"><pre><span class="fn">age</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"나이를 입력하세요: "</span><span class="pn">))</span>
+
+<span class="kw">if</span> age <span class="pn">&gt;=</span> <span class="num">19</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"어서오세요! 주문할 수 있습니다."</span><span class="pn">)</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"죄송합니다. 성인만 이용 가능합니다."</span><span class="pn">)</span></pre></div>
+    </div>
+  </div>
+  <div class="output-block">
+    <div class="out-label">실행 결과 (입력: 17)</div>
+    <pre><span class="out-g">죄송합니다. 성인만 이용 가능합니다.</span></pre>
+  </div>
+
+  <p><code>if</code>와 <code>else</code>는 반드시 <strong>둘 중 하나만</strong> 실행됩니다. 둘 다 실행되거나 둘 다 건너뛰는 일은 없습니다.</p>
+
+  <!-- ─────────────────────────────── -->
+  <h2><span class="n">4.</span>elif — 아니면, 이 조건은?</h2>
+
+  <p>경우가 셋 이상일 때는 <code>elif</code>(else if의 줄임말)를 사용합니다. <code>elif</code>는 앞의 조건이 모두 <code>False</code>일 때만 검사됩니다.</p>
+
+  <div class="code-block">
+    <div class="code-block-header"><span class="cb-lang">python</span><button class="cb-copy" onclick="copyCode(this)">복사</button></div>
+    <div class="code-block-body">
+      <div class="ln-col"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span></div>
+      <div class="code-pre-col"><pre><span class="fn">score</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"점수를 입력하세요: "</span><span class="pn">))</span>
+
+<span class="kw">if</span> score <span class="pn">&gt;=</span> <span class="num">90</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"A등급"</span><span class="pn">)</span>
+<span class="kw">elif</span> score <span class="pn">&gt;=</span> <span class="num">80</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"B등급"</span><span class="pn">)</span>
+<span class="kw">elif</span> score <span class="pn">&gt;=</span> <span class="num">70</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"C등급"</span><span class="pn">)</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"재시험"</span><span class="pn">)</span></pre></div>
+    </div>
+  </div>
+  <div class="output-block">
+    <div class="out-label">실행 결과 (입력: 85)</div>
+    <pre><span class="out-g">B등급</span></pre>
+  </div>
+
+  <p>점수 85는 <code>90</code> 이상이 아니므로 첫 번째 <code>if</code>를 통과하고, <code>80</code> 이상이므로 <code>elif</code>에서 잡힙니다. 한 번 조건에 걸리면 <strong>나머지 elif와 else는 모두 건너뜁니다.</strong></p>
+
+  <div class="tip-box">
+    <div class="box-label">💡 elif는 몇 개든 쓸 수 있습니다</div>
+    <p><code>elif</code>는 필요한 만큼 이어 붙일 수 있습니다. <code>else</code>는 선택 사항이며, 쓴다면 반드시 맨 마지막에 옵니다. 순서는 항상 <code>if → elif → elif → ... → else</code>입니다.</p>
+  </div>
+
+  <!-- ─────────────────────────────── -->
+  <h2><span class="n">5.</span>비교 연산자</h2>
+
+  <p>조건식에는 <strong>비교 연산자</strong>를 사용합니다. 결과는 항상 <code>True</code> 또는 <code>False</code>입니다.</p>
+
+  <table class="op-table">
+    <thead><tr><th>연산자</th><th>의미</th><th>예시</th><th>결과</th></tr></thead>
+    <tbody>
+      <tr><td>==</td><td>같다</td><td><code>5 == 5</code></td><td><code>True</code></td></tr>
+      <tr><td>!=</td><td>다르다</td><td><code>5 != 3</code></td><td><code>True</code></td></tr>
+      <tr><td>&gt;</td><td>크다</td><td><code>7 &gt; 3</code></td><td><code>True</code></td></tr>
+      <tr><td>&lt;</td><td>작다</td><td><code>2 &lt; 1</code></td><td><code>False</code></td></tr>
+      <tr><td>&gt;=</td><td>크거나 같다</td><td><code>5 &gt;= 5</code></td><td><code>True</code></td></tr>
+      <tr><td>&lt;=</td><td>작거나 같다</td><td><code>4 &lt;= 3</code></td><td><code>False</code></td></tr>
+    </tbody>
+  </table>
+
+  <div class="warn-box">
+    <div class="box-label">⚠ = 과 == 는 완전히 다릅니다</div>
+    <p><code>=</code>는 <strong>대입</strong>(<code>x = 5</code> → x에 5를 넣는다), <code>==</code>는 <strong>비교</strong>(<code>x == 5</code> → x가 5인가?)입니다. 조건식에서 <code>=</code>를 쓰면 <code>SyntaxError</code>가 납니다.</p>
+  </div>
+
+  <div class="code-block">
+    <div class="code-block-header"><span class="cb-lang">python</span><button class="cb-copy" onclick="copyCode(this)">복사</button></div>
+    <div class="code-block-body">
+      <div class="ln-col"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span></div>
+      <div class="code-pre-col"><pre><span class="fn">name</span> <span class="pn">=</span> <span class="fn">input</span><span class="pn">(</span><span class="str">"이름: "</span><span class="pn">)</span>
+
+<span class="kw">if</span> name <span class="pn">==</span> <span class="str">"관리자"</span><span class="pn">:</span>        <span class="cm"># 문자열도 == 로 비교</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"관리자 페이지로 이동합니다."</span><span class="pn">)</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">f"안녕하세요, {name}님!"</span><span class="pn">)</span></pre></div>
+    </div>
+  </div>
+  <div class="output-block">
+    <div class="out-label">실행 결과 (입력: 관리자)</div>
+    <pre><span class="out-g">관리자 페이지로 이동합니다.</span></pre>
+  </div>
+
+  <!-- ─────────────────────────────── -->
+  <h2><span class="n">6.</span>논리 연산자 — and, or, not</h2>
+
+  <p>두 조건을 함께 검사하거나 반전시킬 때 논리 연산자를 씁니다.</p>
+
+  <table class="op-table">
+    <thead><tr><th>연산자</th><th>의미</th><th>예시</th><th>결과</th></tr></thead>
+    <tbody>
+      <tr><td>and</td><td>둘 다 참일 때만 True</td><td><code>age &gt;= 18 and age &lt;= 65</code></td><td>18~65세면 True</td></tr>
+      <tr><td>or</td><td>하나라도 참이면 True</td><td><code>score &gt;= 90 or bonus == True</code></td><td>90점 이상이거나 보너스면 True</td></tr>
+      <tr><td>not</td><td>참/거짓 반전</td><td><code>not name == "손님"</code></td><td>손님이 아니면 True</td></tr>
+    </tbody>
+  </table>
+
+  <div class="code-block">
+    <div class="code-block-header"><span class="cb-lang">python</span><button class="cb-copy" onclick="copyCode(this)">복사</button></div>
+    <div class="code-block-body">
+      <div class="ln-col"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span></div>
+      <div class="code-pre-col"><pre><span class="fn">age</span>   <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"나이: "</span><span class="pn">))</span>
+<span class="fn">score</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"점수: "</span><span class="pn">))</span>
+
+<span class="cm"># and — 나이가 18세 이상이고 점수가 60점 이상이어야 합격</span>
+<span class="kw">if</span> age <span class="pn">&gt;=</span> <span class="num">18</span> <span class="kw">and</span> score <span class="pn">&gt;=</span> <span class="num">60</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"합격입니다!"</span><span class="pn">)</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"조건을 충족하지 못했습니다."</span><span class="pn">)</span>
+
+<span class="cm"># or — 나이가 65세 이상이거나 장애인이면 우선 탑승</span></pre></div>
+    </div>
+  </div>
+  <div class="output-block">
+    <div class="out-label">실행 결과 (나이: 20, 점수: 75)</div>
+    <pre><span class="out-g">합격입니다!</span></pre>
+  </div>
+
+  <div class="tip-box">
+    <div class="box-label">💡 파이썬 범위 조건 — 수학처럼 쓸 수 있습니다</div>
+    <p>다른 언어와 달리 파이썬은 <code>0 &lt;= score &lt;= 100</code>처럼 연속 비교를 지원합니다. <code>score &gt;= 0 and score &lt;= 100</code>과 완전히 같습니다.</p>
+  </div>
+
+  <!-- ─────────────────────────────── -->
+  <h2><span class="n">7.</span>실전 예제 — 홀짝·등급·계절 판별</h2>
+
+  <h3>예제 1 — 홀수·짝수 판별</h3>
+  <div class="code-block">
+    <div class="code-block-header"><span class="cb-lang">python</span><button class="cb-copy" onclick="copyCode(this)">복사</button></div>
+    <div class="code-block-body">
+      <div class="ln-col"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+      <div class="code-pre-col"><pre><span class="fn">n</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"숫자를 입력하세요: "</span><span class="pn">))</span>
+
+<span class="kw">if</span> n <span class="pn">%</span> <span class="num">2</span> <span class="pn">==</span> <span class="num">0</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">f"{n}은(는) 짝수입니다."</span><span class="pn">)</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">f"{n}은(는) 홀수입니다."</span><span class="pn">)</span></pre></div>
+    </div>
+  </div>
+  <div class="output-block">
+    <div class="out-label">실행 결과 (입력: 7)</div>
+    <pre><span class="out-g">7은(는) 홀수입니다.</span></pre>
+  </div>
+
+  <h3>예제 2 — 계절 판별</h3>
+  <div class="code-block">
+    <div class="code-block-header"><span class="cb-lang">python</span><button class="cb-copy" onclick="copyCode(this)">복사</button></div>
+    <div class="code-block-body">
+      <div class="ln-col"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span></div>
+      <div class="code-pre-col"><pre><span class="fn">month</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"월(1~12)을 입력하세요: "</span><span class="pn">))</span>
+
+<span class="kw">if</span> <span class="num">3</span> <span class="pn">&lt;=</span> month <span class="pn">&lt;=</span> <span class="num">5</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"봄 🌸"</span><span class="pn">)</span>
+<span class="kw">elif</span> <span class="num">6</span> <span class="pn">&lt;=</span> month <span class="pn">&lt;=</span> <span class="num">8</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"여름 ☀️"</span><span class="pn">)</span>
+<span class="kw">elif</span> <span class="num">9</span> <span class="pn">&lt;=</span> month <span class="pn">&lt;=</span> <span class="num">11</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"가을 🍂"</span><span class="pn">)</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"겨울 ❄️"</span><span class="pn">)</span></pre></div>
+    </div>
+  </div>
+  <div class="output-block">
+    <div class="out-label">실행 결과 (입력: 9)</div>
+    <pre><span class="out-g">가을 🍂</span></pre>
+  </div>
+
+  <h3>예제 3 — 로그인 검사</h3>
+  <div class="code-block">
+    <div class="code-block-header"><span class="cb-lang">python</span><button class="cb-copy" onclick="copyCode(this)">복사</button></div>
+    <div class="code-block-body">
+      <div class="ln-col"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span></div>
+      <div class="code-pre-col"><pre><span class="fn">username</span> <span class="pn">=</span> <span class="fn">input</span><span class="pn">(</span><span class="str">"아이디: "</span><span class="pn">)</span>
+<span class="fn">password</span> <span class="pn">=</span> <span class="fn">input</span><span class="pn">(</span><span class="str">"비밀번호: "</span><span class="pn">)</span>
+
+<span class="kw">if</span> username <span class="pn">==</span> <span class="str">"admin"</span> <span class="kw">and</span> password <span class="pn">==</span> <span class="str">"1234"</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"로그인 성공! 환영합니다."</span><span class="pn">)</span>
+<span class="kw">elif</span> username <span class="pn">==</span> <span class="str">"admin"</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"비밀번호가 틀렸습니다."</span><span class="pn">)</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"존재하지 않는 아이디입니다."</span><span class="pn">)</span></pre></div>
+    </div>
+  </div>
+  <div class="output-block">
+    <div class="out-label">실행 결과 (아이디: admin, 비밀번호: 9999)</div>
+    <pre><span class="out-g">비밀번호가 틀렸습니다.</span></pre>
+  </div>
+
+  <!-- ─────────────────────────────── -->
+  <h2><span class="n">8.</span>중첩 if — if 안에 if</h2>
+
+  <p><code>if</code> 블록 안에 또 다른 <code>if</code>를 넣을 수 있습니다. 이를 <strong>중첩 if</strong>라고 합니다.</p>
+
+  <div class="code-block">
+    <div class="code-block-header"><span class="cb-lang">python</span><button class="cb-copy" onclick="copyCode(this)">복사</button></div>
+    <div class="code-block-body">
+      <div class="ln-col"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span><span>11</span></div>
+      <div class="code-pre-col"><pre><span class="fn">score</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"점수: "</span><span class="pn">))</span>
+<span class="fn">extra</span> <span class="pn">=</span> <span class="fn">input</span><span class="pn">(</span><span class="str">"보너스 점수 있음? (y/n): "</span><span class="pn">)</span>
+
+<span class="kw">if</span> score <span class="pn">&gt;=</span> <span class="num">60</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"합격!"</span><span class="pn">)</span>
+    <span class="kw">if</span> extra <span class="pn">==</span> <span class="str">"y"</span><span class="pn">:</span>           <span class="cm"># 중첩 if — 합격인 경우에만 검사</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">"보너스 점수로 장학금 대상입니다!"</span><span class="pn">)</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"불합격. 재시험 기회가 있습니다."</span><span class="pn">)</span></pre></div>
+    </div>
+  </div>
+  <div class="output-block">
+    <div class="out-label">실행 결과 (점수: 80, 보너스: y)</div>
+    <pre><span class="out-g">합격!
+보너스 점수로 장학금 대상입니다!</span></pre>
+  </div>
+
+  <div class="indent-visual">
+    <div class="iv-l0 iv-bar0"><span class="kw">if</span> score <span class="pn">&gt;=</span> <span class="num">60</span><span class="pn">:</span>  <span class="cm">← 바깥 if (들여쓰기 0)</span></div>
+    <div class="iv-l1 iv-bar1"><span class="fn">&nbsp;&nbsp;&nbsp;&nbsp;print</span><span class="pn">(</span><span class="str">"합격!"</span><span class="pn">)</span>  <span class="cm">← 4칸 들여쓰기</span></div>
+    <div class="iv-l1 iv-bar1"><span class="kw">&nbsp;&nbsp;&nbsp;&nbsp;if</span> extra <span class="pn">==</span> <span class="str">"y"</span><span class="pn">:</span>  <span class="cm">← 중첩 if (4칸)</span></div>
+    <div class="iv-l2"><span class="fn">&nbsp;&nbsp;&nbsp;print</span><span class="pn">(</span><span class="str">"장학금!"</span><span class="pn">)</span>  <span class="cm">← 8칸 들여쓰기</span></div>
+    <div class="iv-l0 iv-bar0"><span class="kw">else</span><span class="pn">:</span>  <span class="cm">← 바깥 if의 else</span></div>
+    <div class="iv-l1"><span class="fn">print</span><span class="pn">(</span><span class="str">"불합격"</span><span class="pn">)</span></div>
+  </div>
+
+  <div class="tip-box">
+    <div class="box-label">💡 중첩보다 and가 더 간결할 때도 있습니다</div>
+    <p>조건 두 개를 모두 만족해야 한다면 중첩 대신 <code>and</code>로 합치는 게 더 읽기 좋을 수 있습니다.<br>
+    <code>if score &gt;= 60 and extra == "y":</code> → 중첩 없이 같은 결과.</p>
+  </div>
+
+  <!-- ─────────────────────────────── -->
+  <h2><span class="n">9.</span>자주 하는 실수</h2>
+
+  <h3>실수 1 — 콜론(:) 빠뜨리기</h3>
+  <div class="error-block">
+    <div class="error-label">SyntaxError</div>
+    <pre>if score >= 90        ← 콜론이 없으면
+    print("A등급")
+SyntaxError: expected ':'</pre>
+  </div>
+
+  <h3>실수 2 — = 와 == 혼동</h3>
+  <div class="error-block">
+    <div class="error-label">SyntaxError</div>
+    <pre>if name = "admin":    ← = 는 대입, 조건식에는 == 를 써야 합니다
+SyntaxError: invalid syntax. Maybe you meant '==' ?</pre>
+  </div>
+
+  <h3>실수 3 — 들여쓰기 불일치</h3>
+  <div class="error-block">
+    <div class="error-label">IndentationError</div>
+    <pre>if score >= 60:
+  print("합격")    ← 스페이스 2칸
+    print("축하!")  ← 스페이스 4칸  → 같은 블록인데 들여쓰기 불일치
+IndentationError: unexpected indent</pre>
+  </div>
+
+  <h3>실수 4 — elif/else 순서 오류</h3>
+  <div class="error-block">
+    <div class="error-label">SyntaxError</div>
+    <pre>else:
+    print("기타")
+elif score >= 80:   ← else 뒤에 elif가 올 수 없습니다
+    print("B등급")
+SyntaxError: invalid syntax</pre>
+  </div>
+
+  <!-- ─────────────────────────────── -->
+  <div class="section-divider"></div>
+
+  <div class="try-section">
+    <div class="try-header"><span style="font-size:14px">⌨</span><span class="try-title">직접 해보기</span></div>
+    <div class="try-body">
+      <p>아래 문제들을 직접 코드로 작성해 실행해보세요.</p>
+      <div class="try-step"><span class="try-step-n">01.</span><span class="try-step-t">숫자를 입력받아 양수인지, 음수인지, 0인지 판별해서 출력하세요.</span></div>
+      <div class="try-step"><span class="try-step-n">02.</span><span class="try-step-t">월(1~12)을 입력받아 해당 계절을 출력하세요. (단, 12, 1, 2월은 겨울)</span></div>
+      <div class="try-step"><span class="try-step-n">03.</span><span class="try-step-t">점수를 입력받아 100점이면 "만점!", 90점 이상이면 "우수", 나머지는 "노력하세요"를 출력하세요.</span></div>
+      <div class="try-step"><span class="try-step-n">도전.</span><span class="try-step-t">세 수를 입력받아 가장 큰 수를 출력하세요. (<code>max()</code> 함수 없이, 직접 if로 비교)</span></div>
+    </div>
+  </div>
+
+  <div class="summary-box">
+    <div class="summary-label">▸ 핵심 요약</div>
+    <div class="summary-grid">
+      <span class="sg-key">if 조건:</span>
+      <span class="sg-val">조건이 True일 때만 블록 실행</span>
+      <span class="sg-key">elif 조건:</span>
+      <span class="sg-val">앞 조건이 False일 때 추가 조건 검사</span>
+      <span class="sg-key">else:</span>
+      <span class="sg-val">모든 조건이 False일 때 실행. 선택 사항</span>
+      <span class="sg-key">== vs =</span>
+      <span class="sg-val">== 는 비교, = 는 대입. 조건식엔 ==</span>
+      <span class="sg-key">and / or / not</span>
+      <span class="sg-val">조건 조합. and=모두 참, or=하나 참, not=반전</span>
+      <span class="sg-key">들여쓰기 4칸</span>
+      <span class="sg-val">블록의 경계를 결정. 일관성이 핵심</span>
+    </div>
+  </div>
+
+  <div class="cheer-box">
+    <span class="cheer-icon">✨</span>
+    <div class="cheer-text">
+      <strong>프로그램이 드디어 스스로 판단합니다!</strong><br>
+      조건문 하나로 코드가 훨씬 똑똑해졌습니다. 이제 사용자 입력에 따라 다르게 반응하는 프로그램을 만들 수 있습니다. 다음 챕터에서는 배운 내용을 50문제로 단단히 다져봅니다.
+    </div>
+  </div>
+
+  <div class="chap-nav">
+    <a href="17-mini-project-02.html" class="chap-nav-btn">
+      <span class="cnb-dir">← 이전 챕터</span>
+      <span class="cnb-title"><span>17.</span> 🎮 미니 프로젝트 ②</span>
+    </a>
+    <a href="19-quiz-if.html" class="chap-nav-btn next">
+      <span class="cnb-dir">다음 챕터 →</span>
+      <span class="cnb-title"><span>19.</span> 연습문제 — 조건문</span>
+    </a>
+  </div>
+
+</div>
+</main>
+</div>
+
+<script>
+  const isMobile = () => window.innerWidth <= 720;
+  const overlay  = document.getElementById('sidebarOverlay');
+  function toggleSidebar() {
+    document.body.classList.toggle('sidebar-closed');
+    if (isMobile()) overlay.classList.toggle('visible', !document.body.classList.contains('sidebar-closed'));
+    localStorage.setItem('sp-sidebar', document.body.classList.contains('sidebar-closed') ? 'closed' : 'open');
+  }
+  function closeSidebar() {
+    document.body.classList.add('sidebar-closed');
+    overlay.classList.remove('visible');
+    localStorage.setItem('sp-sidebar', 'closed');
+  }
+  function toggleGroup(id) { document.getElementById(id).classList.toggle('open'); }
+  function copyCode(btn) {
+    const text = btn.closest('.code-block').querySelector('pre').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '복사됨 ✓';
+      btn.style.color = 'var(--accent)';
+      setTimeout(() => { btn.textContent = '복사'; btn.style.color = ''; }, 2000);
+    });
+  }
+  window.addEventListener('DOMContentLoaded', () => {
+    if (isMobile()) document.body.classList.add('sidebar-closed');
+    else if (localStorage.getItem('sp-sidebar') === 'closed') document.body.classList.add('sidebar-closed');
+  });
+  window.addEventListener('resize', () => { if (!isMobile()) overlay.classList.remove('visible'); });
+</script>
+</body>
+</html>

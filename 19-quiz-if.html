@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>19. 연습문제 — 조건문 — 브론즈 | 슈퍼파이썬</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#111111; --bg-nav:#0A0A0A; --bg-side:#0E0E0E; --bg-card:#181818;
+      --bg-code:#1A1A1A; --accent:#00CC70; --accent-dim:#007A42;
+      --accent-bg:rgba(0,204,112,0.07); --accent2:#C8A000;
+      --text:#D8D8D8; --text-head:#EFEFEF; --text2:#888888;
+      --text3:#444444; --border:#222222; --border2:#2E2E2E;
+      --sy-kw:#C792EA; --sy-fn:#82AAFF; --sy-str:#C3E88D;
+      --sy-cm:#546E7A; --sy-num:#F78C6C; --sy-pn:#89DDFF;
+      --sidebar-w:248px; --content-max:720px; --header-h:48px;
+      font-variant-ligatures:none;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:15px;line-height:1.8;overflow-x:hidden}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}
+    ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+    ::-webkit-scrollbar-thumb:hover{background:var(--accent-dim)}
+
+    .top-header{position:fixed;top:0;left:0;right:0;z-index:200;height:var(--header-h);background:var(--bg-nav);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px}
+    .header-open-btn{display:none;align-items:center;justify-content:center;width:28px;height:28px;flex-shrink:0;margin-right:12px;background:var(--bg-card);border:1px solid var(--border2);border-radius:4px;cursor:pointer;color:var(--text2);font-size:12px}
+    .header-open-btn:hover{color:var(--accent);border-color:var(--accent)}
+    body.sidebar-closed .header-open-btn{display:flex}
+    .header-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0;font-family:'JetBrains Mono',monospace;font-size:12px;overflow:hidden}
+    .header-logo{color:var(--accent);text-decoration:none;font-weight:700;white-space:nowrap}
+    .header-sep{color:var(--text3);flex-shrink:0}
+    .header-grade{color:var(--text2);white-space:nowrap}
+    .header-chap{color:var(--text-head);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .header-center{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);display:flex;align-items:center;gap:8px;flex-shrink:0;padding:0 16px}
+    .progress-mini{width:80px;height:3px;background:var(--border2);border-radius:2px;overflow:hidden}
+    .progress-mini-fill{height:100%;background:var(--accent);border-radius:2px}
+    .header-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+    .nav-btn{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);background:transparent;border:1px solid var(--border2);padding:4px 12px;text-decoration:none;transition:border-color .15s,color .15s;white-space:nowrap}
+    .nav-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .nav-btn.primary{color:var(--bg-nav);background:var(--accent);border-color:var(--accent);font-weight:700}
+    .nav-btn.primary:hover{filter:brightness(1.1)}
+
+    .layout{display:flex;padding-top:var(--header-h);min-height:100vh}
+    .sidebar{width:var(--sidebar-w);flex-shrink:0;position:fixed;top:var(--header-h);bottom:0;left:0;background:var(--bg-side);border-right:1px solid var(--border);overflow-y:auto;overflow-x:hidden;transition:transform .22s ease;z-index:150;padding-top:8px}
+    body.sidebar-closed .sidebar{transform:translateX(calc(-1 * var(--sidebar-w)))}
+    body.sidebar-closed .content{margin-left:0}
+    .sidebar-toggle{position:absolute;top:10px;right:10px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:var(--bg-card);border:1px solid var(--border2);border-radius:4px;cursor:pointer;color:var(--text2);font-size:12px;z-index:10;transition:background .15s,color .15s,border-color .15s}
+    .sidebar-toggle:hover{background:var(--accent-bg);color:var(--accent);border-color:var(--accent)}
+    body.sidebar-closed .sidebar-toggle{display:none}
+    .sidebar-progress{margin:44px 12px 12px;padding:12px 14px;background:var(--bg-card);border:1px solid var(--border)}
+    .sp-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);margin-bottom:6px;letter-spacing:.08em}
+    .sp-bar{height:4px;background:var(--border2);border-radius:2px;overflow:hidden;margin-bottom:5px}
+    .sp-fill{height:100%;background:var(--accent);border-radius:2px}
+    .sp-text{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2)}
+    .sp-text span{color:var(--accent)}
+    .sb-group{border-bottom:1px solid var(--border)}
+    .sb-group-header{display:flex;align-items:center;justify-content:space-between;padding:9px 14px 9px 12px;cursor:pointer;user-select:none;transition:background .12s;gap:8px}
+    .sb-group-header:hover{background:rgba(255,255,255,.03)}
+    .sb-group-title{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--text2);text-transform:uppercase;flex:1}
+    .sb-group.current .sb-group-title{color:var(--accent)}
+    .sb-group-arrow{font-size:9px;color:var(--text3);transition:transform .2s;flex-shrink:0}
+    .sb-group.open .sb-group-arrow{transform:rotate(90deg);color:var(--accent)}
+    .sb-items{overflow:hidden;max-height:0;transition:max-height .28s ease}
+    .sb-group.open .sb-items{max-height:1200px}
+    .sb-item{display:flex;align-items:baseline;gap:8px;padding:6px 14px 6px 20px;font-size:13px;color:var(--text2);text-decoration:none;border-left:2px solid transparent;transition:background .1s,color .1s,border-color .1s;line-height:1.45}
+    .sb-item:hover{background:rgba(255,255,255,.03);color:var(--text)}
+    .sb-item.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-bg);font-weight:500}
+    .sb-item.done{color:var(--text3)}
+    .sb-icon{font-size:9px;flex-shrink:0;font-family:'JetBrains Mono',monospace;width:10px;text-align:center;color:var(--text3)}
+    .sb-item.active .sb-icon{color:var(--accent)}
+    .sb-item.done .sb-icon{color:var(--accent-dim)}
+    .sb-num{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);flex-shrink:0;min-width:22px}
+
+    .content{margin-left:var(--sidebar-w);flex:1;min-width:0;padding:48px 52px 96px;transition:margin-left .22s ease}
+    .content-inner{max-width:var(--content-max);margin:0 auto}
+
+    .chap-meta{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .badge{font-size:10px;padding:2px 8px;letter-spacing:.06em}
+    .badge.quiz{background:rgba(200,160,0,.1);color:var(--accent2);border:1px solid rgba(200,160,0,.25)}
+    .chap-title{font-family:'JetBrains Mono',monospace;font-size:clamp(22px,3.5vw,30px);font-weight:700;color:var(--text-head);line-height:1.25;margin-bottom:8px}
+    .chap-title .hl{color:var(--accent)}
+    .chap-subtitle{font-size:15px;color:var(--text2);margin-bottom:32px;line-height:1.65}
+    code{font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--bg-code);color:var(--accent);padding:1px 6px;border:1px solid var(--border2);border-radius:2px}
+    strong{color:var(--text-head);font-weight:700}
+
+    .scoreboard{display:flex;gap:12px;margin-bottom:36px;flex-wrap:wrap}
+    .score-card{flex:1;min-width:100px;background:var(--bg-card);border:1px solid var(--border2);padding:14px 18px;display:flex;flex-direction:column;gap:4px}
+    .score-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.08em}
+    .score-val{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--accent)}
+    .score-val.total{color:var(--text2)}
+
+    .diff-header{display:flex;align-items:center;gap:12px;margin:44px 0 20px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+    .diff-header:first-of-type{margin-top:0}
+    .diff-badge{font-family:'JetBrains Mono',monospace;font-size:11px;padding:3px 10px;font-weight:700;letter-spacing:.06em}
+    .diff-badge.easy{background:rgba(0,204,112,.12);color:var(--accent);border:1px solid rgba(0,204,112,.25)}
+    .diff-badge.medium{background:rgba(200,160,0,.12);color:var(--accent2);border:1px solid rgba(200,160,0,.25)}
+    .diff-badge.hard{background:rgba(255,80,80,.10);color:#FF7070;border:1px solid rgba(255,80,80,.20)}
+    .diff-title{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--text-head)}
+    .diff-count{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);margin-left:auto}
+
+    .q-card{background:var(--bg-card);border:1px solid var(--border2);margin-bottom:16px;overflow:hidden;transition:border-color .15s}
+    .q-card:hover{border-color:var(--border)}
+    .q-card.solved{border-left:3px solid var(--accent)}
+    .q-card.wrong{border-left:3px solid #FF5555}
+    .q-header{display:flex;align-items:flex-start;gap:14px;padding:16px 18px}
+    .q-num{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text3);flex-shrink:0;min-width:28px;padding-top:1px}
+    .q-body{flex:1;min-width:0}
+    .q-text{font-size:14px;color:var(--text);line-height:1.8;margin-bottom:0}
+    .q-text code{font-size:12px}
+
+    .q-code-block{margin:10px 0;background:var(--bg-code);border:1px solid var(--border2);overflow:hidden}
+    .q-code-inner{display:flex}
+    .q-ln{min-width:34px;padding:10px 8px;text-align:right;border-right:1px solid var(--border);flex-shrink:0}
+    .q-ln span{display:block;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.7;color:var(--sy-cm)}
+    .q-pre{padding:10px 14px;flex:1;overflow-x:auto}
+    .q-pre pre{font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.7;color:var(--text);white-space:pre}
+
+    .q-error-code{margin:10px 0;background:#160A0A;border:1px solid #3A1A1A;border-left:3px solid #FF5555;padding:10px 16px}
+    .q-error-code pre{font-family:'JetBrains Mono',monospace;font-size:12px;color:#FF8080;line-height:1.7;white-space:pre}
+
+    .kw{color:#C792EA}.fn{color:#82AAFF}.str{color:#C3E88D}
+    .cm{color:#546E7A}.num{color:#F78C6C}.pn{color:#89DDFF}
+
+    .q-input-area{padding:0 18px 14px 60px}
+    .q-textarea{width:100%;min-height:56px;background:var(--bg-code);color:var(--text);border:1px solid var(--border2);font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.7;padding:10px 14px;resize:vertical;outline:none;transition:border-color .15s}
+    .q-textarea:focus{border-color:var(--accent)}
+    .q-textarea::placeholder{color:var(--text3)}
+    .q-actions{display:flex;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap}
+    .btn-check{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;padding:6px 16px;background:var(--accent);color:var(--bg-nav);border:none;cursor:pointer;transition:filter .15s}
+    .btn-check:hover{filter:brightness(1.1)}
+    .btn-hint{font-family:'JetBrains Mono',monospace;font-size:11px;padding:6px 14px;background:transparent;color:var(--text3);border:1px solid var(--border2);cursor:pointer;transition:color .15s,border-color .15s}
+    .btn-hint:hover{color:var(--accent2);border-color:var(--accent2)}
+    .btn-answer{font-family:'JetBrains Mono',monospace;font-size:11px;padding:6px 14px;background:transparent;color:var(--text3);border:1px solid var(--border2);cursor:pointer;transition:color .15s,border-color .15s;margin-left:auto}
+    .btn-answer:hover{color:var(--text2);border-color:var(--border)}
+    .q-result{font-family:'JetBrains Mono',monospace;font-size:12px;margin-top:6px;display:none}
+    .q-result.ok{color:var(--accent)}
+    .q-result.err{color:#FF7070}
+
+    .q-dropdown{display:none;margin:0 18px 14px 60px;border:1px solid var(--border2)}
+    .q-dropdown.visible{display:block}
+    .q-dropdown-label{font-family:'JetBrains Mono',monospace;font-size:10px;padding:7px 14px;border-bottom:1px solid var(--border);letter-spacing:.08em}
+    .q-hint-label{color:var(--accent2);background:rgba(200,160,0,.05)}
+    .q-answer-label{color:var(--accent);background:var(--accent-bg)}
+    .q-dropdown-body{padding:12px 14px;background:var(--bg-code)}
+    .q-dropdown-body pre{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text2);line-height:1.7;white-space:pre-wrap;margin:0}
+    .q-dropdown-body p{font-size:13px;color:var(--text2);line-height:1.8;margin-bottom:6px}
+
+    .section-divider{height:1px;background:var(--border);margin:44px 0}
+    .cheer-box{border:1px solid var(--border);background:var(--bg);padding:18px 22px;margin-bottom:44px;display:flex;gap:14px;align-items:flex-start}
+    .cheer-icon{font-size:18px;flex-shrink:0;line-height:1.5}
+    .cheer-text{font-size:14px;color:var(--text2);line-height:1.85}
+    .cheer-text strong{color:var(--text-head)}
+    .chap-nav{display:flex;justify-content:space-between;padding-top:32px;border-top:1px solid var(--border);gap:12px;flex-wrap:wrap}
+    .chap-nav-btn{display:flex;flex-direction:column;gap:4px;text-decoration:none;padding:14px 18px;border:1px solid var(--border2);background:var(--bg-card);flex:1;max-width:300px;transition:border-color .15s}
+    .chap-nav-btn:hover{border-color:var(--accent)}
+    .chap-nav-btn.next{text-align:right}
+    .cnb-dir{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.07em}
+    .cnb-title{font-size:13px;color:var(--text2);line-height:1.45}
+    .cnb-title span{color:var(--accent);font-family:'JetBrains Mono',monospace}
+
+    .sidebar-overlay{display:none;position:fixed;inset:0;top:var(--header-h);z-index:140;background:rgba(0,0,0,.65)}
+    @media(max-width:720px){.sidebar-overlay.visible{display:block}.content{margin-left:0;padding:28px 20px 72px}.header-center{display:none}.q-input-area{padding:0 14px 14px}.q-dropdown{margin:0 14px 14px}}
+    @media(max-width:480px){.header-grade{display:none}.chap-nav-btn{max-width:100%}.header-right .nav-btn:not(.primary){display:none}.scoreboard{gap:8px}}
+  </style>
+</head>
+<body>
+
+<header class="top-header">
+  <button class="header-open-btn" onclick="toggleSidebar()">▶</button>
+  <div class="header-left">
+    <a href="../index.html" class="header-logo">SUPERPYTHON</a>
+    <span class="header-sep">/</span>
+    <span class="header-grade">🟤 BRONZE</span>
+    <span class="header-sep">/</span>
+    <span class="header-chap">19. 연습문제 — 조건문</span>
+  </div>
+  <div class="header-center">
+    <span>19 / 48</span>
+    <div class="progress-mini"><div class="progress-mini-fill" style="width:39.58%"></div></div>
+    <span>39%</span>
+  </div>
+  <div class="header-right">
+    <a href="18-if.html" class="nav-btn">← 이전</a>
+    <a href="20-mini-project-03.html" class="nav-btn primary">다음 →</a>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<div class="layout">
+
+<aside class="sidebar" id="sidebar">
+  <button class="sidebar-toggle" onclick="toggleSidebar()">◀</button>
+  <div class="sidebar-progress">
+    <div class="sp-label">BRONZE 진행률</div>
+    <div class="sp-bar"><div class="sp-fill" style="width:39.58%"></div></div>
+    <div class="sp-text"><span>19</span> / 48 챕터 완료</div>
+  </div>
+
+  <div class="sb-group" id="grp-env">
+    <div class="sb-group-header" onclick="toggleGroup('grp-env')"><span class="sb-group-title">환경 설정</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="01-what-is-python.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">01</span>파이썬이란?</a>
+      <a href="02-setup.html"          class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">02</span>개발환경 설치</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-basic1">
+    <div class="sb-group-header" onclick="toggleGroup('grp-basic1')"><span class="sb-group-title">기초 문법 1</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="03-print.html"                    class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">03</span>print()란?</a>
+      <a href="04-quiz-print.html"               class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">04</span>연습문제</a>
+      <a href="05-variables.html"                class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">05</span>변수와 데이터 타입</a>
+      <a href="06-operators.html"                class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">06</span>연산자</a>
+      <a href="07-quiz-variables-operators.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">07</span>연습문제</a>
+      <a href="08-string.html"                   class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">08</span>문자열 String</a>
+      <a href="09-quiz-string.html"              class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">09</span>연습문제</a>
+      <a href="10-fstring.html"                  class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">10</span>f-string 완전정리</a>
+      <a href="11-quiz-fstring.html"             class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">11</span>연습문제</a>
+      <a href="12-mini-project-01.html"          class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">12</span>🎮 미니 프로젝트 ①</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-basic2">
+    <div class="sb-group-header" onclick="toggleGroup('grp-basic2')"><span class="sb-group-title">기초 문법 2</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="13-list.html"            class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">13</span>리스트</a>
+      <a href="14-quiz-list.html"       class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">14</span>연습문제</a>
+      <a href="15-input.html"           class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">15</span>input() 함수</a>
+      <a href="16-quiz-input.html"      class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">16</span>연습문제</a>
+      <a href="17-mini-project-02.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">17</span>🎮 미니 프로젝트 ②</a>
+    </div>
+  </div>
+  <div class="sb-group current open" id="grp-flow">
+    <div class="sb-group-header" onclick="toggleGroup('grp-flow')"><span class="sb-group-title">흐름 제어</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="18-if.html"              class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">18</span>조건문 (if)</a>
+      <a href="19-quiz-if.html"         class="sb-item active"><span class="sb-icon">▶</span><span class="sb-num">19</span>연습문제</a>
+      <a href="20-mini-project-03.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">20</span>🎮 미니 프로젝트 ③</a>
+      <a href="21-for-range.html"       class="sb-item"><span class="sb-icon"> </span><span class="sb-num">21</span>for문과 range()</a>
+      <a href="22-quiz-for.html"        class="sb-item"><span class="sb-icon"> </span><span class="sb-num">22</span>연습문제</a>
+      <a href="23-while.html"           class="sb-item"><span class="sb-icon"> </span><span class="sb-num">23</span>while문</a>
+      <a href="24-quiz-while.html"      class="sb-item"><span class="sb-icon"> </span><span class="sb-num">24</span>연습문제</a>
+      <a href="25-mini-project-04.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">25</span>🎮 미니 프로젝트 ④</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-error">
+    <div class="sb-group-header" onclick="toggleGroup('grp-error')"><span class="sb-group-title">에러 &amp; 디버깅</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="26-error-types.html"    class="sb-item"><span class="sb-icon"> </span><span class="sb-num">26</span>에러 읽는 법</a>
+      <a href="27-debugging.html"      class="sb-item"><span class="sb-icon"> </span><span class="sb-num">27</span>기초 디버깅 실습</a>
+      <a href="28-quiz-debugging.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">28</span>연습문제</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-func">
+    <div class="sb-group-header" onclick="toggleGroup('grp-func')"><span class="sb-group-title">함수</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="29-function-basic.html"         class="sb-item"><span class="sb-icon"> </span><span class="sb-num">29</span>함수 기초</a>
+      <a href="30-quiz-function-basic.html"    class="sb-item"><span class="sb-icon"> </span><span class="sb-num">30</span>연습문제</a>
+      <a href="31-mini-project-05.html"        class="sb-item"><span class="sb-icon"> </span><span class="sb-num">31</span>🎮 미니 프로젝트 ⑤</a>
+      <a href="32-function-advanced.html"      class="sb-item"><span class="sb-icon"> </span><span class="sb-num">32</span>함수 심화</a>
+      <a href="33-quiz-function-advanced.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">33</span>연습문제</a>
+      <a href="34-module.html"                 class="sb-item"><span class="sb-icon"> </span><span class="sb-num">34</span>모듈</a>
+      <a href="35-quiz-module.html"            class="sb-item"><span class="sb-icon"> </span><span class="sb-num">35</span>연습문제</a>
+      <a href="36-mini-project-06.html"        class="sb-item"><span class="sb-icon"> </span><span class="sb-num">36</span>🎮 미니 프로젝트 ⑥</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-ds">
+    <div class="sb-group-header" onclick="toggleGroup('grp-ds')"><span class="sb-group-title">자료구조</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="37-dictionary.html"      class="sb-item"><span class="sb-icon"> </span><span class="sb-num">37</span>딕셔너리</a>
+      <a href="38-quiz-dictionary.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">38</span>연습문제</a>
+      <a href="39-tuple-set.html"       class="sb-item"><span class="sb-icon"> </span><span class="sb-num">39</span>튜플과 셋</a>
+      <a href="40-quiz-tuple-set.html"  class="sb-item"><span class="sb-icon"> </span><span class="sb-num">40</span>연습문제</a>
+      <a href="41-mini-project-07.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">41</span>🎮 미니 프로젝트 ⑦</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-file">
+    <div class="sb-group-header" onclick="toggleGroup('grp-file')"><span class="sb-group-title">파일 &amp; 예외처리</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="42-file-io.html"         class="sb-item"><span class="sb-icon"> </span><span class="sb-num">42</span>파일 입출력</a>
+      <a href="43-quiz-file-io.html"    class="sb-item"><span class="sb-icon"> </span><span class="sb-num">43</span>연습문제</a>
+      <a href="44-exception-basic.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">44</span>예외처리 기초</a>
+      <a href="45-quiz-exception.html"  class="sb-item"><span class="sb-icon"> </span><span class="sb-num">45</span>연습문제</a>
+      <a href="46-mini-project-08.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">46</span>🎮 미니 프로젝트 ⑧</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-end">
+    <div class="sb-group-header" onclick="toggleGroup('grp-end')"><span class="sb-group-title">마무리</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="47-final-project.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">47</span>★ 최종 프로젝트</a>
+      <a href="48-next-step.html"     class="sb-item"><span class="sb-icon"> </span><span class="sb-num">48</span>다음 단계 미리보기</a>
+    </div>
+  </div>
+</aside>
+
+<main class="content" id="mainContent">
+<div class="content-inner">
+
+  <div class="chap-meta">
+    <span class="badge quiz">QUIZ</span>
+    <span>흐름 제어</span>
+    <span style="color:var(--text3)">·</span>
+    <span>챕터 19 / 48</span>
+  </div>
+  <h1 class="chap-title">연습문제 — <span class="hl">조건문</span></h1>
+  <p class="chap-subtitle">if / elif / else · 비교 연산자 · and / or / not · 중첩 조건 · 오류 찾기. 먼저 스스로 풀고 정답을 확인하세요.</p>
+
+  <div class="scoreboard">
+    <div class="score-card"><div class="score-label">SOLVED</div><div class="score-val" id="solved-count">0</div></div>
+    <div class="score-card"><div class="score-label">TOTAL</div><div class="score-val total" id="total-count">30</div></div>
+    <div class="score-card"><div class="score-label">LEVEL</div><div class="score-val" id="level-text" style="font-size:13px;padding-top:4px;">도전 중...</div></div>
+  </div>
+
+  <!-- ══════════════════════════════
+       하 (1~9) — if 기본 · 흐름 예측
+  ══════════════════════════════ -->
+  <div class="diff-header">
+    <span class="diff-badge easy">하</span>
+    <span class="diff-title">if 기본 · 비교 연산자 · 결과 예측</span>
+    <span class="diff-count">1 – 9번</span>
+  </div>
+
+  <!-- Q1 -->
+  <div class="q-card" id="q1">
+    <div class="q-header">
+      <span class="q-num">Q1.</span>
+      <div class="q-body">
+        <p class="q-text"><code>x = 10</code>을 선언하고, x가 0보다 크면 <code>"양수"</code>를 출력하는 코드를 작성하세요.</p>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q1-input" rows="3" placeholder="코드를 입력하세요..." spellcheck="false"></textarea>
+      <div class="q-actions">
+        <button class="btn-check" onclick="check(1)">확인</button>
+        <button class="btn-hint" onclick="toggleHint(1)">힌트</button>
+        <button class="btn-answer" onclick="toggleAnswer(1)">정답 보기</button>
+      </div>
+      <div class="q-result" id="q1-result"></div>
+    </div>
+    <div class="q-dropdown" id="q1-hint">
+      <div class="q-dropdown-label q-hint-label">💡 힌트</div>
+      <div class="q-dropdown-body"><p><code>if x > 0:</code> 다음 줄에 들여쓰기(스페이스 4칸) 후 <code>print()</code>를 작성하세요.</p></div>
+    </div>
+    <div class="q-dropdown" id="q1-answer">
+      <div class="q-dropdown-label q-answer-label">✅ 정답</div>
+      <div class="q-dropdown-body"><pre><span class="fn">x</span> <span class="pn">=</span> <span class="num">10</span>
+<span class="kw">if</span> x <span class="pn">&gt;</span> <span class="num">0</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"양수"</span><span class="pn">)</span>
+<span class="cm"># 10 > 0 → True → "양수" 출력</span></pre></div>
+    </div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="q-card" id="q2">
+    <div class="q-header">
+      <span class="q-num">Q2.</span>
+      <div class="q-body">
+        <p class="q-text">아래 코드의 출력 결과를 쓰세요.</p>
+        <div class="q-code-block"><div class="q-code-inner">
+          <div class="q-ln"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+          <div class="q-pre"><pre><span class="fn">score</span> <span class="pn">=</span> <span class="num">55</span>
+<span class="kw">if</span> score <span class="pn">&gt;=</span> <span class="num">60</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"합격"</span><span class="pn">)</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"불합격"</span><span class="pn">)</span></pre></div>
+        </div></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q2-input" rows="2" placeholder="출력 결과를 입력하세요..." spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(2)">확인</button><button class="btn-hint" onclick="toggleHint(2)">힌트</button><button class="btn-answer" onclick="toggleAnswer(2)">정답 보기</button></div>
+      <div class="q-result" id="q2-result"></div>
+    </div>
+    <div class="q-dropdown" id="q2-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><p>55 &gt;= 60 이 참인지 거짓인지 먼저 판단하세요.</p></div></div>
+    <div class="q-dropdown" id="q2-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre>불합격
+<span class="cm"># 55 >= 60 → False → else 블록 실행</span></pre></div></div>
+  </div>
+
+  <!-- Q3 -->
+  <div class="q-card" id="q3">
+    <div class="q-header">
+      <span class="q-num">Q3.</span>
+      <div class="q-body">
+        <p class="q-text"><code>temp = 35</code>를 선언하고, 온도가 30보다 높으면 <code>"더워요"</code>, 아니면 <code>"괜찮아요"</code>를 출력하세요.</p>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q3-input" rows="4" placeholder="코드를 입력하세요..." spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(3)">확인</button><button class="btn-hint" onclick="toggleHint(3)">힌트</button><button class="btn-answer" onclick="toggleAnswer(3)">정답 보기</button></div>
+      <div class="q-result" id="q3-result"></div>
+    </div>
+    <div class="q-dropdown" id="q3-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><p><code>if temp > 30:</code> / <code>else:</code> 구조를 사용하세요.</p></div></div>
+    <div class="q-dropdown" id="q3-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">temp</span> <span class="pn">=</span> <span class="num">35</span>
+<span class="kw">if</span> temp <span class="pn">&gt;</span> <span class="num">30</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"더워요"</span><span class="pn">)</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"괜찮아요"</span><span class="pn">)</span>
+<span class="cm"># 35 > 30 → True → "더워요"</span></pre></div></div>
+  </div>
+
+  <!-- Q4 -->
+  <div class="q-card" id="q4">
+    <div class="q-header">
+      <span class="q-num">Q4.</span>
+      <div class="q-body">
+        <p class="q-text"><code>n = 0</code>일 때 출력 결과는?</p>
+        <div class="q-code-block"><div class="q-code-inner">
+          <div class="q-ln"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span></div>
+          <div class="q-pre"><pre><span class="fn">n</span> <span class="pn">=</span> <span class="num">0</span>
+<span class="kw">if</span> n <span class="pn">&gt;</span> <span class="num">0</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"양수"</span><span class="pn">)</span>
+<span class="kw">elif</span> n <span class="pn">&lt;</span> <span class="num">0</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"음수"</span><span class="pn">)</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"영(0)"</span><span class="pn">)</span></pre></div>
+        </div></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q4-input" rows="2" placeholder="출력 결과를 입력하세요..." spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(4)">확인</button><button class="btn-hint" onclick="toggleHint(4)">힌트</button><button class="btn-answer" onclick="toggleAnswer(4)">정답 보기</button></div>
+      <div class="q-result" id="q4-result"></div>
+    </div>
+    <div class="q-dropdown" id="q4-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><p>0은 양수도 음수도 아닙니다. if와 elif가 모두 False면 else가 실행됩니다.</p></div></div>
+    <div class="q-dropdown" id="q4-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre>영(0)
+<span class="cm"># 0 > 0 → False, 0 < 0 → False → else 실행</span></pre></div></div>
+  </div>
+
+  <!-- Q5 -->
+  <div class="q-card" id="q5">
+    <div class="q-header">
+      <span class="q-num">Q5.</span>
+      <div class="q-body">
+        <p class="q-text"><code>num = 7</code>을 선언하고, 짝수이면 <code>"짝수"</code>, 홀수이면 <code>"홀수"</code>를 출력하세요.</p>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q5-input" rows="4" placeholder="코드를 입력하세요..." spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(5)">확인</button><button class="btn-hint" onclick="toggleHint(5)">힌트</button><button class="btn-answer" onclick="toggleAnswer(5)">정답 보기</button></div>
+      <div class="q-result" id="q5-result"></div>
+    </div>
+    <div class="q-dropdown" id="q5-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><p>나머지 연산 <code>num % 2 == 0</code>이면 짝수입니다.</p></div></div>
+    <div class="q-dropdown" id="q5-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">num</span> <span class="pn">=</span> <span class="num">7</span>
+<span class="kw">if</span> num <span class="pn">%</span> <span class="num">2</span> <span class="pn">==</span> <span class="num">0</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"짝수"</span><span class="pn">)</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"홀수"</span><span class="pn">)</span>
+<span class="cm"># 7 % 2 = 1 → 0이 아님 → "홀수"</span></pre></div></div>
+  </div>
+
+  <!-- Q6 -->
+  <div class="q-card" id="q6">
+    <div class="q-header">
+      <span class="q-num">Q6.</span>
+      <div class="q-body">
+        <p class="q-text"><code>x = 15</code>일 때 출력되는 줄을 모두 쓰세요. (독립된 <code>if</code> 3개)</p>
+        <div class="q-code-block"><div class="q-code-inner">
+          <div class="q-ln"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span></div>
+          <div class="q-pre"><pre><span class="fn">x</span> <span class="pn">=</span> <span class="num">15</span>
+<span class="kw">if</span> x <span class="pn">&gt;=</span> <span class="num">10</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"10 이상"</span><span class="pn">)</span>
+<span class="kw">if</span> x <span class="pn">&gt;=</span> <span class="num">15</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"15 이상"</span><span class="pn">)</span>
+<span class="kw">if</span> x <span class="pn">&gt;=</span> <span class="num">20</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"20 이상"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"끝"</span><span class="pn">)</span></pre></div>
+        </div></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q6-input" rows="4" placeholder="출력 결과를 줄 순서대로 입력하세요..." spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(6)">확인</button><button class="btn-hint" onclick="toggleHint(6)">힌트</button><button class="btn-answer" onclick="toggleAnswer(6)">정답 보기</button></div>
+      <div class="q-result" id="q6-result"></div>
+    </div>
+    <div class="q-dropdown" id="q6-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><p>독립된 <code>if</code> 3개는 각각 따로 평가됩니다. <code>if-elif</code>와 다르게 모두 실행됩니다.</p></div></div>
+    <div class="q-dropdown" id="q6-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre>10 이상
+15 이상
+끝
+<span class="cm"># 15>=10 ✓, 15>=15 ✓, 15>=20 ✗
+# "끝"은 if 바깥 → 항상 실행</span></pre></div></div>
+  </div>
+
+  <!-- Q7 -->
+  <div class="q-card" id="q7">
+    <div class="q-header">
+      <span class="q-num">Q7.</span>
+      <div class="q-body">
+        <p class="q-text"><code>score = 82</code>일 때 출력 결과는?</p>
+        <div class="q-code-block"><div class="q-code-inner">
+          <div class="q-ln"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span></div>
+          <div class="q-pre"><pre><span class="fn">score</span> <span class="pn">=</span> <span class="num">82</span>
+<span class="kw">if</span> score <span class="pn">&gt;=</span> <span class="num">90</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"A"</span><span class="pn">)</span>
+<span class="kw">elif</span> score <span class="pn">&gt;=</span> <span class="num">80</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"B"</span><span class="pn">)</span>
+<span class="kw">elif</span> score <span class="pn">&gt;=</span> <span class="num">70</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"C"</span><span class="pn">)</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"F"</span><span class="pn">)</span></pre></div>
+        </div></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q7-input" rows="2" placeholder="출력 결과를 입력하세요..." spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(7)">확인</button><button class="btn-hint" onclick="toggleHint(7)">힌트</button><button class="btn-answer" onclick="toggleAnswer(7)">정답 보기</button></div>
+      <div class="q-result" id="q7-result"></div>
+    </div>
+    <div class="q-dropdown" id="q7-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><p>82 &gt;= 90은 False. 다음 elif로 넘어갑니다. 82 &gt;= 80은?</p></div></div>
+    <div class="q-dropdown" id="q7-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre>B
+<span class="cm"># 82 >= 90 → False
+# 82 >= 80 → True → "B" 출력 후 나머지 건너뜀</span></pre></div></div>
+  </div>
+
+  <!-- Q8 -->
+  <div class="q-card" id="q8">
+    <div class="q-header">
+      <span class="q-num">Q8.</span>
+      <div class="q-body">
+        <p class="q-text"><code>age = 20</code>, <code>vip = False</code>일 때 출력 결과는?</p>
+        <div class="q-code-block"><div class="q-code-inner">
+          <div class="q-ln"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span></div>
+          <div class="q-pre"><pre><span class="fn">age</span> <span class="pn">=</span> <span class="num">20</span>
+<span class="fn">vip</span> <span class="pn">=</span> <span class="kw">False</span>
+<span class="kw">if</span> age <span class="pn">&gt;=</span> <span class="num">18</span> <span class="kw">and</span> vip<span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"VIP 입장"</span><span class="pn">)</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"일반 입장"</span><span class="pn">)</span></pre></div>
+        </div></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q8-input" rows="2" placeholder="출력 결과를 입력하세요..." spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(8)">확인</button><button class="btn-hint" onclick="toggleHint(8)">힌트</button><button class="btn-answer" onclick="toggleAnswer(8)">정답 보기</button></div>
+      <div class="q-result" id="q8-result"></div>
+    </div>
+    <div class="q-dropdown" id="q8-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><p><code>and</code>는 양쪽이 모두 True여야 True입니다. vip가 False이면?</p></div></div>
+    <div class="q-dropdown" id="q8-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre>일반 입장
+<span class="cm"># True and False = False → else 실행</span></pre></div></div>
+  </div>
+
+  <!-- Q9 -->
+  <div class="q-card" id="q9">
+    <div class="q-header">
+      <span class="q-num">Q9.</span>
+      <div class="q-body">
+        <p class="q-text"><code>x = 3</code>일 때 출력 결과는?</p>
+        <div class="q-code-block"><div class="q-code-inner">
+          <div class="q-ln"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+          <div class="q-pre"><pre><span class="fn">x</span> <span class="pn">=</span> <span class="num">3</span>
+<span class="kw">if</span> x <span class="pn">&gt;</span> <span class="num">5</span> <span class="kw">or</span> x <span class="pn">==</span> <span class="num">3</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"해당됨"</span><span class="pn">)</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"해당 안 됨"</span><span class="pn">)</span></pre></div>
+        </div></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q9-input" rows="2" placeholder="출력 결과를 입력하세요..." spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(9)">확인</button><button class="btn-hint" onclick="toggleHint(9)">힌트</button><button class="btn-answer" onclick="toggleAnswer(9)">정답 보기</button></div>
+      <div class="q-result" id="q9-result"></div>
+    </div>
+    <div class="q-dropdown" id="q9-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><p><code>or</code>는 하나라도 True면 True입니다. 3 &gt; 5는? 3 == 3은?</p></div></div>
+    <div class="q-dropdown" id="q9-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre>해당됨
+<span class="cm"># 3 > 5 → False, 3 == 3 → True
+# False or True = True → "해당됨"</span></pre></div></div>
+  </div>
+
+
+  <!-- ══════════════════════════════
+       중 (10~18) — elif · and/or/not · 코드 작성
+  ══════════════════════════════ -->
+  <div class="diff-header">
+    <span class="diff-badge medium">중</span>
+    <span class="diff-title">elif · and/or/not · 연속 비교 · 코드 작성</span>
+    <span class="diff-count">10 – 18번</span>
+  </div>
+
+  <!-- Q10 -->
+  <div class="q-card" id="q10">
+    <div class="q-header">
+      <span class="q-num">Q10.</span>
+      <div class="q-body">
+        <p class="q-text">점수를 입력받아 등급을 출력하세요.<br>90 이상 → <code>"A"</code> / 80 이상 → <code>"B"</code> / 70 이상 → <code>"C"</code> / 나머지 → <code>"F"</code></p>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q10-input" rows="9" placeholder="코드를 입력하세요..." spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(10)">확인</button><button class="btn-hint" onclick="toggleHint(10)">힌트</button><button class="btn-answer" onclick="toggleAnswer(10)">정답 보기</button></div>
+      <div class="q-result" id="q10-result"></div>
+    </div>
+    <div class="q-dropdown" id="q10-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><p><code>if ... elif ... elif ... else</code>. 높은 점수부터 검사해야 합니다.</p></div></div>
+    <div class="q-dropdown" id="q10-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">score</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"점수: "</span><span class="pn">))</span>
+<span class="kw">if</span> score <span class="pn">&gt;=</span> <span class="num">90</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"A"</span><span class="pn">)</span>
+<span class="kw">elif</span> score <span class="pn">&gt;=</span> <span class="num">80</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"B"</span><span class="pn">)</span>
+<span class="kw">elif</span> score <span class="pn">&gt;=</span> <span class="num">70</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"C"</span><span class="pn">)</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"F"</span><span class="pn">)</span></pre></div></div>
+  </div>
+
+  <!-- Q11 -->
+  <div class="q-card" id="q11">
+    <div class="q-header">
+      <span class="q-num">Q11.</span>
+      <div class="q-body">
+        <p class="q-text">월(1~12)을 입력받아 계절을 출력하세요.<br>3~5월 → <code>"봄"</code> / 6~8월 → <code>"여름"</code> / 9~11월 → <code>"가을"</code> / 나머지 → <code>"겨울"</code><br>연속 비교(<code>3 &lt;= month &lt;= 5</code>)를 사용하세요.</p>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q11-input" rows="10" placeholder="코드를 입력하세요..." spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(11)">확인</button><button class="btn-hint" onclick="toggleHint(11)">힌트</button><button class="btn-answer" onclick="toggleAnswer(11)">정답 보기</button></div>
+      <div class="q-result" id="q11-result"></div>
+    </div>
+    <div class="q-dropdown" id="q11-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><p>겨울(12, 1, 2월)은 <code>else</code>로 처리하면 간결합니다.</p></div></div>
+    <div class="q-dropdown" id="q11-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">month</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"월: "</span><span class="pn">))</span>
+<span class="kw">if</span> <span class="num">3</span> <span class="pn">&lt;=</span> month <span class="pn">&lt;=</span> <span class="num">5</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"봄"</span><span class="pn">)</span>
+<span class="kw">elif</span> <span class="num">6</span> <span class="pn">&lt;=</span> month <span class="pn">&lt;=</span> <span class="num">8</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"여름"</span><span class="pn">)</span>
+<span class="kw">elif</span> <span class="num">9</span> <span class="pn">&lt;=</span> month <span class="pn">&lt;=</span> <span class="num">11</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"가을"</span><span class="pn">)</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"겨울"</span><span class="pn">)</span></pre></div></div>
+  </div>
+
+  <!-- Q12 -->
+  <div class="q-card" id="q12">
+    <div class="q-header">
+      <span class="q-num">Q12.</span>
+      <div class="q-body">
+        <p class="q-text"><code>logged_in = True</code>, <code>is_admin = False</code>일 때 출력 결과는?</p>
+        <div class="q-code-block"><div class="q-code-inner">
+          <div class="q-ln"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span></div>
+          <div class="q-pre"><pre><span class="fn">logged_in</span> <span class="pn">=</span> <span class="kw">True</span>
+<span class="fn">is_admin</span>  <span class="pn">=</span> <span class="kw">False</span>
+<span class="kw">if</span> <span class="kw">not</span> logged_in<span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"로그인이 필요합니다"</span><span class="pn">)</span>
+<span class="kw">elif</span> is_admin<span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"관리자 대시보드"</span><span class="pn">)</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"일반 대시보드"</span><span class="pn">)</span></pre></div>
+        </div></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q12-input" rows="2" placeholder="출력 결과를 입력하세요..." spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(12)">확인</button><button class="btn-hint" onclick="toggleHint(12)">힌트</button><button class="btn-answer" onclick="toggleAnswer(12)">정답 보기</button></div>
+      <div class="q-result" id="q12-result"></div>
+    </div>
+    <div class="q-dropdown" id="q12-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><p><code>not True</code>는 <code>False</code>입니다. 첫 if가 False면 다음 elif를 확인합니다.</p></div></div>
+    <div class="q-dropdown" id="q12-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre>일반 대시보드
+<span class="cm"># not True = False → elif: is_admin = False → else 실행</span></pre></div></div>
+  </div>
+
+  <!-- Q13 -->
+  <div class="q-card" id="q13">
+    <div class="q-header">
+      <span class="q-num">Q13.</span>
+      <div class="q-body">
+        <p class="q-text">나이를 입력받아 구분을 출력하세요.<br>13세 미만 → <code>"어린이"</code> / 13~18세 → <code>"청소년"</code> / 19~64세 → <code>"성인"</code> / 65세 이상 → <code>"노인"</code></p>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q13-input" rows="10" placeholder="코드를 입력하세요..." spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(13)">확인</button><button class="btn-hint" onclick="toggleHint(13)">힌트</button><button class="btn-answer" onclick="toggleAnswer(13)">정답 보기</button></div>
+      <div class="q-result" id="q13-result"></div>
+    </div>
+    <div class="q-dropdown" id="q13-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><p>낮은 쪽부터 검사하면 elif에서 앞 조건은 이미 통과한 것이므로 범위를 단순하게 쓸 수 있습니다.</p></div></div>
+    <div class="q-dropdown" id="q13-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">age</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"나이: "</span><span class="pn">))</span>
+<span class="kw">if</span> age <span class="pn">&lt;</span> <span class="num">13</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"어린이"</span><span class="pn">)</span>
+<span class="kw">elif</span> age <span class="pn">&lt;=</span> <span class="num">18</span><span class="pn">:</span>    <span class="cm"># 이미 13 이상</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"청소년"</span><span class="pn">)</span>
+<span class="kw">elif</span> age <span class="pn">&lt;=</span> <span class="num">64</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"성인"</span><span class="pn">)</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"노인"</span><span class="pn">)</span></pre></div></div>
+  </div>
+
+  <!-- Q14 -->
+  <div class="q-card" id="q14">
+    <div class="q-header">
+      <span class="q-num">Q14.</span>
+      <div class="q-body">
+        <p class="q-text">숫자를 입력받아 <strong>양수이면서 짝수</strong>일 때만 <code>"양수 짝수입니다"</code>, 그 외는 <code>"조건 미충족"</code>을 출력하세요.</p>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q14-input" rows="5" placeholder="코드를 입력하세요..." spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(14)">확인</button><button class="btn-hint" onclick="toggleHint(14)">힌트</button><button class="btn-answer" onclick="toggleAnswer(14)">정답 보기</button></div>
+      <div class="q-result" id="q14-result"></div>
+    </div>
+    <div class="q-dropdown" id="q14-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><p>두 조건을 <code>and</code>로 연결: <code>n > 0 and n % 2 == 0</code></p></div></div>
+    <div class="q-dropdown" id="q14-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">n</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"숫자: "</span><span class="pn">))</span>
+<span class="kw">if</span> n <span class="pn">&gt;</span> <span class="num">0</span> <span class="kw">and</span> n <span class="pn">%</span> <span class="num">2</span> <span class="pn">==</span> <span class="num">0</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"양수 짝수입니다"</span><span class="pn">)</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"조건 미충족"</span><span class="pn">)</span></pre></div></div>
+  </div>
+
+  <!-- Q15 -->
+  <div class="q-card" id="q15">
+    <div class="q-header">
+      <span class="q-num">Q15.</span>
+      <div class="q-body">
+        <p class="q-text"><code>n = 12</code>일 때 출력 결과는?</p>
+        <div class="q-code-block"><div class="q-code-inner">
+          <div class="q-ln"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span></div>
+          <div class="q-pre"><pre><span class="fn">n</span> <span class="pn">=</span> <span class="num">12</span>
+<span class="kw">if</span> n <span class="pn">%</span> <span class="num">2</span> <span class="pn">==</span> <span class="num">0</span> <span class="kw">and</span> n <span class="pn">%</span> <span class="num">3</span> <span class="pn">==</span> <span class="num">0</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"2와 3의 공배수"</span><span class="pn">)</span>
+<span class="kw">elif</span> n <span class="pn">%</span> <span class="num">2</span> <span class="pn">==</span> <span class="num">0</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"2의 배수"</span><span class="pn">)</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"해당 없음"</span><span class="pn">)</span></pre></div>
+        </div></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q15-input" rows="2" placeholder="출력 결과를 입력하세요..." spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(15)">확인</button><button class="btn-hint" onclick="toggleHint(15)">힌트</button><button class="btn-answer" onclick="toggleAnswer(15)">정답 보기</button></div>
+      <div class="q-result" id="q15-result"></div>
+    </div>
+    <div class="q-dropdown" id="q15-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><p>12 % 2 = ? &nbsp;&nbsp; 12 % 3 = ?</p></div></div>
+    <div class="q-dropdown" id="q15-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre>2와 3의 공배수
+<span class="cm"># 12%2=0 ✓, 12%3=0 ✓ → and 모두 True</span></pre></div></div>
+  </div>
+
+  <!-- Q16 -->
+  <div class="q-card" id="q16">
+    <div class="q-header">
+      <span class="q-num">Q16.</span>
+      <div class="q-body">
+        <p class="q-text">두 수 <code>a = 7</code>, <code>b = 3</code>을 선언하고, 더 큰 수를 <code>"더 큰 수: [값]"</code> 형식으로 출력하세요. 같으면 <code>"두 수가 같습니다"</code>를 출력하세요.</p>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q16-input" rows="8" placeholder="코드를 입력하세요..." spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(16)">확인</button><button class="btn-hint" onclick="toggleHint(16)">힌트</button><button class="btn-answer" onclick="toggleAnswer(16)">정답 보기</button></div>
+      <div class="q-result" id="q16-result"></div>
+    </div>
+    <div class="q-dropdown" id="q16-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><p><code>if a > b</code> / <code>elif b > a</code> / <code>else</code> 세 분기를 사용하세요.</p></div></div>
+    <div class="q-dropdown" id="q16-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">a</span><span class="pn">,</span> b <span class="pn">=</span> <span class="num">7</span><span class="pn">,</span> <span class="num">3</span>
+<span class="kw">if</span> a <span class="pn">&gt;</span> b<span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">f"더 큰 수: {a}"</span><span class="pn">)</span>
+<span class="kw">elif</span> b <span class="pn">&gt;</span> a<span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">f"더 큰 수: {b}"</span><span class="pn">)</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"두 수가 같습니다"</span><span class="pn">)</span></pre></div></div>
+  </div>
+
+  <!-- Q17 -->
+  <div class="q-card" id="q17">
+    <div class="q-header">
+      <span class="q-num">Q17.</span>
+      <div class="q-body">
+        <p class="q-text">연도를 입력받아 윤년 여부를 판단하세요.<br>조건: <code>(year % 4 == 0 and year % 100 != 0) or year % 400 == 0</code><br>윤년이면 <code>"윤년입니다"</code>, 아니면 <code>"평년입니다"</code>를 출력하세요.</p>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q17-input" rows="5" placeholder="코드를 입력하세요..." spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(17)">확인</button><button class="btn-hint" onclick="toggleHint(17)">힌트</button><button class="btn-answer" onclick="toggleAnswer(17)">정답 보기</button></div>
+      <div class="q-result" id="q17-result"></div>
+    </div>
+    <div class="q-dropdown" id="q17-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><p>조건식을 그대로 if 뒤에 넣으면 됩니다. 괄호로 우선순위를 명확히 하세요.</p></div></div>
+    <div class="q-dropdown" id="q17-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">year</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"연도: "</span><span class="pn">))</span>
+<span class="kw">if</span> <span class="pn">(</span>year <span class="pn">%</span> <span class="num">4</span> <span class="pn">==</span> <span class="num">0</span> <span class="kw">and</span> year <span class="pn">%</span> <span class="num">100</span> <span class="pn">!=</span> <span class="num">0</span><span class="pn">)</span> <span class="kw">or</span> year <span class="pn">%</span> <span class="num">400</span> <span class="pn">==</span> <span class="num">0</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"윤년입니다"</span><span class="pn">)</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"평년입니다"</span><span class="pn">)</span>
+<span class="cm"># 2024: 4로 나눠짐 + 100으로 안 나눠짐 → 윤년
+# 1900: 100으로 나눠짐, 400으로 안 나눠짐 → 평년</span></pre></div></div>
+  </div>
+
+  <!-- Q18 -->
+  <div class="q-card" id="q18">
+    <div class="q-header">
+      <span class="q-num">Q18.</span>
+      <div class="q-body">
+        <p class="q-text"><code>score = 85</code>, <code>attendance = 70</code>일 때 출력 결과는? (중첩 if)</p>
+        <div class="q-code-block"><div class="q-code-inner">
+          <div class="q-ln"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span></div>
+          <div class="q-pre"><pre><span class="fn">score</span>      <span class="pn">=</span> <span class="num">85</span>
+<span class="fn">attendance</span> <span class="pn">=</span> <span class="num">70</span>
+<span class="kw">if</span> score <span class="pn">&gt;=</span> <span class="num">80</span><span class="pn">:</span>
+    <span class="kw">if</span> attendance <span class="pn">&gt;=</span> <span class="num">80</span><span class="pn">:</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">"장학금 대상"</span><span class="pn">)</span>
+    <span class="kw">else</span><span class="pn">:</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">"점수 우수, 출석 미달"</span><span class="pn">)</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"점수 미달"</span><span class="pn">)</span></pre></div>
+        </div></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q18-input" rows="2" placeholder="출력 결과를 입력하세요..." spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(18)">확인</button><button class="btn-hint" onclick="toggleHint(18)">힌트</button><button class="btn-answer" onclick="toggleAnswer(18)">정답 보기</button></div>
+      <div class="q-result" id="q18-result"></div>
+    </div>
+    <div class="q-dropdown" id="q18-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><p>바깥 if가 True이면 안쪽 if로 진입합니다. attendance가 80 이상인지 확인하세요.</p></div></div>
+    <div class="q-dropdown" id="q18-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre>점수 우수, 출석 미달
+<span class="cm"># 85 >= 80 → True 진입, 70 >= 80 → False → 안쪽 else</span></pre></div></div>
+  </div>
+
+
+  <!-- ══════════════════════════════
+       상 (19~30) — 오류 찾기 · 종합 응용 · 도전
+  ══════════════════════════════ -->
+  <div class="diff-header">
+    <span class="diff-badge hard">상</span>
+    <span class="diff-title">오류 찾기 · 종합 응용 · 도전 문제</span>
+    <span class="diff-count">19 – 30번</span>
+  </div>
+
+  <!-- Q19 오류 찾기 -->
+  <div class="q-card" id="q19">
+    <div class="q-header">
+      <span class="q-num">Q19.</span>
+      <div class="q-body">
+        <p class="q-text">아래 코드에는 오류가 있습니다. 무엇이 문제인지 설명하고 올바르게 고치세요.</p>
+        <div class="q-error-code"><pre>score = 75
+if score >= 90
+    print("A")
+elif score >= 80:
+    print("B")</pre></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q19-input" rows="5" placeholder="오류 원인과 수정 방법을 입력하세요..." spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(19)">확인</button><button class="btn-hint" onclick="toggleHint(19)">힌트</button><button class="btn-answer" onclick="toggleAnswer(19)">정답 보기</button></div>
+      <div class="q-result" id="q19-result"></div>
+    </div>
+    <div class="q-dropdown" id="q19-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><p>if 문 뒤에 반드시 있어야 하는 기호가 빠져 있습니다.</p></div></div>
+    <div class="q-dropdown" id="q19-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="cm"># 오류: if score >= 90 뒤에 콜론(:)이 없음
+# SyntaxError 발생</span>
+
+<span class="cm"># 수정:</span>
+<span class="fn">score</span> <span class="pn">=</span> <span class="num">75</span>
+<span class="kw">if</span> score <span class="pn">&gt;=</span> <span class="num">90</span><span class="pn">:</span>          <span class="cm"># ← 콜론 추가</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"A"</span><span class="pn">)</span>
+<span class="kw">elif</span> score <span class="pn">&gt;=</span> <span class="num">80</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"B"</span><span class="pn">)</span></pre></div></div>
+  </div>
+
+  <!-- Q20 오류 찾기 -->
+  <div class="q-card" id="q20">
+    <div class="q-header">
+      <span class="q-num">Q20.</span>
+      <div class="q-body">
+        <p class="q-text">아래 코드는 실행되지만 의도와 다르게 동작합니다. 문제를 찾고 수정하세요.<br>(의도: 80점 이상은 "우수", 60점 이상은 "보통", 나머지는 "노력")</p>
+        <div class="q-error-code"><pre>score = 65
+if score >= 60:
+    print("보통")
+elif score >= 80:
+    print("우수")
+else:
+    print("노력")</pre></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q20-input" rows="5" placeholder="오류 원인과 수정 방법을 입력하세요..." spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(20)">확인</button><button class="btn-hint" onclick="toggleHint(20)">힌트</button><button class="btn-answer" onclick="toggleAnswer(20)">정답 보기</button></div>
+      <div class="q-result" id="q20-result"></div>
+    </div>
+    <div class="q-dropdown" id="q20-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><p>if-elif 구조에서 첫 번째 조건이 True이면 뒤 elif는 아예 확인하지 않습니다. 80점인 학생에게 무슨 일이 벌어질까요?</p></div></div>
+    <div class="q-dropdown" id="q20-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="cm"># 문제: 조건 순서가 잘못됨
+# score=80이면 60>=80이 아니라 if score>=60 → True 먼저 걸려
+# "보통"이 출력되어 "우수"를 출력할 수가 없음
+
+# 수정: 높은 기준을 먼저 검사</span>
+<span class="fn">score</span> <span class="pn">=</span> <span class="num">65</span>
+<span class="kw">if</span> score <span class="pn">&gt;=</span> <span class="num">80</span><span class="pn">:</span>      <span class="cm"># 높은 기준 먼저</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"우수"</span><span class="pn">)</span>
+<span class="kw">elif</span> score <span class="pn">&gt;=</span> <span class="num">60</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"보통"</span><span class="pn">)</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"노력"</span><span class="pn">)</span></pre></div></div>
+  </div>
+
+  <!-- Q21 오류 찾기 -->
+  <div class="q-card" id="q21">
+    <div class="q-header">
+      <span class="q-num">Q21.</span>
+      <div class="q-body">
+        <p class="q-text">아래 코드의 오류를 찾아 수정하세요.</p>
+        <div class="q-error-code"><pre>x = 10
+if x = 10:
+    print("10입니다")</pre></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q21-input" rows="4" placeholder="오류 원인과 수정 방법을 입력하세요..." spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(21)">확인</button><button class="btn-hint" onclick="toggleHint(21)">힌트</button><button class="btn-answer" onclick="toggleAnswer(21)">정답 보기</button></div>
+      <div class="q-result" id="q21-result"></div>
+    </div>
+    <div class="q-dropdown" id="q21-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><p>=은 대입, ==은 비교입니다. 조건식에서는 어떤 것을 써야 할까요?</p></div></div>
+    <div class="q-dropdown" id="q21-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="cm"># 오류: if x = 10 → = 은 대입 연산자, 조건식에 사용 불가
+# SyntaxError 발생
+
+# 수정: == (동등 비교) 사용</span>
+<span class="fn">x</span> <span class="pn">=</span> <span class="num">10</span>
+<span class="kw">if</span> x <span class="pn">==</span> <span class="num">10</span><span class="pn">:</span>          <span class="cm"># ← == 으로 수정</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"10입니다"</span><span class="pn">)</span></pre></div></div>
+  </div>
+
+  <!-- Q22 -->
+  <div class="q-card" id="q22">
+    <div class="q-header">
+      <span class="q-num">Q22.</span>
+      <div class="q-body">
+        <p class="q-text">숫자를 입력받아 1~100 범위 안이면 <code>"유효한 점수"</code>, 범위 밖이면 <code>"잘못된 입력"</code>을 출력하세요. 연속 비교를 사용하세요.</p>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q22-input" rows="4" placeholder="코드를 입력하세요..." spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(22)">확인</button><button class="btn-hint" onclick="toggleHint(22)">힌트</button><button class="btn-answer" onclick="toggleAnswer(22)">정답 보기</button></div>
+      <div class="q-result" id="q22-result"></div>
+    </div>
+    <div class="q-dropdown" id="q22-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><p><code>1 &lt;= n &lt;= 100</code></p></div></div>
+    <div class="q-dropdown" id="q22-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">n</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"점수: "</span><span class="pn">))</span>
+<span class="kw">if</span> <span class="num">1</span> <span class="pn">&lt;=</span> n <span class="pn">&lt;=</span> <span class="num">100</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"유효한 점수"</span><span class="pn">)</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"잘못된 입력"</span><span class="pn">)</span></pre></div></div>
+  </div>
+
+  <!-- Q23 -->
+  <div class="q-card" id="q23">
+    <div class="q-header">
+      <span class="q-num">Q23.</span>
+      <div class="q-body">
+        <p class="q-text"><code>num = 15</code>일 때 출력 결과는? (FizzBuzz 패턴)</p>
+        <div class="q-code-block"><div class="q-code-inner">
+          <div class="q-ln"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span></div>
+          <div class="q-pre"><pre><span class="fn">num</span> <span class="pn">=</span> <span class="num">15</span>
+<span class="kw">if</span> num <span class="pn">%</span> <span class="num">3</span> <span class="pn">==</span> <span class="num">0</span> <span class="kw">and</span> num <span class="pn">%</span> <span class="num">5</span> <span class="pn">==</span> <span class="num">0</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"FizzBuzz"</span><span class="pn">)</span>
+<span class="kw">elif</span> num <span class="pn">%</span> <span class="num">3</span> <span class="pn">==</span> <span class="num">0</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"Fizz"</span><span class="pn">)</span>
+<span class="kw">elif</span> num <span class="pn">%</span> <span class="num">5</span> <span class="pn">==</span> <span class="num">0</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"Buzz"</span><span class="pn">)</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span>num<span class="pn">)</span></pre></div>
+        </div></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q23-input" rows="2" placeholder="출력 결과를 입력하세요..." spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(23)">확인</button><button class="btn-hint" onclick="toggleHint(23)">힌트</button><button class="btn-answer" onclick="toggleAnswer(23)">정답 보기</button></div>
+      <div class="q-result" id="q23-result"></div>
+    </div>
+    <div class="q-dropdown" id="q23-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><p>15 % 3 = ? &nbsp;&nbsp; 15 % 5 = ?</p></div></div>
+    <div class="q-dropdown" id="q23-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre>FizzBuzz
+<span class="cm"># 15%3=0 ✓, 15%5=0 ✓ → and 모두 True → 첫 번째 조건 실행</span></pre></div></div>
+  </div>
+
+  <!-- Q24 -->
+  <div class="q-card" id="q24">
+    <div class="q-header">
+      <span class="q-num">Q24.</span>
+      <div class="q-body">
+        <p class="q-text">아이디와 비밀번호를 입력받아 로그인 처리를 하세요.<br>정답: id = <code>"python"</code>, pw = <code>"1234"</code><br>둘 다 맞으면 → <code>"로그인 성공"</code><br>아이디만 틀리면 → <code>"아이디 오류"</code><br>비밀번호만 틀리면 → <code>"비밀번호 오류"</code><br>둘 다 틀리면 → <code>"아이디/비밀번호 오류"</code></p>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q24-input" rows="12" placeholder="코드를 입력하세요..." spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(24)">확인</button><button class="btn-hint" onclick="toggleHint(24)">힌트</button><button class="btn-answer" onclick="toggleAnswer(24)">정답 보기</button></div>
+      <div class="q-result" id="q24-result"></div>
+    </div>
+    <div class="q-dropdown" id="q24-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><p>ok_id, ok_pw 두 변수에 True/False를 저장하고, and/or/not으로 4가지 경우를 분기하세요.</p></div></div>
+    <div class="q-dropdown" id="q24-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">user_id</span>  <span class="pn">=</span> <span class="fn">input</span><span class="pn">(</span><span class="str">"아이디: "</span><span class="pn">)</span>
+<span class="fn">password</span> <span class="pn">=</span> <span class="fn">input</span><span class="pn">(</span><span class="str">"비밀번호: "</span><span class="pn">)</span>
+<span class="fn">ok_id</span> <span class="pn">=</span> user_id  <span class="pn">==</span> <span class="str">"python"</span>
+<span class="fn">ok_pw</span> <span class="pn">=</span> password <span class="pn">==</span> <span class="str">"1234"</span>
+<span class="kw">if</span> ok_id <span class="kw">and</span> ok_pw<span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"로그인 성공"</span><span class="pn">)</span>
+<span class="kw">elif</span> <span class="kw">not</span> ok_id <span class="kw">and</span> ok_pw<span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"아이디 오류"</span><span class="pn">)</span>
+<span class="kw">elif</span> ok_id <span class="kw">and</span> <span class="kw">not</span> ok_pw<span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"비밀번호 오류"</span><span class="pn">)</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"아이디/비밀번호 오류"</span><span class="pn">)</span></pre></div></div>
+  </div>
+
+  <!-- Q25 -->
+  <div class="q-card" id="q25">
+    <div class="q-header">
+      <span class="q-num">Q25.</span>
+      <div class="q-body">
+        <p class="q-text">메뉴 번호(1~3)와 금액을 입력받아 자판기를 구현하세요.<br>1.콜라(1500원) / 2.물(1000원) / 3.커피(2000원)<br>금액 충분 → <code>"[상품] 나옵니다. 잔돈: [금액]원"</code><br>금액 부족 → <code>"[부족금액]원 더 필요합니다."</code><br>번호 오류 → <code>"없는 메뉴입니다."</code></p>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q25-input" rows="18" placeholder="코드를 입력하세요..." spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(25)">확인</button><button class="btn-hint" onclick="toggleHint(25)">힌트</button><button class="btn-answer" onclick="toggleAnswer(25)">정답 보기</button></div>
+      <div class="q-result" id="q25-result"></div>
+    </div>
+    <div class="q-dropdown" id="q25-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><p>먼저 메뉴로 상품명/가격을 결정하고, 그 다음 금액을 비교(중첩 if)하세요.</p></div></div>
+    <div class="q-dropdown" id="q25-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">menu</span>  <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"메뉴(1.콜라 2.물 3.커피): "</span><span class="pn">))</span>
+<span class="fn">money</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"금액: "</span><span class="pn">))</span>
+<span class="kw">if</span> menu <span class="pn">==</span> <span class="num">1</span><span class="pn">:</span>
+    name<span class="pn">,</span> price <span class="pn">=</span> <span class="str">"콜라"</span><span class="pn">,</span> <span class="num">1500</span>
+<span class="kw">elif</span> menu <span class="pn">==</span> <span class="num">2</span><span class="pn">:</span>
+    name<span class="pn">,</span> price <span class="pn">=</span> <span class="str">"물"</span><span class="pn">,</span> <span class="num">1000</span>
+<span class="kw">elif</span> menu <span class="pn">==</span> <span class="num">3</span><span class="pn">:</span>
+    name<span class="pn">,</span> price <span class="pn">=</span> <span class="str">"커피"</span><span class="pn">,</span> <span class="num">2000</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"없는 메뉴입니다."</span><span class="pn">)</span>
+    name <span class="pn">=</span> <span class="kw">None</span>
+<span class="kw">if</span> name <span class="kw">is not</span> <span class="kw">None</span><span class="pn">:</span>
+    <span class="kw">if</span> money <span class="pn">&gt;=</span> price<span class="pn">:</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">f"{name} 나옵니다. 잔돈: {money - price}원"</span><span class="pn">)</span>
+    <span class="kw">else</span><span class="pn">:</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">f"{price - money}원 더 필요합니다."</span><span class="pn">)</span></pre></div></div>
+  </div>
+
+  <!-- Q26 -->
+  <div class="q-card" id="q26">
+    <div class="q-header">
+      <span class="q-num">Q26.</span>
+      <div class="q-body">
+        <p class="q-text">아래 코드의 오류를 찾아 수정하세요. (들여쓰기 오류)</p>
+        <div class="q-error-code"><pre>x = 5
+if x > 0:
+print("양수입니다")
+else:
+    print("양수가 아닙니다")</pre></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q26-input" rows="5" placeholder="오류 원인과 수정 방법을 입력하세요..." spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(26)">확인</button><button class="btn-hint" onclick="toggleHint(26)">힌트</button><button class="btn-answer" onclick="toggleAnswer(26)">정답 보기</button></div>
+      <div class="q-result" id="q26-result"></div>
+    </div>
+    <div class="q-dropdown" id="q26-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><p>if 블록 안의 코드는 반드시 들여써야 합니다.</p></div></div>
+    <div class="q-dropdown" id="q26-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="cm"># 오류: print("양수입니다") 앞에 들여쓰기 없음
+# IndentationError 발생
+
+# 수정:</span>
+<span class="fn">x</span> <span class="pn">=</span> <span class="num">5</span>
+<span class="kw">if</span> x <span class="pn">&gt;</span> <span class="num">0</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"양수입니다"</span><span class="pn">)</span>     <span class="cm"># ← 들여쓰기 추가</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"양수가 아닙니다"</span><span class="pn">)</span></pre></div></div>
+  </div>
+
+  <!-- Q27 -->
+  <div class="q-card" id="q27">
+    <div class="q-header">
+      <span class="q-num">Q27.</span>
+      <div class="q-body">
+        <p class="q-text">숫자를 두 개 입력받아 다음을 각각 출력하세요.<br>① 두 수의 합이 100 이상이면 <code>"합계 초과"</code>, 아니면 <code>"합계 정상"</code><br>② 두 수가 모두 양수이면 <code>"모두 양수"</code>, 하나라도 음수이면 <code>"음수 포함"</code></p>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q27-input" rows="10" placeholder="코드를 입력하세요..." spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(27)">확인</button><button class="btn-hint" onclick="toggleHint(27)">힌트</button><button class="btn-answer" onclick="toggleAnswer(27)">정답 보기</button></div>
+      <div class="q-result" id="q27-result"></div>
+    </div>
+    <div class="q-dropdown" id="q27-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><p>두 조건은 독립적이므로 각각 별도 <code>if-else</code>를 사용하세요. ② "하나라도 음수"는 <code>not (a > 0 and b > 0)</code> 또는 <code>a &lt;= 0 or b &lt;= 0</code>.</p></div></div>
+    <div class="q-dropdown" id="q27-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">a</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"첫 번째 수: "</span><span class="pn">))</span>
+<span class="fn">b</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"두 번째 수: "</span><span class="pn">))</span>
+<span class="cm"># ① 합계 검사</span>
+<span class="kw">if</span> a <span class="pn">+</span> b <span class="pn">&gt;=</span> <span class="num">100</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"합계 초과"</span><span class="pn">)</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"합계 정상"</span><span class="pn">)</span>
+<span class="cm"># ② 부호 검사</span>
+<span class="kw">if</span> a <span class="pn">&gt;</span> <span class="num">0</span> <span class="kw">and</span> b <span class="pn">&gt;</span> <span class="num">0</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"모두 양수"</span><span class="pn">)</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"음수 포함"</span><span class="pn">)</span></pre></div></div>
+  </div>
+
+  <!-- Q28 -->
+  <div class="q-card" id="q28">
+    <div class="q-header">
+      <span class="q-num">Q28.</span>
+      <div class="q-body">
+        <p class="q-text">세 변의 길이를 입력받아 삼각형을 분류하세요.<br>세 변이 모두 같으면 → <code>"정삼각형"</code><br>두 변이 같으면 → <code>"이등변삼각형"</code><br>모두 다르면 → <code>"일반삼각형"</code><br>(삼각형 성립 조건 검사는 제외해도 됩니다)</p>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q28-input" rows="12" placeholder="코드를 입력하세요..." spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(28)">확인</button><button class="btn-hint" onclick="toggleHint(28)">힌트</button><button class="btn-answer" onclick="toggleAnswer(28)">정답 보기</button></div>
+      <div class="q-result" id="q28-result"></div>
+    </div>
+    <div class="q-dropdown" id="q28-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><p>정삼각형: <code>a == b == c</code> / 이등변: <code>a == b or b == c or a == c</code>. 정삼각형을 먼저 검사하세요.</p></div></div>
+    <div class="q-dropdown" id="q28-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">a</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"변 a: "</span><span class="pn">))</span>
+<span class="fn">b</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"변 b: "</span><span class="pn">))</span>
+<span class="fn">c</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"변 c: "</span><span class="pn">))</span>
+<span class="kw">if</span> a <span class="pn">==</span> b <span class="pn">==</span> c<span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"정삼각형"</span><span class="pn">)</span>
+<span class="kw">elif</span> a <span class="pn">==</span> b <span class="kw">or</span> b <span class="pn">==</span> c <span class="kw">or</span> a <span class="pn">==</span> c<span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"이등변삼각형"</span><span class="pn">)</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"일반삼각형"</span><span class="pn">)</span></pre></div></div>
+  </div>
+
+  <!-- Q29 도전 -->
+  <div class="q-card" id="q29">
+    <div class="q-header">
+      <span class="q-num">Q29.</span>
+      <div class="q-body">
+        <p class="q-text">🔥 <strong>도전 문제</strong> — BMI 계산기를 만드세요.<br>몸무게(kg)와 키(m)를 입력받아 BMI = 몸무게 / (키 ** 2)를 계산하고,<br>BMI &lt; 18.5 → <code>"저체중"</code><br>18.5 이상 23 미만 → <code>"정상"</code><br>23 이상 25 미만 → <code>"과체중"</code><br>25 이상 → <code>"비만"</code><br>결과를 <code>"BMI: [값] → [구분]"</code> 형식으로 출력하세요. (소수점 1자리)</p>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q29-input" rows="14" placeholder="코드를 입력하세요..." spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(29)">확인</button><button class="btn-hint" onclick="toggleHint(29)">힌트</button><button class="btn-answer" onclick="toggleAnswer(29)">정답 보기</button></div>
+      <div class="q-result" id="q29-result"></div>
+    </div>
+    <div class="q-dropdown" id="q29-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><p>BMI 먼저 계산 후 변수에 저장 → elif 연쇄로 구분 결정 → f-string으로 출력. 소수점 1자리는 <code>f"{bmi:.1f}"</code>.</p></div></div>
+    <div class="q-dropdown" id="q29-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">weight</span> <span class="pn">=</span> <span class="fn">float</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"몸무게(kg): "</span><span class="pn">))</span>
+<span class="fn">height</span> <span class="pn">=</span> <span class="fn">float</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"키(m): "</span><span class="pn">))</span>
+<span class="fn">bmi</span>    <span class="pn">=</span> weight <span class="pn">/</span> <span class="pn">(</span>height <span class="pn">**</span> <span class="num">2</span><span class="pn">)</span>
+<span class="kw">if</span> bmi <span class="pn">&lt;</span> <span class="num">18.5</span><span class="pn">:</span>
+    <span class="fn">label</span> <span class="pn">=</span> <span class="str">"저체중"</span>
+<span class="kw">elif</span> bmi <span class="pn">&lt;</span> <span class="num">23</span><span class="pn">:</span>
+    <span class="fn">label</span> <span class="pn">=</span> <span class="str">"정상"</span>
+<span class="kw">elif</span> bmi <span class="pn">&lt;</span> <span class="num">25</span><span class="pn">:</span>
+    <span class="fn">label</span> <span class="pn">=</span> <span class="str">"과체중"</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">label</span> <span class="pn">=</span> <span class="str">"비만"</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"BMI: {bmi:.1f} → {label}"</span><span class="pn">)</span></pre></div></div>
+  </div>
+
+  <!-- Q30 도전 -->
+  <div class="q-card" id="q30">
+    <div class="q-header">
+      <span class="q-num">Q30.</span>
+      <div class="q-body">
+        <p class="q-text">🔥 <strong>도전 문제</strong> — 간단한 계산기를 만드세요.<br>두 수와 연산자(<code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>)를 입력받아 계산 결과를 출력하세요.<br>나누기(/)는 <code>b == 0</code>이면 <code>"0으로 나눌 수 없습니다"</code>를 출력하세요.<br>잘못된 연산자면 <code>"지원하지 않는 연산자입니다"</code>를 출력하세요.</p>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q30-input" rows="16" placeholder="코드를 입력하세요..." spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(30)">확인</button><button class="btn-hint" onclick="toggleHint(30)">힌트</button><button class="btn-answer" onclick="toggleAnswer(30)">정답 보기</button></div>
+      <div class="q-result" id="q30-result"></div>
+    </div>
+    <div class="q-dropdown" id="q30-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><p>연산자 분기를 먼저 처리하고, <code>/</code>일 때는 중첩 if로 b == 0을 따로 검사하세요.</p></div></div>
+    <div class="q-dropdown" id="q30-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">a</span>  <span class="pn">=</span> <span class="fn">float</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"첫 번째 수: "</span><span class="pn">))</span>
+<span class="fn">op</span> <span class="pn">=</span> <span class="fn">input</span><span class="pn">(</span><span class="str">"연산자(+ - * /): "</span><span class="pn">)</span>
+<span class="fn">b</span>  <span class="pn">=</span> <span class="fn">float</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"두 번째 수: "</span><span class="pn">))</span>
+<span class="kw">if</span> op <span class="pn">==</span> <span class="str">"+"</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">f"결과: {a + b}"</span><span class="pn">)</span>
+<span class="kw">elif</span> op <span class="pn">==</span> <span class="str">"-"</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">f"결과: {a - b}"</span><span class="pn">)</span>
+<span class="kw">elif</span> op <span class="pn">==</span> <span class="str">"*"</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">f"결과: {a * b}"</span><span class="pn">)</span>
+<span class="kw">elif</span> op <span class="pn">==</span> <span class="str">"/"</span><span class="pn">:</span>
+    <span class="kw">if</span> b <span class="pn">==</span> <span class="num">0</span><span class="pn">:</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">"0으로 나눌 수 없습니다"</span><span class="pn">)</span>
+    <span class="kw">else</span><span class="pn">:</span>
+        <span class="fn">print</span><span class="pn">(</span><span class="str">f"결과: {a / b}"</span><span class="pn">)</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"지원하지 않는 연산자입니다"</span><span class="pn">)</span></pre></div></div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <div class="cheer-box">
+    <span class="cheer-icon">🎯</span>
+    <div class="cheer-text">
+      <strong>조건문 연습문제 완료!</strong><br>
+      30문제를 모두 풀었군요. 틀린 문제가 있어도 괜찮습니다 — 오류를 직접 찾아보는 과정이 실력을 키워줍니다. 다음은 배운 조건문으로 실제 프로그램을 만드는 미니 프로젝트입니다!
+    </div>
+  </div>
+
+  <div class="chap-nav">
+    <a href="18-if.html" class="chap-nav-btn">
+      <span class="cnb-dir">← 이전 챕터</span>
+      <span class="cnb-title"><span>18.</span> 조건문 (if)</span>
+    </a>
+    <a href="20-mini-project-03.html" class="chap-nav-btn next">
+      <span class="cnb-dir">다음 챕터 →</span>
+      <span class="cnb-title"><span>20.</span> 🎮 미니 프로젝트 ③</span>
+    </a>
+  </div>
+
+</div>
+</main>
+</div>
+
+<script>
+  const isMobile = () => window.innerWidth <= 720;
+  const overlay  = document.getElementById('sidebarOverlay');
+  function toggleSidebar() {
+    document.body.classList.toggle('sidebar-closed');
+    if (isMobile()) overlay.classList.toggle('visible', !document.body.classList.contains('sidebar-closed'));
+    localStorage.setItem('sp-sidebar', document.body.classList.contains('sidebar-closed') ? 'closed' : 'open');
+  }
+  function closeSidebar() { document.body.classList.add('sidebar-closed'); overlay.classList.remove('visible'); }
+  function toggleGroup(id) { document.getElementById(id).classList.toggle('open'); }
+  window.addEventListener('DOMContentLoaded', () => {
+    if (isMobile()) document.body.classList.add('sidebar-closed');
+    else if (localStorage.getItem('sp-sidebar') === 'closed') document.body.classList.add('sidebar-closed');
+    updateScore();
+  });
+  window.addEventListener('resize', () => { if (!isMobile()) overlay.classList.remove('visible'); });
+
+  function toggleHint(n)   { toggleDropdown(`q${n}-hint`); }
+  function toggleAnswer(n) { toggleDropdown(`q${n}-answer`); }
+  function toggleDropdown(id) {
+    document.querySelectorAll('.q-dropdown').forEach(d => { if (d.id !== id) d.classList.remove('visible'); });
+    document.getElementById(id).classList.toggle('visible');
+  }
+
+  // ★ ANSWERS — 모든 문제 type:'text', 핵심 키워드 매칭
+  const ANSWERS = {
+    1:  { type:'text', expected:'양수' },
+    2:  { type:'text', expected:'불합격' },
+    3:  { type:'text', expected:'더워요' },
+    4:  { type:'text', expected:'영(0)' },
+    5:  { type:'text', expected:'홀수' },
+    6:  { type:'text', expected:'10 이상' },
+    7:  { type:'text', expected:'B' },
+    8:  { type:'text', expected:'일반 입장' },
+    9:  { type:'text', expected:'해당됨' },
+    10: { type:'text', expected:'elif' },
+    11: { type:'text', expected:'elif' },
+    12: { type:'text', expected:'일반 대시보드' },
+    13: { type:'text', expected:'elif' },
+    14: { type:'text', expected:'and' },
+    15: { type:'text', expected:'2와 3의 공배수' },
+    16: { type:'text', expected:'더 큰 수: 7' },
+    17: { type:'text', expected:'윤년' },
+    18: { type:'text', expected:'점수 우수, 출석 미달' },
+    19: { type:'text', expected:'콜론' },
+    20: { type:'text', expected:'순서' },
+    21: { type:'text', expected:'==' },
+    22: { type:'text', expected:'유효한 점수' },
+    23: { type:'text', expected:'FizzBuzz' },
+    24: { type:'text', expected:'로그인 성공' },
+    25: { type:'text', expected:'나옵니다' },
+    26: { type:'text', expected:'들여쓰기' },
+    27: { type:'text', expected:'합계' },
+    28: { type:'text', expected:'삼각형' },
+    29: { type:'text', expected:'BMI' },
+    30: { type:'text', expected:'결과' },
+  };
+
+  let solvedSet = new Set();
+
+  function check(n) {
+    const input  = document.getElementById(`q${n}-input`).value.trim();
+    const ans    = ANSWERS[n];
+    const result = document.getElementById(`q${n}-result`);
+    const card   = document.getElementById(`q${n}`);
+    result.style.display = 'block';
+    const ok = input.toLowerCase().includes(ans.expected.toLowerCase());
+    if (ok) {
+      result.className = 'q-result ok';
+      result.textContent = '✓ 정답입니다!';
+      card.className = 'q-card solved';
+      solvedSet.add(n);
+    } else {
+      result.className = 'q-result err';
+      result.textContent = '✗ 다시 생각해보세요.';
+      card.className = 'q-card wrong';
+    }
+    updateScore();
+  }
+
+  function updateScore() {
+    const total = Object.keys(ANSWERS).length;
+    const cnt   = solvedSet.size;
+    document.getElementById('solved-count').textContent = cnt;
+    document.getElementById('total-count').textContent  = total;
+    const pct = cnt / total;
+    const level = cnt === 0      ? '도전 중...'
+                : pct < 0.4      ? '🌱 시작!'
+                : pct < 0.7      ? '🔥 잘하고 있어요!'
+                : pct < 1        ? '⚡ 거의 다 왔어요!'
+                :                  '🏆 완벽!';
+    document.getElementById('level-text').textContent = level;
+  }
+</script>
+</body>
+</html>

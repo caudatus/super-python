@@ -1,0 +1,1698 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>14. 연습문제 — 리스트 | 브론즈 | 슈퍼파이썬</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#111111;--bg-nav:#0A0A0A;--bg-side:#0E0E0E;--bg-card:#181818;
+      --bg-code:#1A1A1A;--bg-tip:#131A13;--bg-warn:#1A1410;--bg-info:#101520;
+      --accent:#00CC70;--accent-dim:#007A42;--accent-bg:rgba(0,204,112,0.07);
+      --accent2:#C8A000;--text:#D8D8D8;--text-head:#EFEFEF;
+      --text2:#888888;--text3:#444444;--border:#222222;--border2:#2E2E2E;
+      --sy-kw:#C792EA;--sy-fn:#82AAFF;--sy-str:#C3E88D;
+      --sy-cm:#546E7A;--sy-num:#F78C6C;--sy-pn:#89DDFF;--sy-ln-t:#555555;
+      --sidebar-w:248px;--content-max:720px;--header-h:48px;
+      font-variant-ligatures: none;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:15px;line-height:1.8;overflow-x:hidden}
+    ::-webkit-scrollbar{width:5px;height:5px}
+    ::-webkit-scrollbar-track{background:var(--bg)}
+    ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+    ::-webkit-scrollbar-thumb:hover{background:var(--accent-dim)}
+    .top-header{position:fixed;top:0;left:0;right:0;z-index:200;height:var(--header-h);background:var(--bg-nav);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px}
+    .header-open-btn{display:none;align-items:center;justify-content:center;width:28px;height:28px;flex-shrink:0;margin-right:12px;background:var(--bg-card);border:1px solid var(--border2);border-radius:4px;cursor:pointer;color:var(--text2);font-size:12px;transition:background .15s,color .15s,border-color .15s}
+    .header-open-btn:hover{background:var(--accent-bg);color:var(--accent);border-color:var(--accent)}
+    body.sidebar-closed .header-open-btn{display:flex}
+    .header-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0;font-family:'JetBrains Mono',monospace;font-size:12px;overflow:hidden}
+    .header-logo{color:var(--accent);text-decoration:none;font-weight:700;white-space:nowrap}
+    .header-sep{color:var(--text3);flex-shrink:0}
+    .header-grade{color:var(--text2);white-space:nowrap}
+    .header-chap{color:var(--text-head);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .header-center{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);display:flex;align-items:center;gap:8px;flex-shrink:0;padding:0 16px}
+    .progress-mini{width:80px;height:3px;background:var(--border2);border-radius:2px;overflow:hidden}
+    .progress-mini-fill{height:100%;background:var(--accent);border-radius:2px}
+    .header-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+    .nav-btn{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);background:transparent;border:1px solid var(--border2);padding:4px 12px;text-decoration:none;transition:border-color .15s,color .15s;white-space:nowrap}
+    .nav-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .nav-btn.primary{color:var(--bg-nav);background:var(--accent);border-color:var(--accent);font-weight:700}
+    .nav-btn.primary:hover{filter:brightness(1.1)}
+    .layout{display:flex;padding-top:var(--header-h);min-height:100vh}
+    .sidebar{width:var(--sidebar-w);flex-shrink:0;position:fixed;top:var(--header-h);bottom:0;left:0;background:var(--bg-side);border-right:1px solid var(--border);overflow-y:auto;overflow-x:hidden;transition:transform .22s ease;z-index:150;padding-top:8px}
+    body.sidebar-closed .sidebar{transform:translateX(calc(-1 * var(--sidebar-w)))}
+    body.sidebar-closed .content{margin-left:0}
+    .sidebar-toggle{position:absolute;top:10px;right:10px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:var(--bg-card);border:1px solid var(--border2);border-radius:4px;cursor:pointer;color:var(--text2);font-size:12px;z-index:10;transition:background .15s,color .15s,border-color .15s}
+    .sidebar-toggle:hover{background:var(--accent-bg);color:var(--accent);border-color:var(--accent)}
+    body.sidebar-closed .sidebar-toggle{display:none}
+    .sidebar-progress{margin:44px 12px 12px;padding:12px 14px;background:var(--bg-card);border:1px solid var(--border)}
+    .sp-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);margin-bottom:6px;letter-spacing:.08em}
+    .sp-bar{height:4px;background:var(--border2);border-radius:2px;overflow:hidden;margin-bottom:5px}
+    .sp-fill{height:100%;background:var(--accent);border-radius:2px}
+    .sp-text{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2)}
+    .sp-text span{color:var(--accent)}
+    .sb-group{border-bottom:1px solid var(--border)}
+    .sb-group-header{display:flex;align-items:center;justify-content:space-between;padding:9px 14px 9px 12px;cursor:pointer;user-select:none;transition:background .12s;gap:8px}
+    .sb-group-header:hover{background:rgba(255,255,255,.03)}
+    .sb-group-title{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--text2);text-transform:uppercase;flex:1}
+    .sb-group.current .sb-group-title{color:var(--accent)}
+    .sb-group-arrow{font-size:9px;color:var(--text3);transition:transform .2s;flex-shrink:0}
+    .sb-group.open .sb-group-arrow{transform:rotate(90deg);color:var(--accent)}
+    .sb-items{overflow:hidden;max-height:0;transition:max-height .28s ease}
+    .sb-group.open .sb-items{max-height:1200px}
+    .sb-item{display:flex;align-items:baseline;gap:8px;padding:6px 14px 6px 20px;font-size:13px;color:var(--text2);text-decoration:none;border-left:2px solid transparent;transition:background .1s,color .1s,border-color .1s;line-height:1.45}
+    .sb-item:hover{background:rgba(255,255,255,.03);color:var(--text)}
+    .sb-item.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-bg);font-weight:500}
+    .sb-item.done{color:var(--text3)}
+    .sb-icon{font-size:9px;flex-shrink:0;font-family:'JetBrains Mono',monospace;width:10px;text-align:center;color:var(--text3)}
+    .sb-item.active .sb-icon{color:var(--accent)}
+    .sb-item.done .sb-icon{color:var(--accent-dim)}
+    .sb-num{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);flex-shrink:0;min-width:22px}
+    .content{margin-left:var(--sidebar-w);flex:1;min-width:0;padding:48px 52px 96px;transition:margin-left .22s ease}
+    .content-inner{max-width:var(--content-max);margin:0 auto}
+    .chap-meta{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .badge{font-size:10px;padding:2px 8px;background:var(--accent-bg);color:var(--accent);border:1px solid rgba(0,204,112,.25);letter-spacing:.06em}
+    .badge.quiz{background:rgba(200,160,0,.1);color:var(--accent2);border-color:rgba(200,160,0,.25)}
+    .chap-title{font-family:'JetBrains Mono',monospace;font-size:clamp(22px,3.5vw,30px);font-weight:700;color:var(--text-head);line-height:1.25;margin-bottom:8px}
+    .chap-title .hl{color:var(--accent)}
+    .chap-subtitle{font-size:15px;color:var(--text2);margin-bottom:32px;line-height:1.65}
+    p{color:var(--text);margin-bottom:16px;line-height:1.9;font-size:15px}
+    code{font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--bg-code);color:var(--accent);padding:1px 6px;border:1px solid var(--border2);border-radius:2px}
+    strong{color:var(--text-head);font-weight:700}
+    .scoreboard{display:flex;gap:12px;margin-bottom:36px;flex-wrap:wrap}
+    .score-card{flex:1;min-width:100px;background:var(--bg-card);border:1px solid var(--border2);padding:14px 18px;display:flex;flex-direction:column;gap:4px}
+    .score-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.08em}
+    .score-val{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--accent)}
+    .score-val.total{color:var(--text2)}
+    .diff-header{display:flex;align-items:center;gap:12px;margin:44px 0 20px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+    .diff-badge{font-family:'JetBrains Mono',monospace;font-size:11px;padding:3px 10px;font-weight:700;letter-spacing:.06em}
+    .diff-badge.easy{background:rgba(0,204,112,.12);color:var(--accent);border:1px solid rgba(0,204,112,.25)}
+    .diff-badge.medium{background:rgba(200,160,0,.12);color:var(--accent2);border:1px solid rgba(200,160,0,.25)}
+    .diff-badge.hard{background:rgba(255,80,80,.10);color:#FF7070;border:1px solid rgba(255,80,80,.20)}
+    .diff-title{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--text-head)}
+    .diff-count{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);margin-left:auto}
+    .q-card{background:var(--bg-card);border:1px solid var(--border2);margin-bottom:16px;overflow:hidden;transition:border-color .15s}
+    .q-card:hover{border-color:var(--border)}
+    .q-card.solved{border-left:3px solid var(--accent)}
+    .q-card.wrong{border-left:3px solid #FF5555}
+    .q-header{display:flex;align-items:flex-start;gap:14px;padding:16px 18px}
+    .q-num{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text3);flex-shrink:0;min-width:28px;padding-top:1px}
+    .q-body{flex:1;min-width:0}
+    .q-text{font-size:14px;color:var(--text);line-height:1.8}
+    .q-text code{font-size:12px}
+    .q-expected{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text3);margin-top:8px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+    .q-expected-label{font-size:10px;letter-spacing:.06em;flex-shrink:0}
+    .q-expected-val{color:var(--accent)}
+    .q-error-code{margin:10px 0;background:#160A0A;border:1px solid #3A1A1A;border-left:3px solid #FF5555;padding:10px 16px}
+    .q-error-code pre{font-family:'JetBrains Mono',monospace;font-size:13px;color:#FF8080;line-height:1.7;white-space:pre-wrap}
+    .q-code-block{margin:10px 0;background:var(--bg-code);border:1px solid var(--border2);padding:10px 16px}
+    .q-code-block pre{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text);line-height:1.7;white-space:pre-wrap}
+    .kw{color:var(--sy-kw)}.fn{color:var(--sy-fn)}.str{color:var(--sy-str)}
+    .cm{color:var(--sy-cm)}.num{color:var(--sy-num)}.pn{color:var(--sy-pn)}
+    .q-input-area{padding:0 18px 14px 60px}
+    .q-textarea{width:100%;min-height:60px;background:var(--bg-code);color:var(--text);border:1px solid var(--border2);font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.7;padding:10px 14px;resize:vertical;outline:none;transition:border-color .15s}
+    .q-textarea:focus{border-color:var(--accent)}
+    .q-textarea::placeholder{color:var(--text3)}
+    .q-actions{display:flex;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap}
+    .btn-check{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;padding:6px 16px;background:var(--accent);color:var(--bg-nav);border:none;cursor:pointer;transition:filter .15s}
+    .btn-check:hover{filter:brightness(1.1)}
+    .btn-hint{font-family:'JetBrains Mono',monospace;font-size:11px;padding:6px 14px;background:transparent;color:var(--text3);border:1px solid var(--border2);cursor:pointer;transition:color .15s,border-color .15s}
+    .btn-hint:hover{color:var(--accent2);border-color:var(--accent2)}
+    .btn-answer{font-family:'JetBrains Mono',monospace;font-size:11px;padding:6px 14px;background:transparent;color:var(--text3);border:1px solid var(--border2);cursor:pointer;transition:color .15s,border-color .15s;margin-left:auto}
+    .btn-answer:hover{color:var(--text2);border-color:var(--border)}
+    .q-result{font-family:'JetBrains Mono',monospace;font-size:12px;margin-top:6px;display:none}
+    .q-result.ok{color:var(--accent)}
+    .q-result.err{color:#FF7070}
+    .q-dropdown{display:none;margin:0 18px 14px 60px;border:1px solid var(--border2)}
+    .q-dropdown.visible{display:block}
+    .q-dropdown-label{font-family:'JetBrains Mono',monospace;font-size:10px;padding:7px 14px;border-bottom:1px solid var(--border);letter-spacing:.08em}
+    .q-hint-label{color:var(--accent2);background:rgba(200,160,0,.05)}
+    .q-answer-label{color:var(--accent);background:var(--accent-bg)}
+    .q-dropdown-body{padding:12px 14px;background:var(--bg-code)}
+    .q-dropdown-body pre{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text2);line-height:1.7;white-space:pre-wrap;margin:0}
+    .section-divider{height:1px;background:var(--border);margin:44px 0}
+    .cheer-box{border:1px solid var(--border);background:var(--bg);padding:18px 22px;margin-bottom:44px;display:flex;gap:14px;align-items:flex-start}
+    .cheer-icon{font-size:18px;flex-shrink:0;line-height:1.5}
+    .cheer-text{font-size:14px;color:var(--text2);line-height:1.85}
+    .cheer-text strong{color:var(--text-head)}
+    .chap-nav{display:flex;justify-content:space-between;padding-top:32px;border-top:1px solid var(--border);gap:12px;flex-wrap:wrap}
+    .chap-nav-btn{display:flex;flex-direction:column;gap:4px;text-decoration:none;padding:14px 18px;border:1px solid var(--border2);background:var(--bg-card);flex:1;max-width:300px;transition:border-color .15s}
+    .chap-nav-btn:hover{border-color:var(--accent)}
+    .chap-nav-btn.next{text-align:right}
+    .cnb-dir{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.07em}
+    .cnb-title{font-size:13px;color:var(--text2);line-height:1.45}
+    .cnb-title span{color:var(--accent);font-family:'JetBrains Mono',monospace}
+    .sidebar-overlay{display:none;position:fixed;inset:0;top:var(--header-h);z-index:140;background:rgba(0,0,0,.65)}
+    @media(max-width:720px){
+      .sidebar-overlay.visible{display:block}
+      .content{margin-left:0;padding:28px 20px 72px}
+      .header-center{display:none}
+      .q-input-area{padding-left:18px}
+      .q-dropdown{margin-left:18px}
+    }
+    @media(max-width:480px){
+      .header-grade{display:none}
+      .chap-nav-btn{max-width:100%}
+      .header-right .nav-btn:not(.primary){display:none}
+    }
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important}}
+  </style>
+</head>
+<body>
+<header class="top-header">
+  <button class="header-open-btn" onclick="toggleSidebar()">▶</button>
+  <div class="header-left">
+    <a href="../index.html" class="header-logo">SUPERPYTHON</a>
+    <span class="header-sep">/</span>
+    <span class="header-grade">🟤 BRONZE</span>
+    <span class="header-sep">/</span>
+    <span class="header-chap">14. 연습문제 — 리스트</span>
+  </div>
+  <div class="header-center">
+    <span>14 / 48</span>
+    <div class="progress-mini"><div class="progress-mini-fill" style="width:29.17%"></div></div>
+    <span>29%</span>
+  </div>
+  <div class="header-right">
+    <a href="13-list.html" class="nav-btn">← 이전</a>
+    <a href="15-input.html" class="nav-btn primary">다음 →</a>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<div class="layout">
+<aside class="sidebar" id="sidebar">
+  <button class="sidebar-toggle" onclick="toggleSidebar()">◀</button>
+  <div class="sidebar-progress">
+    <div class="sp-label">BRONZE 진행률</div>
+    <div class="sp-bar"><div class="sp-fill" style="width:29.17%"></div></div>
+    <div class="sp-text"><span>14</span> / 48 챕터 완료</div>
+  </div>
+  <div class="sb-group" id="grp-env">
+    <div class="sb-group-header" onclick="toggleGroup('grp-env')"><span class="sb-group-title">환경 설정</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="01-what-is-python.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">01</span>파이썬이란?</a>
+      <a href="02-setup.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">02</span>개발환경 설치</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-basic1">
+    <div class="sb-group-header" onclick="toggleGroup('grp-basic1')"><span class="sb-group-title">기초 문법 1</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="03-print.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">03</span>print()란?</a>
+      <a href="04-quiz-print.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">04</span>연습문제</a>
+      <a href="05-variables.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">05</span>변수와 데이터 타입</a>
+      <a href="06-operators.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">06</span>연산자</a>
+      <a href="07-quiz-variables-operators.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">07</span>연습문제</a>
+      <a href="08-string.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">08</span>문자열 String</a>
+      <a href="09-quiz-string.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">09</span>연습문제</a>
+      <a href="10-fstring.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">10</span>f-string 완전정리</a>
+      <a href="11-quiz-fstring.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">11</span>연습문제</a>
+      <a href="12-mini-project-01.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">12</span>🎮 미니 프로젝트 ①</a>
+    </div>
+  </div>
+  <div class="sb-group current open" id="grp-basic2">
+    <div class="sb-group-header" onclick="toggleGroup('grp-basic2')"><span class="sb-group-title">기초 문법 2</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="13-list.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">13</span>리스트</a>
+      <a href="14-quiz-list.html" class="sb-item active"><span class="sb-icon">▶</span><span class="sb-num">14</span>연습문제</a>
+      <a href="15-input.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">15</span>input() 함수</a>
+      <a href="16-quiz-input.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">16</span>연습문제</a>
+      <a href="17-mini-project-02.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">17</span>🎮 미니 프로젝트 ②</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-flow">
+    <div class="sb-group-header" onclick="toggleGroup('grp-flow')"><span class="sb-group-title">흐름 제어</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="18-if.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">18</span>조건문 (if)</a>
+      <a href="19-quiz-if.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">19</span>연습문제</a>
+      <a href="20-mini-project-03.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">20</span>🎮 미니 프로젝트 ③</a>
+      <a href="21-for-range.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">21</span>for문과 range()</a>
+      <a href="22-quiz-for.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">22</span>연습문제</a>
+      <a href="23-while.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">23</span>while문</a>
+      <a href="24-quiz-while.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">24</span>연습문제</a>
+      <a href="25-mini-project-04.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">25</span>🎮 미니 프로젝트 ④</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-error">
+    <div class="sb-group-header" onclick="toggleGroup('grp-error')"><span class="sb-group-title">에러 &amp; 디버깅</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="26-error-types.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">26</span>에러 읽는 법</a>
+      <a href="27-debugging.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">27</span>기초 디버깅 실습</a>
+      <a href="28-quiz-debugging.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">28</span>연습문제</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-func">
+    <div class="sb-group-header" onclick="toggleGroup('grp-func')"><span class="sb-group-title">함수</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="29-function-basic.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">29</span>함수 기초</a>
+      <a href="30-quiz-function-basic.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">30</span>연습문제</a>
+      <a href="31-mini-project-05.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">31</span>🎮 미니 프로젝트 ⑤</a>
+      <a href="32-function-advanced.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">32</span>함수 심화</a>
+      <a href="33-quiz-function-advanced.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">33</span>연습문제</a>
+      <a href="34-module.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">34</span>모듈</a>
+      <a href="35-quiz-module.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">35</span>연습문제</a>
+      <a href="36-mini-project-06.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">36</span>🎮 미니 프로젝트 ⑥</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-ds">
+    <div class="sb-group-header" onclick="toggleGroup('grp-ds')"><span class="sb-group-title">자료구조</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="37-dictionary.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">37</span>딕셔너리</a>
+      <a href="38-quiz-dictionary.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">38</span>연습문제</a>
+      <a href="39-tuple-set.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">39</span>튜플과 셋</a>
+      <a href="40-quiz-tuple-set.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">40</span>연습문제</a>
+      <a href="41-mini-project-07.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">41</span>🎮 미니 프로젝트 ⑦</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-file">
+    <div class="sb-group-header" onclick="toggleGroup('grp-file')"><span class="sb-group-title">파일 &amp; 예외처리</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="42-file-io.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">42</span>파일 입출력</a>
+      <a href="43-quiz-file-io.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">43</span>연습문제</a>
+      <a href="44-exception-basic.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">44</span>예외처리 기초</a>
+      <a href="45-quiz-exception.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">45</span>연습문제</a>
+      <a href="46-mini-project-08.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">46</span>🎮 미니 프로젝트 ⑧</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-end">
+    <div class="sb-group-header" onclick="toggleGroup('grp-end')"><span class="sb-group-title">마무리</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="47-final-project.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">47</span>★ 최종 프로젝트</a>
+      <a href="48-next-step.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">48</span>다음 단계 미리보기</a>
+    </div>
+  </div>
+</aside>
+
+<main class="content" id="mainContent">
+<div class="content-inner">
+  <div class="chap-meta">
+    <span class="badge quiz">QUIZ</span>
+    <span>기초 문법 2</span>
+    <span style="color:var(--text3)">·</span>
+    <span>챕터 14 / 48</span>
+  </div>
+  <h1 class="chap-title">연습문제 — <span class="hl">리스트</span></h1>
+  <p class="chap-subtitle">배운 것을 직접 코드로 써봐야 진짜 실력이 됩니다. 먼저 스스로 풀고 나서 정답을 확인하세요.</p>
+
+  <div class="scoreboard">
+    <div class="score-card"><div class="score-label">SOLVED</div><div class="score-val" id="solved-count">0</div></div>
+    <div class="score-card"><div class="score-label">TOTAL</div><div class="score-val total" id="total-count">50</div></div>
+    <div class="score-card"><div class="score-label">LEVEL</div><div class="score-val" id="level-text" style="font-size:13px;padding-top:4px;">도전 중...</div></div>
+  </div>
+
+
+  <!-- ══ 하 (1~10) ══ -->
+  <div class="diff-header">
+    <span class="diff-badge easy">하</span>
+    <span class="diff-title">리스트 생성 · 인덱싱 · 기본 함수</span>
+    <span class="diff-count">1 – 10번</span>
+  </div>
+
+  <!-- Q1 -->
+  <div class="q-card" id="q1">
+    <div class="q-header"><span class="q-num">Q1.</span>
+      <div class="q-body">
+        <p class="q-text"><code>fruits = ["사과", "바나나", "포도"]</code>를 만들고 그대로 출력하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">['사과', '바나나', '포도']</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q1-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(1)">확인</button><button class="btn-hint" onclick="toggleHint(1)">힌트</button><button class="btn-answer" onclick="toggleAnswer(1)">정답 보기</button></div>
+      <div class="q-result" id="q1-result"></div>
+    </div>
+    <div class="q-dropdown" id="q1-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>대괄호 [ ]를 쓰고 요소를 쉼표로 구분하세요.</pre></div></div>
+    <div class="q-dropdown" id="q1-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">fruits</span> <span class="pn">=</span> <span class="pn">[</span><span class="str">"사과"</span><span class="pn">,</span> <span class="str">"바나나"</span><span class="pn">,</span> <span class="str">"포도"</span><span class="pn">]</span>
+<span class="fn">print</span><span class="pn">(</span>fruits<span class="pn">)</span></pre></div></div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="q-card" id="q2">
+    <div class="q-header"><span class="q-num">Q2.</span>
+      <div class="q-body">
+        <p class="q-text"><code>nums = [10, 20, 30, 40, 50]</code>에서 첫 번째 요소를 출력하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">10</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q2-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(2)">확인</button><button class="btn-hint" onclick="toggleHint(2)">힌트</button><button class="btn-answer" onclick="toggleAnswer(2)">정답 보기</button></div>
+      <div class="q-result" id="q2-result"></div>
+    </div>
+    <div class="q-dropdown" id="q2-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>인덱스는 0부터 시작합니다. nums[0]</pre></div></div>
+    <div class="q-dropdown" id="q2-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">nums</span> <span class="pn">=</span> <span class="pn">[</span><span class="num">10</span><span class="pn">,</span> <span class="num">20</span><span class="pn">,</span> <span class="num">30</span><span class="pn">,</span> <span class="num">40</span><span class="pn">,</span> <span class="num">50</span><span class="pn">]</span>
+<span class="fn">print</span><span class="pn">(</span>nums<span class="pn">[</span><span class="num">0</span><span class="pn">])</span>  <span class="cm"># 인덱스 0 = 첫 번째</span></pre></div></div>
+  </div>
+
+  <!-- Q3 -->
+  <div class="q-card" id="q3">
+    <div class="q-header"><span class="q-num">Q3.</span>
+      <div class="q-body">
+        <p class="q-text"><code>colors = ["빨강", "파랑", "초록", "노랑"]</code>에서 마지막 요소를 <strong>음수 인덱스</strong>로 출력하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">노랑</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q3-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(3)">확인</button><button class="btn-hint" onclick="toggleHint(3)">힌트</button><button class="btn-answer" onclick="toggleAnswer(3)">정답 보기</button></div>
+      <div class="q-result" id="q3-result"></div>
+    </div>
+    <div class="q-dropdown" id="q3-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>마지막 요소는 항상 인덱스 -1로 접근합니다.</pre></div></div>
+    <div class="q-dropdown" id="q3-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">colors</span> <span class="pn">=</span> <span class="pn">[</span><span class="str">"빨강"</span><span class="pn">,</span> <span class="str">"파랑"</span><span class="pn">,</span> <span class="str">"초록"</span><span class="pn">,</span> <span class="str">"노랑"</span><span class="pn">]</span>
+<span class="fn">print</span><span class="pn">(</span>colors<span class="pn">[</span><span class="num">-1</span><span class="pn">])</span>  <span class="cm"># -1 = 마지막</span></pre></div></div>
+  </div>
+
+  <!-- Q4 -->
+  <div class="q-card" id="q4">
+    <div class="q-header"><span class="q-num">Q4.</span>
+      <div class="q-body">
+        <p class="q-text"><code>items = ["A", "B", "C", "D", "E"]</code>의 요소 개수를 출력하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">5</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q4-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(4)">확인</button><button class="btn-hint" onclick="toggleHint(4)">힌트</button><button class="btn-answer" onclick="toggleAnswer(4)">정답 보기</button></div>
+      <div class="q-result" id="q4-result"></div>
+    </div>
+    <div class="q-dropdown" id="q4-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>len() 함수로 리스트 길이를 구합니다.</pre></div></div>
+    <div class="q-dropdown" id="q4-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">items</span> <span class="pn">=</span> <span class="pn">[</span><span class="str">"A"</span><span class="pn">,</span> <span class="str">"B"</span><span class="pn">,</span> <span class="str">"C"</span><span class="pn">,</span> <span class="str">"D"</span><span class="pn">,</span> <span class="str">"E"</span><span class="pn">]</span>
+<span class="fn">print</span><span class="pn">(</span><span class="fn">len</span><span class="pn">(</span>items<span class="pn">))</span></pre></div></div>
+  </div>
+
+  <!-- Q5 -->
+  <div class="q-card" id="q5">
+    <div class="q-header"><span class="q-num">Q5.</span>
+      <div class="q-body">
+        <p class="q-text">숫자 1~5가 담긴 리스트를 만들고 합계를 출력하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">15</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q5-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(5)">확인</button><button class="btn-hint" onclick="toggleHint(5)">힌트</button><button class="btn-answer" onclick="toggleAnswer(5)">정답 보기</button></div>
+      <div class="q-result" id="q5-result"></div>
+    </div>
+    <div class="q-dropdown" id="q5-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>sum() 함수로 숫자 리스트의 합을 구합니다.</pre></div></div>
+    <div class="q-dropdown" id="q5-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">nums</span> <span class="pn">=</span> <span class="pn">[</span><span class="num">1</span><span class="pn">,</span> <span class="num">2</span><span class="pn">,</span> <span class="num">3</span><span class="pn">,</span> <span class="num">4</span><span class="pn">,</span> <span class="num">5</span><span class="pn">]</span>
+<span class="fn">print</span><span class="pn">(</span><span class="fn">sum</span><span class="pn">(</span>nums<span class="pn">))</span></pre></div></div>
+  </div>
+
+  <!-- Q6 -->
+  <div class="q-card" id="q6">
+    <div class="q-header"><span class="q-num">Q6.</span>
+      <div class="q-body">
+        <p class="q-text"><code>scores = [88, 72, 95, 60, 84]</code>의 최댓값을 출력하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">95</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q6-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(6)">확인</button><button class="btn-hint" onclick="toggleHint(6)">힌트</button><button class="btn-answer" onclick="toggleAnswer(6)">정답 보기</button></div>
+      <div class="q-result" id="q6-result"></div>
+    </div>
+    <div class="q-dropdown" id="q6-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>max() 함수를 사용하세요.</pre></div></div>
+    <div class="q-dropdown" id="q6-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">scores</span> <span class="pn">=</span> <span class="pn">[</span><span class="num">88</span><span class="pn">,</span> <span class="num">72</span><span class="pn">,</span> <span class="num">95</span><span class="pn">,</span> <span class="num">60</span><span class="pn">,</span> <span class="num">84</span><span class="pn">]</span>
+<span class="fn">print</span><span class="pn">(</span><span class="fn">max</span><span class="pn">(</span>scores<span class="pn">))</span></pre></div></div>
+  </div>
+
+  <!-- Q7 -->
+  <div class="q-card" id="q7">
+    <div class="q-header"><span class="q-num">Q7.</span>
+      <div class="q-body">
+        <p class="q-text">빈 리스트를 만들고 그 길이를 출력하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">0</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q7-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(7)">확인</button><button class="btn-hint" onclick="toggleHint(7)">힌트</button><button class="btn-answer" onclick="toggleAnswer(7)">정답 보기</button></div>
+      <div class="q-result" id="q7-result"></div>
+    </div>
+    <div class="q-dropdown" id="q7-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>빈 리스트는 [] 입니다.</pre></div></div>
+    <div class="q-dropdown" id="q7-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">empty</span> <span class="pn">=</span> <span class="pn">[]</span>
+<span class="fn">print</span><span class="pn">(</span><span class="fn">len</span><span class="pn">(</span>empty<span class="pn">))</span></pre></div></div>
+  </div>
+
+  <!-- Q8 -->
+  <div class="q-card" id="q8">
+    <div class="q-header"><span class="q-num">Q8.</span>
+      <div class="q-body">
+        <p class="q-text"><code>data = [3, 1, 4, 1, 5, 9, 2, 6]</code>에서 뒤에서 두 번째 요소를 출력하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">2</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q8-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(8)">확인</button><button class="btn-hint" onclick="toggleHint(8)">힌트</button><button class="btn-answer" onclick="toggleAnswer(8)">정답 보기</button></div>
+      <div class="q-result" id="q8-result"></div>
+    </div>
+    <div class="q-dropdown" id="q8-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>뒤에서 두 번째 = 인덱스 -2</pre></div></div>
+    <div class="q-dropdown" id="q8-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">data</span> <span class="pn">=</span> <span class="pn">[</span><span class="num">3</span><span class="pn">,</span> <span class="num">1</span><span class="pn">,</span> <span class="num">4</span><span class="pn">,</span> <span class="num">1</span><span class="pn">,</span> <span class="num">5</span><span class="pn">,</span> <span class="num">9</span><span class="pn">,</span> <span class="num">2</span><span class="pn">,</span> <span class="num">6</span><span class="pn">]</span>
+<span class="fn">print</span><span class="pn">(</span>data<span class="pn">[</span><span class="num">-2</span><span class="pn">])</span></pre></div></div>
+  </div>
+
+  <!-- Q9 -->
+  <div class="q-card" id="q9">
+    <div class="q-header"><span class="q-num">Q9.</span>
+      <div class="q-body">
+        <p class="q-text"><code>nums = [5, 3, 8, 1, 9]</code>의 최솟값을 출력하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">1</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q9-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(9)">확인</button><button class="btn-hint" onclick="toggleHint(9)">힌트</button><button class="btn-answer" onclick="toggleAnswer(9)">정답 보기</button></div>
+      <div class="q-result" id="q9-result"></div>
+    </div>
+    <div class="q-dropdown" id="q9-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>min() 함수를 사용하세요.</pre></div></div>
+    <div class="q-dropdown" id="q9-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">nums</span> <span class="pn">=</span> <span class="pn">[</span><span class="num">5</span><span class="pn">,</span> <span class="num">3</span><span class="pn">,</span> <span class="num">8</span><span class="pn">,</span> <span class="num">1</span><span class="pn">,</span> <span class="num">9</span><span class="pn">]</span>
+<span class="fn">print</span><span class="pn">(</span><span class="fn">min</span><span class="pn">(</span>nums<span class="pn">))</span></pre></div></div>
+  </div>
+
+  <!-- Q10 -->
+  <div class="q-card" id="q10">
+    <div class="q-header"><span class="q-num">Q10.</span>
+      <div class="q-body">
+        <p class="q-text"><code>words = ["파이썬", "자바", "C언어"]</code>에서 두 번째 요소를 출력하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">자바</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q10-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(10)">확인</button><button class="btn-hint" onclick="toggleHint(10)">힌트</button><button class="btn-answer" onclick="toggleAnswer(10)">정답 보기</button></div>
+      <div class="q-result" id="q10-result"></div>
+    </div>
+    <div class="q-dropdown" id="q10-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>두 번째 요소의 인덱스는 1입니다.</pre></div></div>
+    <div class="q-dropdown" id="q10-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">words</span> <span class="pn">=</span> <span class="pn">[</span><span class="str">"파이썬"</span><span class="pn">,</span> <span class="str">"자바"</span><span class="pn">,</span> <span class="str">"C언어"</span><span class="pn">]</span>
+<span class="fn">print</span><span class="pn">(</span>words<span class="pn">[</span><span class="num">1</span><span class="pn">])</span></pre></div></div>
+  </div>
+
+
+  <!-- ══ 중 (11~35) ══ -->
+  <div class="diff-header">
+    <span class="diff-badge medium">중</span>
+    <span class="diff-title">슬라이싱 · 수정 · 메서드 · 연산 · 응용</span>
+    <span class="diff-count">11 – 35번</span>
+  </div>
+
+  <!-- Q11 -->
+  <div class="q-card" id="q11">
+    <div class="q-header"><span class="q-num">Q11.</span>
+      <div class="q-body">
+        <p class="q-text"><code>nums = [10, 20, 30, 40, 50]</code>에서 인덱스 1~3 범위(20, 30, 40)를 슬라이싱으로 출력하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">[20, 30, 40]</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q11-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(11)">확인</button><button class="btn-hint" onclick="toggleHint(11)">힌트</button><button class="btn-answer" onclick="toggleAnswer(11)">정답 보기</button></div>
+      <div class="q-result" id="q11-result"></div>
+    </div>
+    <div class="q-dropdown" id="q11-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>lst[start:stop] — stop은 포함되지 않습니다.
+인덱스 1, 2, 3을 얻으려면 [1:4] 를 씁니다.</pre></div></div>
+    <div class="q-dropdown" id="q11-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">nums</span> <span class="pn">=</span> <span class="pn">[</span><span class="num">10</span><span class="pn">,</span> <span class="num">20</span><span class="pn">,</span> <span class="num">30</span><span class="pn">,</span> <span class="num">40</span><span class="pn">,</span> <span class="num">50</span><span class="pn">]</span>
+<span class="fn">print</span><span class="pn">(</span>nums<span class="pn">[</span><span class="num">1</span><span class="pn">:</span><span class="num">4</span><span class="pn">])</span>  <span class="cm"># 1 이상 4 미만</span></pre></div></div>
+  </div>
+
+  <!-- Q12 -->
+  <div class="q-card" id="q12">
+    <div class="q-header"><span class="q-num">Q12.</span>
+      <div class="q-body">
+        <p class="q-text"><code>letters = ["a", "b", "c", "d", "e"]</code>에서 처음 3개 요소를 슬라이싱으로 출력하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">['a', 'b', 'c']</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q12-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(12)">확인</button><button class="btn-hint" onclick="toggleHint(12)">힌트</button><button class="btn-answer" onclick="toggleAnswer(12)">정답 보기</button></div>
+      <div class="q-result" id="q12-result"></div>
+    </div>
+    <div class="q-dropdown" id="q12-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>시작 인덱스를 생략하면 처음부터 자릅니다. lst[:3]</pre></div></div>
+    <div class="q-dropdown" id="q12-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">letters</span> <span class="pn">=</span> <span class="pn">[</span><span class="str">"a"</span><span class="pn">,</span> <span class="str">"b"</span><span class="pn">,</span> <span class="str">"c"</span><span class="pn">,</span> <span class="str">"d"</span><span class="pn">,</span> <span class="str">"e"</span><span class="pn">]</span>
+<span class="fn">print</span><span class="pn">(</span>letters<span class="pn">[:</span><span class="num">3</span><span class="pn">])</span></pre></div></div>
+  </div>
+
+  <!-- Q13 -->
+  <div class="q-card" id="q13">
+    <div class="q-header"><span class="q-num">Q13.</span>
+      <div class="q-body">
+        <p class="q-text"><code>nums = [1, 2, 3, 4, 5, 6, 7, 8]</code>에서 2 간격으로 슬라이싱해 홀수 위치 요소들을 출력하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">[1, 3, 5, 7]</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q13-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(13)">확인</button><button class="btn-hint" onclick="toggleHint(13)">힌트</button><button class="btn-answer" onclick="toggleAnswer(13)">정답 보기</button></div>
+      <div class="q-result" id="q13-result"></div>
+    </div>
+    <div class="q-dropdown" id="q13-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>lst[::2] — 처음부터 끝까지 2칸 간격으로 슬라이싱</pre></div></div>
+    <div class="q-dropdown" id="q13-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">nums</span> <span class="pn">=</span> <span class="pn">[</span><span class="num">1</span><span class="pn">,</span> <span class="num">2</span><span class="pn">,</span> <span class="num">3</span><span class="pn">,</span> <span class="num">4</span><span class="pn">,</span> <span class="num">5</span><span class="pn">,</span> <span class="num">6</span><span class="pn">,</span> <span class="num">7</span><span class="pn">,</span> <span class="num">8</span><span class="pn">]</span>
+<span class="fn">print</span><span class="pn">(</span>nums<span class="pn">[:</span><span class="pn">:</span><span class="num">2</span><span class="pn">])</span>  <span class="cm"># 인덱스 0, 2, 4, 6</span></pre></div></div>
+  </div>
+
+  <!-- Q14 -->
+  <div class="q-card" id="q14">
+    <div class="q-header"><span class="q-num">Q14.</span>
+      <div class="q-body">
+        <p class="q-text"><code>cart = ["우유", "달걀", "빵"]</code>에 <code>"버터"</code>를 맨 끝에 추가하고 출력하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">['우유', '달걀', '빵', '버터']</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q14-input" placeholder="코드를 입력하세요..." rows="3" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(14)">확인</button><button class="btn-hint" onclick="toggleHint(14)">힌트</button><button class="btn-answer" onclick="toggleAnswer(14)">정답 보기</button></div>
+      <div class="q-result" id="q14-result"></div>
+    </div>
+    <div class="q-dropdown" id="q14-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>.append(값) — 리스트 맨 끝에 요소를 추가합니다.</pre></div></div>
+    <div class="q-dropdown" id="q14-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">cart</span> <span class="pn">=</span> <span class="pn">[</span><span class="str">"우유"</span><span class="pn">,</span> <span class="str">"달걀"</span><span class="pn">,</span> <span class="str">"빵"</span><span class="pn">]</span>
+cart<span class="pn">.</span><span class="fn">append</span><span class="pn">(</span><span class="str">"버터"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span>cart<span class="pn">)</span></pre></div></div>
+  </div>
+
+  <!-- Q15 -->
+  <div class="q-card" id="q15">
+    <div class="q-header"><span class="q-num">Q15.</span>
+      <div class="q-body">
+        <p class="q-text"><code>fruits = ["사과", "포도", "딸기"]</code>에서 <code>"포도"</code>를 제거하고 출력하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">['사과', '딸기']</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q15-input" placeholder="코드를 입력하세요..." rows="3" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(15)">확인</button><button class="btn-hint" onclick="toggleHint(15)">힌트</button><button class="btn-answer" onclick="toggleAnswer(15)">정답 보기</button></div>
+      <div class="q-result" id="q15-result"></div>
+    </div>
+    <div class="q-dropdown" id="q15-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>.remove(값) — 해당 값의 첫 번째 항목을 삭제합니다.</pre></div></div>
+    <div class="q-dropdown" id="q15-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">fruits</span> <span class="pn">=</span> <span class="pn">[</span><span class="str">"사과"</span><span class="pn">,</span> <span class="str">"포도"</span><span class="pn">,</span> <span class="str">"딸기"</span><span class="pn">]</span>
+fruits<span class="pn">.</span><span class="fn">remove</span><span class="pn">(</span><span class="str">"포도"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span>fruits<span class="pn">)</span></pre></div></div>
+  </div>
+
+  <!-- Q16 -->
+  <div class="q-card" id="q16">
+    <div class="q-header"><span class="q-num">Q16.</span>
+      <div class="q-body">
+        <p class="q-text"><code>nums = [3, 1, 4, 1, 5]</code>를 오름차순 정렬하고 출력하세요. 원본이 바뀌어도 됩니다.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">[1, 1, 3, 4, 5]</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q16-input" placeholder="코드를 입력하세요..." rows="3" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(16)">확인</button><button class="btn-hint" onclick="toggleHint(16)">힌트</button><button class="btn-answer" onclick="toggleAnswer(16)">정답 보기</button></div>
+      <div class="q-result" id="q16-result"></div>
+    </div>
+    <div class="q-dropdown" id="q16-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>.sort() — 원본 리스트를 정렬합니다.</pre></div></div>
+    <div class="q-dropdown" id="q16-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">nums</span> <span class="pn">=</span> <span class="pn">[</span><span class="num">3</span><span class="pn">,</span> <span class="num">1</span><span class="pn">,</span> <span class="num">4</span><span class="pn">,</span> <span class="num">1</span><span class="pn">,</span> <span class="num">5</span><span class="pn">]</span>
+nums<span class="pn">.</span><span class="fn">sort</span><span class="pn">()</span>
+<span class="fn">print</span><span class="pn">(</span>nums<span class="pn">)</span></pre></div></div>
+  </div>
+
+  <!-- Q17 -->
+  <div class="q-card" id="q17">
+    <div class="q-header"><span class="q-num">Q17.</span>
+      <div class="q-body">
+        <p class="q-text"><code>nums = [10, 20, 30]</code>의 두 번째 요소를 <code>99</code>로 바꾸고 출력하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">[10, 99, 30]</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q17-input" placeholder="코드를 입력하세요..." rows="3" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(17)">확인</button><button class="btn-hint" onclick="toggleHint(17)">힌트</button><button class="btn-answer" onclick="toggleAnswer(17)">정답 보기</button></div>
+      <div class="q-result" id="q17-result"></div>
+    </div>
+    <div class="q-dropdown" id="q17-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>lst[인덱스] = 새값  형태로 요소를 수정합니다.</pre></div></div>
+    <div class="q-dropdown" id="q17-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">nums</span> <span class="pn">=</span> <span class="pn">[</span><span class="num">10</span><span class="pn">,</span> <span class="num">20</span><span class="pn">,</span> <span class="num">30</span><span class="pn">]</span>
+nums<span class="pn">[</span><span class="num">1</span><span class="pn">]</span> <span class="pn">=</span> <span class="num">99</span>
+<span class="fn">print</span><span class="pn">(</span>nums<span class="pn">)</span></pre></div></div>
+  </div>
+
+  <!-- Q18 -->
+  <div class="q-card" id="q18">
+    <div class="q-header"><span class="q-num">Q18.</span>
+      <div class="q-body">
+        <p class="q-text"><code>langs = ["파이썬", "자바", "C"]</code>에 <code>"파이썬"</code>이 포함되어 있는지 <code>in</code>으로 확인하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">True</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q18-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(18)">확인</button><button class="btn-hint" onclick="toggleHint(18)">힌트</button><button class="btn-answer" onclick="toggleAnswer(18)">정답 보기</button></div>
+      <div class="q-result" id="q18-result"></div>
+    </div>
+    <div class="q-dropdown" id="q18-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>"값" in 리스트  →  True 또는 False</pre></div></div>
+    <div class="q-dropdown" id="q18-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">langs</span> <span class="pn">=</span> <span class="pn">[</span><span class="str">"파이썬"</span><span class="pn">,</span> <span class="str">"자바"</span><span class="pn">,</span> <span class="str">"C"</span><span class="pn">]</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"파이썬"</span> <span class="kw">in</span> langs<span class="pn">)</span></pre></div></div>
+  </div>
+
+  <!-- Q19 -->
+  <div class="q-card" id="q19">
+    <div class="q-header"><span class="q-num">Q19.</span>
+      <div class="q-body">
+        <p class="q-text"><code>nums = [5, 2, 8, 1, 9, 3]</code>의 순서를 뒤집어 출력하세요. <code>.reverse()</code>를 사용하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">[3, 9, 1, 8, 2, 5]</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q19-input" placeholder="코드를 입력하세요..." rows="3" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(19)">확인</button><button class="btn-hint" onclick="toggleHint(19)">힌트</button><button class="btn-answer" onclick="toggleAnswer(19)">정답 보기</button></div>
+      <div class="q-result" id="q19-result"></div>
+    </div>
+    <div class="q-dropdown" id="q19-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>.reverse() — 원본 리스트를 제자리에서 뒤집습니다.</pre></div></div>
+    <div class="q-dropdown" id="q19-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">nums</span> <span class="pn">=</span> <span class="pn">[</span><span class="num">5</span><span class="pn">,</span> <span class="num">2</span><span class="pn">,</span> <span class="num">8</span><span class="pn">,</span> <span class="num">1</span><span class="pn">,</span> <span class="num">9</span><span class="pn">,</span> <span class="num">3</span><span class="pn">]</span>
+nums<span class="pn">.</span><span class="fn">reverse</span><span class="pn">()</span>
+<span class="fn">print</span><span class="pn">(</span>nums<span class="pn">)</span></pre></div></div>
+  </div>
+
+  <!-- Q20 -->
+  <div class="q-card" id="q20">
+    <div class="q-header"><span class="q-num">Q20.</span>
+      <div class="q-body">
+        <p class="q-text"><code>a = [1, 2, 3]</code>과 <code>b = [4, 5, 6]</code>을 <code>+</code>로 합쳐서 출력하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">[1, 2, 3, 4, 5, 6]</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q20-input" placeholder="코드를 입력하세요..." rows="3" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(20)">확인</button><button class="btn-hint" onclick="toggleHint(20)">힌트</button><button class="btn-answer" onclick="toggleAnswer(20)">정답 보기</button></div>
+      <div class="q-result" id="q20-result"></div>
+    </div>
+    <div class="q-dropdown" id="q20-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>리스트 + 리스트 로 두 리스트를 연결합니다.</pre></div></div>
+    <div class="q-dropdown" id="q20-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">a</span> <span class="pn">=</span> <span class="pn">[</span><span class="num">1</span><span class="pn">,</span> <span class="num">2</span><span class="pn">,</span> <span class="num">3</span><span class="pn">]</span>
+<span class="fn">b</span> <span class="pn">=</span> <span class="pn">[</span><span class="num">4</span><span class="pn">,</span> <span class="num">5</span><span class="pn">,</span> <span class="num">6</span><span class="pn">]</span>
+<span class="fn">print</span><span class="pn">(</span>a <span class="pn">+</span> b<span class="pn">)</span></pre></div></div>
+  </div>
+
+  <!-- Q21 -->
+  <div class="q-card" id="q21">
+    <div class="q-header"><span class="q-num">Q21.</span>
+      <div class="q-body">
+        <p class="q-text"><code>nums = [7, 2, 9, 1, 5]</code>에서 원본을 유지하면서 정렬된 새 리스트를 만들어 두 줄로 출력하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">[1, 2, 5, 7, 9]\n[7, 2, 9, 1, 5]</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q21-input" placeholder="코드를 입력하세요..." rows="3" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(21)">확인</button><button class="btn-hint" onclick="toggleHint(21)">힌트</button><button class="btn-answer" onclick="toggleAnswer(21)">정답 보기</button></div>
+      <div class="q-result" id="q21-result"></div>
+    </div>
+    <div class="q-dropdown" id="q21-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>sorted(리스트) — 원본을 건드리지 않고 새 리스트를 반환합니다.</pre></div></div>
+    <div class="q-dropdown" id="q21-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">nums</span> <span class="pn">=</span> <span class="pn">[</span><span class="num">7</span><span class="pn">,</span> <span class="num">2</span><span class="pn">,</span> <span class="num">9</span><span class="pn">,</span> <span class="num">1</span><span class="pn">,</span> <span class="num">5</span><span class="pn">]</span>
+<span class="fn">new_list</span> <span class="pn">=</span> <span class="fn">sorted</span><span class="pn">(</span>nums<span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span>new_list<span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span>nums<span class="pn">)</span>  <span class="cm"># 원본 그대로</span></pre></div></div>
+  </div>
+
+  <!-- Q22 -->
+  <div class="q-card" id="q22">
+    <div class="q-header"><span class="q-num">Q22.</span>
+      <div class="q-body">
+        <p class="q-text"><code>items = ["X", "Y", "Z"]</code>의 인덱스 1 위치에 <code>"W"</code>를 삽입하고 출력하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">['X', 'W', 'Y', 'Z']</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q22-input" placeholder="코드를 입력하세요..." rows="3" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(22)">확인</button><button class="btn-hint" onclick="toggleHint(22)">힌트</button><button class="btn-answer" onclick="toggleAnswer(22)">정답 보기</button></div>
+      <div class="q-result" id="q22-result"></div>
+    </div>
+    <div class="q-dropdown" id="q22-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>.insert(인덱스, 값) — 지정 위치에 삽입합니다.</pre></div></div>
+    <div class="q-dropdown" id="q22-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">items</span> <span class="pn">=</span> <span class="pn">[</span><span class="str">"X"</span><span class="pn">,</span> <span class="str">"Y"</span><span class="pn">,</span> <span class="str">"Z"</span><span class="pn">]</span>
+items<span class="pn">.</span><span class="fn">insert</span><span class="pn">(</span><span class="num">1</span><span class="pn">,</span> <span class="str">"W"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span>items<span class="pn">)</span></pre></div></div>
+  </div>
+
+  <!-- Q23 -->
+  <div class="q-card" id="q23">
+    <div class="q-header"><span class="q-num">Q23.</span>
+      <div class="q-body">
+        <p class="q-text">아래 코드의 출력 결과를 예상하고, 그 결과와 같은 값을 출력하는 코드를 작성하세요.</p>
+        <div class="q-code-block"><pre><span class="fn">lst</span> <span class="pn">=</span> <span class="pn">[</span><span class="num">10</span><span class="pn">,</span> <span class="num">20</span><span class="pn">,</span> <span class="num">30</span><span class="pn">,</span> <span class="num">40</span><span class="pn">,</span> <span class="num">50</span><span class="pn">]</span>
+lst<span class="pn">[</span><span class="num">-1</span><span class="pn">]</span> <span class="pn">=</span> <span class="num">99</span>
+<span class="fn">print</span><span class="pn">(</span>lst<span class="pn">[</span><span class="num">3</span><span class="pn">])</span></pre></div>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">40</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q23-input" placeholder="코드를 입력하세요..." rows="3" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(23)">확인</button><button class="btn-hint" onclick="toggleHint(23)">힌트</button><button class="btn-answer" onclick="toggleAnswer(23)">정답 보기</button></div>
+      <div class="q-result" id="q23-result"></div>
+    </div>
+    <div class="q-dropdown" id="q23-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>lst[-1] = 99 은 마지막 요소(50)를 99로 바꿉니다.
+인덱스 3은 네 번째 요소이며, 수정되지 않은 값입니다.</pre></div></div>
+    <div class="q-dropdown" id="q23-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="cm"># lst[-1]=99 → [10,20,30,40,99]
+# lst[3] = 40 (네 번째, 수정 안 됨)</span>
+<span class="fn">lst</span> <span class="pn">=</span> <span class="pn">[</span><span class="num">10</span><span class="pn">,</span> <span class="num">20</span><span class="pn">,</span> <span class="num">30</span><span class="pn">,</span> <span class="num">40</span><span class="pn">,</span> <span class="num">50</span><span class="pn">]</span>
+lst<span class="pn">[</span><span class="num">-1</span><span class="pn">]</span> <span class="pn">=</span> <span class="num">99</span>
+<span class="fn">print</span><span class="pn">(</span>lst<span class="pn">[</span><span class="num">3</span><span class="pn">])</span></pre></div></div>
+  </div>
+
+  <!-- Q24 -->
+  <div class="q-card" id="q24">
+    <div class="q-header"><span class="q-num">Q24.</span>
+      <div class="q-body">
+        <p class="q-text"><code>nums = [1, 2, 3, 4, 5]</code>에서 마지막 요소를 <code>.pop()</code>으로 꺼내 저장하고, 꺼낸 값과 남은 리스트를 각각 출력하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">5\n[1, 2, 3, 4]</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q24-input" placeholder="코드를 입력하세요..." rows="3" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(24)">확인</button><button class="btn-hint" onclick="toggleHint(24)">힌트</button><button class="btn-answer" onclick="toggleAnswer(24)">정답 보기</button></div>
+      <div class="q-result" id="q24-result"></div>
+    </div>
+    <div class="q-dropdown" id="q24-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>last = lst.pop()  # 마지막 요소를 꺼내고 리스트에서 삭제</pre></div></div>
+    <div class="q-dropdown" id="q24-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">nums</span> <span class="pn">=</span> <span class="pn">[</span><span class="num">1</span><span class="pn">,</span> <span class="num">2</span><span class="pn">,</span> <span class="num">3</span><span class="pn">,</span> <span class="num">4</span><span class="pn">,</span> <span class="num">5</span><span class="pn">]</span>
+<span class="fn">last</span> <span class="pn">=</span> nums<span class="pn">.</span><span class="fn">pop</span><span class="pn">()</span>
+<span class="fn">print</span><span class="pn">(</span>last<span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span>nums<span class="pn">)</span></pre></div></div>
+  </div>
+
+  <!-- Q25 -->
+  <div class="q-card" id="q25">
+    <div class="q-header"><span class="q-num">Q25.</span>
+      <div class="q-body">
+        <p class="q-text"><code>data = [4, 4, 2, 4, 1, 4]</code>에서 숫자 <code>4</code>가 몇 번 등장하는지 출력하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">4</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q25-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(25)">확인</button><button class="btn-hint" onclick="toggleHint(25)">힌트</button><button class="btn-answer" onclick="toggleAnswer(25)">정답 보기</button></div>
+      <div class="q-result" id="q25-result"></div>
+    </div>
+    <div class="q-dropdown" id="q25-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>.count(값) — 해당 값이 몇 번 나오는지 반환합니다.</pre></div></div>
+    <div class="q-dropdown" id="q25-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">data</span> <span class="pn">=</span> <span class="pn">[</span><span class="num">4</span><span class="pn">,</span> <span class="num">4</span><span class="pn">,</span> <span class="num">2</span><span class="pn">,</span> <span class="num">4</span><span class="pn">,</span> <span class="num">1</span><span class="pn">,</span> <span class="num">4</span><span class="pn">]</span>
+<span class="fn">print</span><span class="pn">(</span>data<span class="pn">.</span><span class="fn">count</span><span class="pn">(</span><span class="num">4</span><span class="pn">))</span></pre></div></div>
+  </div>
+
+  <!-- Q26 -->
+  <div class="q-card" id="q26">
+    <div class="q-header"><span class="q-num">Q26.</span>
+      <div class="q-body">
+        <p class="q-text"><code>fruits = ["사과", "바나나", "포도", "딸기"]</code>에서 <code>"포도"</code>의 인덱스를 출력하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">2</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q26-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(26)">확인</button><button class="btn-hint" onclick="toggleHint(26)">힌트</button><button class="btn-answer" onclick="toggleAnswer(26)">정답 보기</button></div>
+      <div class="q-result" id="q26-result"></div>
+    </div>
+    <div class="q-dropdown" id="q26-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>.index(값) — 해당 값이 처음 등장하는 인덱스를 반환합니다.</pre></div></div>
+    <div class="q-dropdown" id="q26-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">fruits</span> <span class="pn">=</span> <span class="pn">[</span><span class="str">"사과"</span><span class="pn">,</span> <span class="str">"바나나"</span><span class="pn">,</span> <span class="str">"포도"</span><span class="pn">,</span> <span class="str">"딸기"</span><span class="pn">]</span>
+<span class="fn">print</span><span class="pn">(</span>fruits<span class="pn">.</span><span class="fn">index</span><span class="pn">(</span><span class="str">"포도"</span><span class="pn">))</span></pre></div></div>
+  </div>
+
+  <!-- Q27 -->
+  <div class="q-card" id="q27">
+    <div class="q-header"><span class="q-num">Q27.</span>
+      <div class="q-body">
+        <p class="q-text"><code>[0] * 5</code>로 만들어지는 리스트를 출력하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">[0, 0, 0, 0, 0]</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q27-input" placeholder="코드를 입력하세요..." rows="1" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(27)">확인</button><button class="btn-hint" onclick="toggleHint(27)">힌트</button><button class="btn-answer" onclick="toggleAnswer(27)">정답 보기</button></div>
+      <div class="q-result" id="q27-result"></div>
+    </div>
+    <div class="q-dropdown" id="q27-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>리스트 * 정수 — 리스트를 해당 횟수만큼 반복합니다.</pre></div></div>
+    <div class="q-dropdown" id="q27-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">print</span><span class="pn">([</span><span class="num">0</span><span class="pn">]</span> <span class="pn">*</span> <span class="num">5</span><span class="pn">)</span></pre></div></div>
+  </div>
+
+  <!-- Q28 -->
+  <div class="q-card" id="q28">
+    <div class="q-header"><span class="q-num">Q28.</span>
+      <div class="q-body">
+        <p class="q-text"><code>scores = [85, 92, 78, 96, 88]</code>의 평균을 소수점 첫째 자리까지 출력하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">87.8</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q28-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(28)">확인</button><button class="btn-hint" onclick="toggleHint(28)">힌트</button><button class="btn-answer" onclick="toggleAnswer(28)">정답 보기</button></div>
+      <div class="q-result" id="q28-result"></div>
+    </div>
+    <div class="q-dropdown" id="q28-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>평균 = sum(lst) / len(lst)
+f-string 의 :.1f 서식으로 소수점 첫째 자리를 지정합니다.</pre></div></div>
+    <div class="q-dropdown" id="q28-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">scores</span> <span class="pn">=</span> <span class="pn">[</span><span class="num">85</span><span class="pn">,</span> <span class="num">92</span><span class="pn">,</span> <span class="num">78</span><span class="pn">,</span> <span class="num">96</span><span class="pn">,</span> <span class="num">88</span><span class="pn">]</span>
+<span class="fn">avg</span> <span class="pn">=</span> <span class="fn">sum</span><span class="pn">(</span>scores<span class="pn">)</span> <span class="pn">/</span> <span class="fn">len</span><span class="pn">(</span>scores<span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"{avg:.1f}"</span><span class="pn">)</span></pre></div></div>
+  </div>
+
+  <!-- Q29 -->
+  <div class="q-card" id="q29">
+    <div class="q-header"><span class="q-num">Q29.</span>
+      <div class="q-body">
+        <p class="q-text">f-string을 사용해 <code>fruits = ["사과", "바나나", "포도"]</code>의 첫 번째 과일을 포함한 문장을 출력하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">내가 좋아하는 과일: 사과</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q29-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(29)">확인</button><button class="btn-hint" onclick="toggleHint(29)">힌트</button><button class="btn-answer" onclick="toggleAnswer(29)">정답 보기</button></div>
+      <div class="q-result" id="q29-result"></div>
+    </div>
+    <div class="q-dropdown" id="q29-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>f-string 안에서 fruits[0]처럼 인덱싱을 직접 쓸 수 있습니다.</pre></div></div>
+    <div class="q-dropdown" id="q29-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">fruits</span> <span class="pn">=</span> <span class="pn">[</span><span class="str">"사과"</span><span class="pn">,</span> <span class="str">"바나나"</span><span class="pn">,</span> <span class="str">"포도"</span><span class="pn">]</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"내가 좋아하는 과일: {fruits[0]}"</span><span class="pn">)</span></pre></div></div>
+  </div>
+
+  <!-- Q30 -->
+  <div class="q-card" id="q30">
+    <div class="q-header"><span class="q-num">Q30.</span>
+      <div class="q-body">
+        <p class="q-text"><code>nums = [1, 2, 3, 4, 5]</code>를 역순 슬라이싱(<code>[::-1]</code>)으로 출력하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">[5, 4, 3, 2, 1]</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q30-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(30)">확인</button><button class="btn-hint" onclick="toggleHint(30)">힌트</button><button class="btn-answer" onclick="toggleAnswer(30)">정답 보기</button></div>
+      <div class="q-result" id="q30-result"></div>
+    </div>
+    <div class="q-dropdown" id="q30-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>lst[::-1] — step이 -1이면 역순으로 슬라이싱됩니다.</pre></div></div>
+    <div class="q-dropdown" id="q30-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">nums</span> <span class="pn">=</span> <span class="pn">[</span><span class="num">1</span><span class="pn">,</span> <span class="num">2</span><span class="pn">,</span> <span class="num">3</span><span class="pn">,</span> <span class="num">4</span><span class="pn">,</span> <span class="num">5</span><span class="pn">]</span>
+<span class="fn">print</span><span class="pn">(</span>nums<span class="pn">[:</span><span class="pn">:</span><span class="num">-1</span><span class="pn">])</span></pre></div></div>
+  </div>
+
+  <!-- Q31 -->
+  <div class="q-card" id="q31">
+    <div class="q-header"><span class="q-num">Q31.</span>
+      <div class="q-body">
+        <p class="q-text"><code>team = ["Alice", "Bob", "Charlie"]</code>에서 <code>"Dave"</code>가 없음을 <code>not in</code>으로 확인하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">True</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q31-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(31)">확인</button><button class="btn-hint" onclick="toggleHint(31)">힌트</button><button class="btn-answer" onclick="toggleAnswer(31)">정답 보기</button></div>
+      <div class="q-result" id="q31-result"></div>
+    </div>
+    <div class="q-dropdown" id="q31-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>"값" not in 리스트 — 리스트에 없으면 True</pre></div></div>
+    <div class="q-dropdown" id="q31-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">team</span> <span class="pn">=</span> <span class="pn">[</span><span class="str">"Alice"</span><span class="pn">,</span> <span class="str">"Bob"</span><span class="pn">,</span> <span class="str">"Charlie"</span><span class="pn">]</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"Dave"</span> <span class="kw">not in</span> team<span class="pn">)</span></pre></div></div>
+  </div>
+
+  <!-- Q32 -->
+  <div class="q-card" id="q32">
+    <div class="q-header"><span class="q-num">Q32.</span>
+      <div class="q-body">
+        <p class="q-text">중첩 리스트 <code>matrix = [[1,2,3],[4,5,6],[7,8,9]]</code>에서 숫자 <code>5</code>를 출력하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">5</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q32-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(32)">확인</button><button class="btn-hint" onclick="toggleHint(32)">힌트</button><button class="btn-answer" onclick="toggleAnswer(32)">정답 보기</button></div>
+      <div class="q-result" id="q32-result"></div>
+    </div>
+    <div class="q-dropdown" id="q32-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>5는 두 번째 리스트([4,5,6])의 두 번째 요소입니다.
+matrix[행][열] 형태로 접근하세요.</pre></div></div>
+    <div class="q-dropdown" id="q32-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">matrix</span> <span class="pn">=</span> <span class="pn">[[</span><span class="num">1</span><span class="pn">,</span><span class="num">2</span><span class="pn">,</span><span class="num">3</span><span class="pn">],[</span><span class="num">4</span><span class="pn">,</span><span class="num">5</span><span class="pn">,</span><span class="num">6</span><span class="pn">],[</span><span class="num">7</span><span class="pn">,</span><span class="num">8</span><span class="pn">,</span><span class="num">9</span><span class="pn">]]</span>
+<span class="fn">print</span><span class="pn">(</span>matrix<span class="pn">[</span><span class="num">1</span><span class="pn">][</span><span class="num">1</span><span class="pn">])</span>  <span class="cm"># 행1, 열1</span></pre></div></div>
+  </div>
+
+  <!-- Q33 -->
+  <div class="q-card" id="q33">
+    <div class="q-header"><span class="q-num">Q33.</span>
+      <div class="q-body">
+        <p class="q-text">문자열 <code>"python"</code>을 <code>list()</code>로 변환해 출력하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">['p', 'y', 't', 'h', 'o', 'n']</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q33-input" placeholder="코드를 입력하세요..." rows="1" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(33)">확인</button><button class="btn-hint" onclick="toggleHint(33)">힌트</button><button class="btn-answer" onclick="toggleAnswer(33)">정답 보기</button></div>
+      <div class="q-result" id="q33-result"></div>
+    </div>
+    <div class="q-dropdown" id="q33-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>list("문자열") — 각 문자가 요소인 리스트를 만듭니다.</pre></div></div>
+    <div class="q-dropdown" id="q33-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">print</span><span class="pn">(</span><span class="fn">list</span><span class="pn">(</span><span class="str">"python"</span><span class="pn">))</span></pre></div></div>
+  </div>
+
+  <!-- Q34 -->
+  <div class="q-card" id="q34">
+    <div class="q-header"><span class="q-num">Q34.</span>
+      <div class="q-body">
+        <p class="q-text"><code>nums = [8, 3, 6, 1, 9, 2]</code>의 최솟값과 최댓값을 아래 형식으로 출력하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">최솟값: 1, 최댓값: 9</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q34-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(34)">확인</button><button class="btn-hint" onclick="toggleHint(34)">힌트</button><button class="btn-answer" onclick="toggleAnswer(34)">정답 보기</button></div>
+      <div class="q-result" id="q34-result"></div>
+    </div>
+    <div class="q-dropdown" id="q34-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>f"최솟값: {min(nums)}, 최댓값: {max(nums)}"</pre></div></div>
+    <div class="q-dropdown" id="q34-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">nums</span> <span class="pn">=</span> <span class="pn">[</span><span class="num">8</span><span class="pn">,</span> <span class="num">3</span><span class="pn">,</span> <span class="num">6</span><span class="pn">,</span> <span class="num">1</span><span class="pn">,</span> <span class="num">9</span><span class="pn">,</span> <span class="num">2</span><span class="pn">]</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"최솟값: {min(nums)}, 최댓값: {max(nums)}"</span><span class="pn">)</span></pre></div></div>
+  </div>
+
+  <!-- Q35 -->
+  <div class="q-card" id="q35">
+    <div class="q-header"><span class="q-num">Q35.</span>
+      <div class="q-body">
+        <p class="q-text"><code>prices = [1200, 3500, 800, 4200, 2100]</code>의 합계를 천 단위 구분 기호(,)와 함께 출력하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">11,800</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q35-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(35)">확인</button><button class="btn-hint" onclick="toggleHint(35)">힌트</button><button class="btn-answer" onclick="toggleAnswer(35)">정답 보기</button></div>
+      <div class="q-result" id="q35-result"></div>
+    </div>
+    <div class="q-dropdown" id="q35-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>f-string 에서 {:,} 서식으로 천 단위 쉼표를 추가합니다.</pre></div></div>
+    <div class="q-dropdown" id="q35-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">prices</span> <span class="pn">=</span> <span class="pn">[</span><span class="num">1200</span><span class="pn">,</span> <span class="num">3500</span><span class="pn">,</span> <span class="num">800</span><span class="pn">,</span> <span class="num">4200</span><span class="pn">,</span> <span class="num">2100</span><span class="pn">]</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"{sum(prices):,}"</span><span class="pn">)</span></pre></div></div>
+  </div>
+
+
+  <!-- ══ 상 (36~50) ══ -->
+  <div class="diff-header">
+    <span class="diff-badge hard">상</span>
+    <span class="diff-title">오류 찾기 · 종합 응용 · 도전 문제</span>
+    <span class="diff-count">36 – 50번</span>
+  </div>
+
+  <!-- Q36 -->
+  <div class="q-card" id="q36">
+    <div class="q-header"><span class="q-num">Q36.</span>
+      <div class="q-body">
+        <p class="q-text">아래 코드의 오류 종류(에러 이름)를 입력하세요.</p>
+        <div class="q-error-code"><pre>nums = [1, 2, 3]
+print(nums[3])</pre></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q36-input" placeholder="에러 이름을 입력하세요..." rows="1" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(36)">확인</button><button class="btn-hint" onclick="toggleHint(36)">힌트</button><button class="btn-answer" onclick="toggleAnswer(36)">정답 보기</button></div>
+      <div class="q-result" id="q36-result"></div>
+    </div>
+    <div class="q-dropdown" id="q36-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>3개 리스트의 유효 인덱스는 0, 1, 2입니다.
+범위를 벗어난 인덱스에 접근하면 어떤 에러가 발생하나요?</pre></div></div>
+    <div class="q-dropdown" id="q36-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre>IndexError
+# list index out of range
+# 인덱스 3은 범위 초과 (유효: 0, 1, 2)</pre></div></div>
+  </div>
+
+  <!-- Q37 -->
+  <div class="q-card" id="q37">
+    <div class="q-header"><span class="q-num">Q37.</span>
+      <div class="q-body">
+        <p class="q-text">아래 코드에서 오류를 찾아 수정하세요. 목표 출력은 <code>사과</code>입니다.</p>
+        <div class="q-error-code"><pre>fruits = ["사과", "바나나", "포도"]
+print(fruits[1])</pre></div>
+        <div class="q-expected"><span class="q-expected-label">올바른 출력:</span><span class="q-expected-val">사과</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q37-input" placeholder="올바른 코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(37)">확인</button><button class="btn-hint" onclick="toggleHint(37)">힌트</button><button class="btn-answer" onclick="toggleAnswer(37)">정답 보기</button></div>
+      <div class="q-result" id="q37-result"></div>
+    </div>
+    <div class="q-dropdown" id="q37-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>"사과"는 첫 번째 요소입니다. 인덱스 번호를 확인하세요.</pre></div></div>
+    <div class="q-dropdown" id="q37-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">fruits</span> <span class="pn">=</span> <span class="pn">[</span><span class="str">"사과"</span><span class="pn">,</span> <span class="str">"바나나"</span><span class="pn">,</span> <span class="str">"포도"</span><span class="pn">]</span>
+<span class="fn">print</span><span class="pn">(</span>fruits<span class="pn">[</span><span class="num">0</span><span class="pn">])</span>  <span class="cm"># [1] → [0] 으로 수정</span></pre></div></div>
+  </div>
+
+  <!-- Q38 -->
+  <div class="q-card" id="q38">
+    <div class="q-header"><span class="q-num">Q38.</span>
+      <div class="q-body">
+        <p class="q-text">아래 코드는 정렬 후 리스트를 출력하려 했는데 <code>None</code>이 나왔습니다. 올바르게 고치세요.</p>
+        <div class="q-error-code"><pre>nums = [3, 1, 2]
+print(nums.sort())</pre></div>
+        <div class="q-expected"><span class="q-expected-label">올바른 출력:</span><span class="q-expected-val">[1, 2, 3]</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q38-input" placeholder="올바른 코드를 입력하세요..." rows="3" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(38)">확인</button><button class="btn-hint" onclick="toggleHint(38)">힌트</button><button class="btn-answer" onclick="toggleAnswer(38)">정답 보기</button></div>
+      <div class="q-result" id="q38-result"></div>
+    </div>
+    <div class="q-dropdown" id="q38-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>.sort()는 None을 반환합니다. 정렬 후 리스트 자체를 print()하세요.</pre></div></div>
+    <div class="q-dropdown" id="q38-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">nums</span> <span class="pn">=</span> <span class="pn">[</span><span class="num">3</span><span class="pn">,</span> <span class="num">1</span><span class="pn">,</span> <span class="num">2</span><span class="pn">]</span>
+nums<span class="pn">.</span><span class="fn">sort</span><span class="pn">()</span>       <span class="cm"># 원본 정렬 (None 반환)</span>
+<span class="fn">print</span><span class="pn">(</span>nums<span class="pn">)</span>      <span class="cm"># 리스트 자체를 출력</span></pre></div></div>
+  </div>
+
+  <!-- Q39 -->
+  <div class="q-card" id="q39">
+    <div class="q-header"><span class="q-num">Q39.</span>
+      <div class="q-body">
+        <p class="q-text">아래 코드의 오류를 찾아 수정하세요.</p>
+        <div class="q-error-code"><pre>cart = ["우유", "달걀"]
+cart.append["치즈"]
+print(cart)</pre></div>
+        <div class="q-expected"><span class="q-expected-label">올바른 출력:</span><span class="q-expected-val">['우유', '달걀', '치즈']</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q39-input" placeholder="올바른 코드를 입력하세요..." rows="3" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(39)">확인</button><button class="btn-hint" onclick="toggleHint(39)">힌트</button><button class="btn-answer" onclick="toggleAnswer(39)">정답 보기</button></div>
+      <div class="q-result" id="q39-result"></div>
+    </div>
+    <div class="q-dropdown" id="q39-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>메서드 호출은 대괄호 [ ]가 아닌 소괄호 ( )를 사용합니다.</pre></div></div>
+    <div class="q-dropdown" id="q39-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">cart</span> <span class="pn">=</span> <span class="pn">[</span><span class="str">"우유"</span><span class="pn">,</span> <span class="str">"달걀"</span><span class="pn">]</span>
+cart<span class="pn">.</span><span class="fn">append</span><span class="pn">(</span><span class="str">"치즈"</span><span class="pn">)</span>  <span class="cm"># [] → () 로 수정</span>
+<span class="fn">print</span><span class="pn">(</span>cart<span class="pn">)</span></pre></div></div>
+  </div>
+
+  <!-- Q40 -->
+  <div class="q-card" id="q40">
+    <div class="q-header"><span class="q-num">Q40.</span>
+      <div class="q-body">
+        <p class="q-text">다음 코드의 출력 결과를 예상하고 그 값을 <code>print()</code>로 작성하세요.</p>
+        <div class="q-code-block"><pre><span class="fn">lst</span> <span class="pn">=</span> <span class="pn">[</span><span class="num">1</span><span class="pn">,</span> <span class="num">2</span><span class="pn">,</span> <span class="num">2</span><span class="pn">,</span> <span class="num">3</span><span class="pn">,</span> <span class="num">2</span><span class="pn">]</span>
+lst<span class="pn">.</span><span class="fn">remove</span><span class="pn">(</span><span class="num">2</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span>lst<span class="pn">)</span></pre></div>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">[1, 2, 3, 2]</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q40-input" placeholder="코드를 입력하세요..." rows="3" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(40)">확인</button><button class="btn-hint" onclick="toggleHint(40)">힌트</button><button class="btn-answer" onclick="toggleAnswer(40)">정답 보기</button></div>
+      <div class="q-result" id="q40-result"></div>
+    </div>
+    <div class="q-dropdown" id="q40-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>.remove()는 해당 값의 첫 번째 항목만 제거합니다.</pre></div></div>
+    <div class="q-dropdown" id="q40-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="cm"># 인덱스 1의 2(첫 번째 2)만 제거됨</span>
+<span class="fn">lst</span> <span class="pn">=</span> <span class="pn">[</span><span class="num">1</span><span class="pn">,</span> <span class="num">2</span><span class="pn">,</span> <span class="num">2</span><span class="pn">,</span> <span class="num">3</span><span class="pn">,</span> <span class="num">2</span><span class="pn">]</span>
+lst<span class="pn">.</span><span class="fn">remove</span><span class="pn">(</span><span class="num">2</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span>lst<span class="pn">)</span></pre></div></div>
+  </div>
+
+  <!-- Q41 -->
+  <div class="q-card" id="q41">
+    <div class="q-header"><span class="q-num">Q41.</span>
+      <div class="q-body">
+        <p class="q-text"><code>nums = [5, 8, 2, 9, 1, 7]</code>에서 상위 3개(가장 큰 3개)를 추출해 출력하세요. 원본을 수정하지 마세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">[7, 8, 9]</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q41-input" placeholder="코드를 입력하세요..." rows="3" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(41)">확인</button><button class="btn-hint" onclick="toggleHint(41)">힌트</button><button class="btn-answer" onclick="toggleAnswer(41)">정답 보기</button></div>
+      <div class="q-result" id="q41-result"></div>
+    </div>
+    <div class="q-dropdown" id="q41-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>sorted()로 정렬한 뒤 마지막 3개를 슬라이싱하세요. [-3:]</pre></div></div>
+    <div class="q-dropdown" id="q41-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">nums</span> <span class="pn">=</span> <span class="pn">[</span><span class="num">5</span><span class="pn">,</span> <span class="num">8</span><span class="pn">,</span> <span class="num">2</span><span class="pn">,</span> <span class="num">9</span><span class="pn">,</span> <span class="num">1</span><span class="pn">,</span> <span class="num">7</span><span class="pn">]</span>
+<span class="fn">top3</span> <span class="pn">=</span> <span class="fn">sorted</span><span class="pn">(</span>nums<span class="pn">)[</span><span class="num">-3</span><span class="pn">:]</span>  <span class="cm"># 정렬 후 마지막 3개</span>
+<span class="fn">print</span><span class="pn">(</span>top3<span class="pn">)</span></pre></div></div>
+  </div>
+
+  <!-- Q42 -->
+  <div class="q-card" id="q42">
+    <div class="q-header"><span class="q-num">Q42.</span>
+      <div class="q-body">
+        <p class="q-text"><code>a = [10, 20, 30]</code>과 <code>b = [10, 20, 30]</code>의 합산 리스트를 만들어 출력하세요. (각 위치의 값을 더한 결과)</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">[20, 40, 60]</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q42-input" placeholder="코드를 입력하세요..." rows="4" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(42)">확인</button><button class="btn-hint" onclick="toggleHint(42)">힌트</button><button class="btn-answer" onclick="toggleAnswer(42)">정답 보기</button></div>
+      <div class="q-result" id="q42-result"></div>
+    </div>
+    <div class="q-dropdown" id="q42-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>인덱스로 각 위치의 값을 더해서 새 리스트에 담으세요.
+result = [a[0]+b[0], a[1]+b[1], a[2]+b[2]]</pre></div></div>
+    <div class="q-dropdown" id="q42-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">a</span> <span class="pn">=</span> <span class="pn">[</span><span class="num">10</span><span class="pn">,</span> <span class="num">20</span><span class="pn">,</span> <span class="num">30</span><span class="pn">]</span>
+<span class="fn">b</span> <span class="pn">=</span> <span class="pn">[</span><span class="num">10</span><span class="pn">,</span> <span class="num">20</span><span class="pn">,</span> <span class="num">30</span><span class="pn">]</span>
+<span class="fn">result</span> <span class="pn">=</span> <span class="pn">[</span>a<span class="pn">[</span><span class="num">0</span><span class="pn">]+</span>b<span class="pn">[</span><span class="num">0</span><span class="pn">],</span> a<span class="pn">[</span><span class="num">1</span><span class="pn">]+</span>b<span class="pn">[</span><span class="num">1</span><span class="pn">],</span> a<span class="pn">[</span><span class="num">2</span><span class="pn">]+</span>b<span class="pn">[</span><span class="num">2</span><span class="pn">]]</span>
+<span class="fn">print</span><span class="pn">(</span>result<span class="pn">)</span></pre></div></div>
+  </div>
+
+  <!-- Q43 -->
+  <div class="q-card" id="q43">
+    <div class="q-header"><span class="q-num">Q43.</span>
+      <div class="q-body">
+        <p class="q-text">다음 코드의 출력 결과를 예상하고 그 값을 <code>print()</code>로 작성하세요.</p>
+        <div class="q-code-block"><pre><span class="fn">nums</span> <span class="pn">=</span> <span class="pn">[</span><span class="num">10</span><span class="pn">,</span> <span class="num">20</span><span class="pn">,</span> <span class="num">30</span><span class="pn">,</span> <span class="num">40</span><span class="pn">,</span> <span class="num">50</span><span class="pn">]</span>
+<span class="fn">print</span><span class="pn">(</span>nums<span class="pn">[</span><span class="num">1</span><span class="pn">:</span><span class="num">4</span><span class="pn">][</span><span class="num">0</span><span class="pn">])</span></pre></div>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">20</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q43-input" placeholder="코드를 입력하세요..." rows="3" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(43)">확인</button><button class="btn-hint" onclick="toggleHint(43)">힌트</button><button class="btn-answer" onclick="toggleAnswer(43)">정답 보기</button></div>
+      <div class="q-result" id="q43-result"></div>
+    </div>
+    <div class="q-dropdown" id="q43-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>nums[1:4] → [20, 30, 40]
+그 결과의 [0] 번째 요소는?</pre></div></div>
+    <div class="q-dropdown" id="q43-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="cm"># nums[1:4] = [20,30,40]  →  [0] = 20</span>
+<span class="fn">nums</span> <span class="pn">=</span> <span class="pn">[</span><span class="num">10</span><span class="pn">,</span> <span class="num">20</span><span class="pn">,</span> <span class="num">30</span><span class="pn">,</span> <span class="num">40</span><span class="pn">,</span> <span class="num">50</span><span class="pn">]</span>
+<span class="fn">print</span><span class="pn">(</span>nums<span class="pn">[</span><span class="num">1</span><span class="pn">:</span><span class="num">4</span><span class="pn">][</span><span class="num">0</span><span class="pn">])</span></pre></div></div>
+  </div>
+
+  <!-- Q44 -->
+  <div class="q-card" id="q44">
+    <div class="q-header"><span class="q-num">Q44.</span>
+      <div class="q-body">
+        <p class="q-text">리스트 <code>stack = []</code>에 1, 2, 3을 순서대로 추가한 뒤, 마지막 요소부터 하나씩 꺼내면서 꺼낸 값을 출력하는 코드를 작성하세요. (총 3줄 출력)</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">3\n2\n1</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q44-input" placeholder="코드를 입력하세요..." rows="7" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(44)">확인</button><button class="btn-hint" onclick="toggleHint(44)">힌트</button><button class="btn-answer" onclick="toggleAnswer(44)">정답 보기</button></div>
+      <div class="q-result" id="q44-result"></div>
+    </div>
+    <div class="q-dropdown" id="q44-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>append()로 추가, pop()으로 꺼내면 됩니다.
+스택은 마지막에 넣은 것이 먼저 나옵니다 (LIFO).</pre></div></div>
+    <div class="q-dropdown" id="q44-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">stack</span> <span class="pn">=</span> <span class="pn">[]</span>
+stack<span class="pn">.</span><span class="fn">append</span><span class="pn">(</span><span class="num">1</span><span class="pn">)</span>
+stack<span class="pn">.</span><span class="fn">append</span><span class="pn">(</span><span class="num">2</span><span class="pn">)</span>
+stack<span class="pn">.</span><span class="fn">append</span><span class="pn">(</span><span class="num">3</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span>stack<span class="pn">.</span><span class="fn">pop</span><span class="pn">())</span>  <span class="cm"># 3</span>
+<span class="fn">print</span><span class="pn">(</span>stack<span class="pn">.</span><span class="fn">pop</span><span class="pn">())</span>  <span class="cm"># 2</span>
+<span class="fn">print</span><span class="pn">(</span>stack<span class="pn">.</span><span class="fn">pop</span><span class="pn">())</span>  <span class="cm"># 1</span></pre></div></div>
+  </div>
+
+  <!-- Q45 -->
+  <div class="q-card" id="q45">
+    <div class="q-header"><span class="q-num">Q45.</span>
+      <div class="q-body">
+        <p class="q-text">중첩 리스트 <code>board = [[1,2,3],[4,5,6],[7,8,9]]</code>에서 세 번째 행의 전체 리스트를 출력하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">[7, 8, 9]</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q45-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(45)">확인</button><button class="btn-hint" onclick="toggleHint(45)">힌트</button><button class="btn-answer" onclick="toggleAnswer(45)">정답 보기</button></div>
+      <div class="q-result" id="q45-result"></div>
+    </div>
+    <div class="q-dropdown" id="q45-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>세 번째 행은 인덱스 2입니다. board[2]</pre></div></div>
+    <div class="q-dropdown" id="q45-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">board</span> <span class="pn">=</span> <span class="pn">[[</span><span class="num">1</span><span class="pn">,</span><span class="num">2</span><span class="pn">,</span><span class="num">3</span><span class="pn">],[</span><span class="num">4</span><span class="pn">,</span><span class="num">5</span><span class="pn">,</span><span class="num">6</span><span class="pn">],[</span><span class="num">7</span><span class="pn">,</span><span class="num">8</span><span class="pn">,</span><span class="num">9</span><span class="pn">]]</span>
+<span class="fn">print</span><span class="pn">(</span>board<span class="pn">[</span><span class="num">2</span><span class="pn">])</span></pre></div></div>
+  </div>
+
+  <!-- Q46 -->
+  <div class="q-card" id="q46">
+    <div class="q-header"><span class="q-num">Q46.</span>
+      <div class="q-body">
+        <p class="q-text"><code>data = [10, 25, 3, 47, 16]</code>에서 두 번째로 큰 값을 출력하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">25</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q46-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(46)">확인</button><button class="btn-hint" onclick="toggleHint(46)">힌트</button><button class="btn-answer" onclick="toggleAnswer(46)">정답 보기</button></div>
+      <div class="q-result" id="q46-result"></div>
+    </div>
+    <div class="q-dropdown" id="q46-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>sorted()로 정렬한 뒤 뒤에서 두 번째 값은 인덱스 [-2]입니다.</pre></div></div>
+    <div class="q-dropdown" id="q46-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">data</span> <span class="pn">=</span> <span class="pn">[</span><span class="num">10</span><span class="pn">,</span> <span class="num">25</span><span class="pn">,</span> <span class="num">3</span><span class="pn">,</span> <span class="num">47</span><span class="pn">,</span> <span class="num">16</span><span class="pn">]</span>
+<span class="fn">print</span><span class="pn">(</span><span class="fn">sorted</span><span class="pn">(</span>data<span class="pn">)[</span><span class="num">-2</span><span class="pn">])</span>  <span class="cm"># 정렬 후 뒤에서 두 번째</span></pre></div></div>
+  </div>
+
+  <!-- Q47 -->
+  <div class="q-card" id="q47">
+    <div class="q-header"><span class="q-num">Q47.</span>
+      <div class="q-body">
+        <p class="q-text"><code>words = ["hello", "world", "python"]</code>에서 가장 긴 단어를 출력하세요. 단어 길이를 기준으로 max를 활용하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">python</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q47-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(47)">확인</button><button class="btn-hint" onclick="toggleHint(47)">힌트</button><button class="btn-answer" onclick="toggleAnswer(47)">정답 보기</button></div>
+      <div class="q-result" id="q47-result"></div>
+    </div>
+    <div class="q-dropdown" id="q47-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>max(리스트, key=len) — 각 요소의 len()을 기준으로 최댓값을 찾습니다.</pre></div></div>
+    <div class="q-dropdown" id="q47-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">words</span> <span class="pn">=</span> <span class="pn">[</span><span class="str">"hello"</span><span class="pn">,</span> <span class="str">"world"</span><span class="pn">,</span> <span class="str">"python"</span><span class="pn">]</span>
+<span class="fn">print</span><span class="pn">(</span><span class="fn">max</span><span class="pn">(</span>words<span class="pn">,</span> <span class="fn">key</span><span class="pn">=</span><span class="fn">len</span><span class="pn">))</span>  <span class="cm"># 길이 기준 최댓값</span></pre></div></div>
+  </div>
+
+  <!-- Q48 -->
+  <div class="q-card" id="q48">
+    <div class="q-header"><span class="q-num">Q48.</span>
+      <div class="q-body">
+        <p class="q-text"><code>nums = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]</code>에서 홀수 인덱스 요소들만 슬라이싱으로 추출해 출력하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">[2, 4, 6, 8, 10]</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q48-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(48)">확인</button><button class="btn-hint" onclick="toggleHint(48)">힌트</button><button class="btn-answer" onclick="toggleAnswer(48)">정답 보기</button></div>
+      <div class="q-result" id="q48-result"></div>
+    </div>
+    <div class="q-dropdown" id="q48-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>인덱스 1, 3, 5, 7, 9 → 시작 1, 간격 2 : lst[1::2]</pre></div></div>
+    <div class="q-dropdown" id="q48-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">nums</span> <span class="pn">=</span> <span class="pn">[</span><span class="num">1</span><span class="pn">,</span> <span class="num">2</span><span class="pn">,</span> <span class="num">3</span><span class="pn">,</span> <span class="num">4</span><span class="pn">,</span> <span class="num">5</span><span class="pn">,</span> <span class="num">6</span><span class="pn">,</span> <span class="num">7</span><span class="pn">,</span> <span class="num">8</span><span class="pn">,</span> <span class="num">9</span><span class="pn">,</span> <span class="num">10</span><span class="pn">]</span>
+<span class="fn">print</span><span class="pn">(</span>nums<span class="pn">[</span><span class="num">1</span><span class="pn">:</span><span class="pn">:</span><span class="num">2</span><span class="pn">])</span>  <span class="cm"># 인덱스 1, 3, 5, 7, 9</span></pre></div></div>
+  </div>
+
+  <!-- Q49 -->
+  <div class="q-card" id="q49">
+    <div class="q-header"><span class="q-num">Q49.</span>
+      <div class="q-body">
+        <p class="q-text"><code>grades = [["수학", 90], ["영어", 85], ["과학", 92]]</code>에서 영어 점수를 출력하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">85</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q49-input" placeholder="코드를 입력하세요..." rows="2" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(49)">확인</button><button class="btn-hint" onclick="toggleHint(49)">힌트</button><button class="btn-answer" onclick="toggleAnswer(49)">정답 보기</button></div>
+      <div class="q-result" id="q49-result"></div>
+    </div>
+    <div class="q-dropdown" id="q49-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>영어는 인덱스 1번 리스트, 점수는 그 리스트의 인덱스 1입니다.
+grades[1][1]</pre></div></div>
+    <div class="q-dropdown" id="q49-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">grades</span> <span class="pn">=</span> <span class="pn">[[</span><span class="str">"수학"</span><span class="pn">,</span> <span class="num">90</span><span class="pn">],</span> <span class="pn">[</span><span class="str">"영어"</span><span class="pn">,</span> <span class="num">85</span><span class="pn">],</span> <span class="pn">[</span><span class="str">"과학"</span><span class="pn">,</span> <span class="num">92</span><span class="pn">]]</span>
+<span class="fn">print</span><span class="pn">(</span>grades<span class="pn">[</span><span class="num">1</span><span class="pn">][</span><span class="num">1</span><span class="pn">])</span>  <span class="cm"># 영어 리스트의 점수</span></pre></div></div>
+  </div>
+
+  <!-- Q50 -->
+  <div class="q-card" id="q50">
+    <div class="q-header"><span class="q-num">Q50.</span>
+      <div class="q-body">
+        <p class="q-text">🏆 <strong>도전 문제</strong> — <code>nums = [3, 7, 1, 8, 4, 6, 2, 9, 5]</code>에서 중앙값(정렬 후 가운데 값)을 출력하세요.</p>
+        <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">5</span></div>
+      </div>
+    </div>
+    <div class="q-input-area">
+      <textarea class="q-textarea" id="q50-input" placeholder="코드를 입력하세요..." rows="3" spellcheck="false"></textarea>
+      <div class="q-actions"><button class="btn-check" onclick="check(50)">확인</button><button class="btn-hint" onclick="toggleHint(50)">힌트</button><button class="btn-answer" onclick="toggleAnswer(50)">정답 보기</button></div>
+      <div class="q-result" id="q50-result"></div>
+    </div>
+    <div class="q-dropdown" id="q50-hint"><div class="q-dropdown-label q-hint-label">💡 힌트</div><div class="q-dropdown-body"><pre>1. sorted()로 정렬한 새 리스트를 만든다.
+2. 가운데 인덱스 = len(lst) // 2
+3. 정렬된 리스트의 가운데 인덱스 요소를 출력한다.</pre></div></div>
+    <div class="q-dropdown" id="q50-answer"><div class="q-dropdown-label q-answer-label">✅ 정답</div><div class="q-dropdown-body"><pre><span class="fn">nums</span> <span class="pn">=</span> <span class="pn">[</span><span class="num">3</span><span class="pn">,</span> <span class="num">7</span><span class="pn">,</span> <span class="num">1</span><span class="pn">,</span> <span class="num">8</span><span class="pn">,</span> <span class="num">4</span><span class="pn">,</span> <span class="num">6</span><span class="pn">,</span> <span class="num">2</span><span class="pn">,</span> <span class="num">9</span><span class="pn">,</span> <span class="num">5</span><span class="pn">]</span>
+<span class="fn">s</span> <span class="pn">=</span> <span class="fn">sorted</span><span class="pn">(</span>nums<span class="pn">)</span>          <span class="cm"># 정렬</span>
+<span class="fn">mid</span> <span class="pn">=</span> <span class="fn">len</span><span class="pn">(</span>s<span class="pn">)</span> <span class="pn">//</span> <span class="num">2</span>         <span class="cm"># 가운데 인덱스 = 4</span>
+<span class="fn">print</span><span class="pn">(</span>s<span class="pn">[</span>mid<span class="pn">])</span>              <span class="cm"># s[4] = 5</span></pre></div></div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <div class="cheer-box">
+    <span class="cheer-icon">🎯</span>
+    <div class="cheer-text">
+      <strong>리스트 연습문제 완료!</strong><br>
+      50문제를 모두 풀었다면 정말 대단합니다! 틀린 문제가 있어도 괜찮아요 — 직접 손으로 써보는 과정 자체가 실력을 키웁니다. 다음 챕터에서는 사용자 입력을 받는 <strong>input() 함수</strong>를 배웁니다. 드디어 사용자와 대화하는 프로그램을 만들 수 있게 됩니다!
+    </div>
+  </div>
+
+  <div class="chap-nav">
+    <a href="13-list.html" class="chap-nav-btn">
+      <span class="cnb-dir">← 이전 챕터</span>
+      <span class="cnb-title"><span>13.</span> 리스트</span>
+    </a>
+    <a href="15-input.html" class="chap-nav-btn next">
+      <span class="cnb-dir">다음 챕터 →</span>
+      <span class="cnb-title"><span>15.</span> input() 함수</span>
+    </a>
+  </div>
+
+</div>
+</main>
+</div>
+
+<script>
+  const isMobile = () => window.innerWidth <= 720;
+  const overlay  = document.getElementById('sidebarOverlay');
+  function toggleSidebar() { document.body.classList.toggle('sidebar-closed'); if (isMobile()) overlay.classList.toggle('visible', !document.body.classList.contains('sidebar-closed')); localStorage.setItem('sp-sidebar', document.body.classList.contains('sidebar-closed') ? 'closed' : 'open'); }
+  function closeSidebar()  { document.body.classList.add('sidebar-closed'); overlay.classList.remove('visible'); localStorage.setItem('sp-sidebar','closed'); }
+  function toggleGroup(id) { document.getElementById(id).classList.toggle('open'); }
+  window.addEventListener('DOMContentLoaded', () => {
+    if (isMobile()) document.body.classList.add('sidebar-closed');
+    else if (localStorage.getItem('sp-sidebar') === 'closed') document.body.classList.add('sidebar-closed');
+  });
+  window.addEventListener('resize', () => { if (!isMobile()) overlay.classList.remove('visible'); });
+
+  function toggleHint(n)   { toggleDropdown(`q${n}-hint`); }
+  function toggleAnswer(n) { toggleDropdown(`q${n}-answer`); }
+  function toggleDropdown(id) {
+    document.querySelectorAll('.q-dropdown').forEach(d => { if (d.id !== id) d.classList.remove('visible'); });
+    document.getElementById(id).classList.toggle('visible');
+  }
+
+  const ANSWERS = {
+    1:  { type: 'code', expected: "['사과', '바나나', '포도']" },
+    2:  { type: 'code', expected: '10' },
+    3:  { type: 'code', expected: '노랑' },
+    4:  { type: 'code', expected: '5' },
+    5:  { type: 'code', expected: '15' },
+    6:  { type: 'code', expected: '95' },
+    7:  { type: 'code', expected: '0' },
+    8:  { type: 'code', expected: '2' },
+    9:  { type: 'code', expected: '1' },
+    10: { type: 'code', expected: '자바' },
+    11: { type: 'code', expected: '[20, 30, 40]' },
+    12: { type: 'code', expected: "['a', 'b', 'c']" },
+    13: { type: 'code', expected: '[1, 3, 5, 7]' },
+    14: { type: 'code', expected: "['우유', '달걀', '빵', '버터']" },
+    15: { type: 'code', expected: "['사과', '딸기']" },
+    16: { type: 'code', expected: '[1, 1, 3, 4, 5]' },
+    17: { type: 'code', expected: '[10, 99, 30]' },
+    18: { type: 'code', expected: 'True' },
+    19: { type: 'code', expected: '[3, 9, 1, 8, 2, 5]' },
+    20: { type: 'code', expected: '[1, 2, 3, 4, 5, 6]' },
+    21: { type: 'code', expected: '[1, 2, 5, 7, 9]\n[7, 2, 9, 1, 5]' },
+    22: { type: 'code', expected: "['X', 'W', 'Y', 'Z']" },
+    23: { type: 'code', expected: '40' },
+    24: { type: 'code', expected: '5\n[1, 2, 3, 4]' },
+    25: { type: 'code', expected: '4' },
+    26: { type: 'code', expected: '2' },
+    27: { type: 'code', expected: '[0, 0, 0, 0, 0]' },
+    28: { type: 'code', expected: '87.8' },
+    29: { type: 'code', expected: '내가 좋아하는 과일: 사과' },
+    30: { type: 'code', expected: '[5, 4, 3, 2, 1]' },
+    31: { type: 'code', expected: 'True' },
+    32: { type: 'code', expected: '5' },
+    33: { type: 'code', expected: "['p', 'y', 't', 'h', 'o', 'n']" },
+    34: { type: 'code', expected: '최솟값: 1, 최댓값: 9' },
+    35: { type: 'code', expected: '11,800' },
+    36: { type: 'text', expected: 'indexerror' },
+    37: { type: 'code', expected: '사과' },
+    38: { type: 'code', expected: '[1, 2, 3]' },
+    39: { type: 'code', expected: "['우유', '달걀', '치즈']" },
+    40: { type: 'code', expected: '[1, 2, 3, 2]' },
+    41: { type: 'code', expected: '[7, 8, 9]' },
+    42: { type: 'code', expected: '[20, 40, 60]' },
+    43: { type: 'code', expected: '20' },
+    44: { type: 'code', expected: '3\n2\n1' },
+    45: { type: 'code', expected: '[7, 8, 9]' },
+    46: { type: 'code', expected: '25' },
+    47: { type: 'code', expected: 'python' },
+    48: { type: 'code', expected: '[2, 4, 6, 8, 10]' },
+    49: { type: 'code', expected: '85' },
+    50: { type: 'code', expected: '5' },
+  };
+
+  let solvedSet = new Set();
+
+  function check(n) {
+    const input  = document.getElementById(`q${n}-input`).value;
+    const ans    = ANSWERS[n];
+    const result = document.getElementById(`q${n}-result`);
+    const card   = document.getElementById(`q${n}`);
+    result.style.display = 'block';
+    if (ans.type === 'code') {
+      const sim = simulatePrint(input.trim());
+      const exp = ans.expected;
+      const ok  = sim !== null && sim.trim() === exp.trim();
+      if (ok) {
+        result.className = 'q-result ok'; result.textContent = '✓ 정답입니다!';
+        card.className = 'q-card solved'; solvedSet.add(n);
+      } else if (sim === null) {
+        result.className = 'q-result err'; result.textContent = '코드를 확인해 주세요. print() 형태로 작성했나요?';
+        card.className = 'q-card wrong';
+      } else {
+        result.className = 'q-result err';
+        result.textContent = `✗ 출력: "${sim.trim()}"  →  예상: "${exp.trim()}"`;
+        card.className = 'q-card wrong';
+      }
+    } else {
+      const ok = input.trim().toLowerCase().includes(ans.expected.toLowerCase());
+      if (ok) { result.className = 'q-result ok'; result.textContent = '✓ 정답입니다!'; card.className = 'q-card solved'; solvedSet.add(n); }
+      else    { result.className = 'q-result err'; result.textContent = '✗ 다시 생각해보세요.'; card.className = 'q-card wrong'; }
+    }
+    updateScore();
+  }
+
+  function updateScore() {
+    const total = Object.keys(ANSWERS).length;
+    const cnt   = solvedSet.size;
+    document.getElementById('solved-count').textContent = cnt;
+    document.getElementById('total-count').textContent  = total;
+    const pct = cnt / total;
+    const lvl = cnt <= 0 ? '도전 중...' : pct < 0.4 ? '🌱 시작!' : pct < 0.7 ? '🔥 잘하고 있어요!' : pct < 1 ? '⚡ 거의 다 왔어요!' : '🏆 완벽!';
+    document.getElementById('level-text').textContent = lvl;
+  }
+
+  /* 파이썬 시뮬레이터 */
+  function simulatePrint(code) {
+    const lines = code.trim().split('\n');
+    let output = '';
+    // 변수 저장소
+    const vars = {};
+    for (const raw of lines) {
+      const line = raw.trim();
+      if (!line || line.startsWith('#')) continue;
+      // 변수 할당 감지 (단순 패턴)
+      const assignM = line.match(/^([a-zA-Z_]\w*)\s*=\s*(.+)$/);
+      if (assignM && !line.startsWith('print')) {
+        const varName = assignM[1];
+        const valStr  = assignM[2].trim();
+        vars[varName] = evalExprSimple(valStr, vars);
+        continue;
+      }
+      // 메서드 호출 (부작용 — append, sort, reverse 등)
+      const methodM = line.match(/^([a-zA-Z_]\w*)\.(append|insert|remove|sort|reverse|pop)\((.*)\)$/);
+      if (methodM) {
+        const vn = methodM[1], method = methodM[2], arg = methodM[3].trim();
+        if (Array.isArray(vars[vn])) {
+          if (method === 'append') vars[vn].push(evalExprSimple(arg, vars));
+          else if (method === 'sort') vars[vn].sort((a,b) => a-b || String(a).localeCompare(String(b)));
+          else if (method === 'reverse') vars[vn].reverse();
+          else if (method === 'remove') { const idx = vars[vn].indexOf(evalExprSimple(arg, vars)); if (idx > -1) vars[vn].splice(idx,1); }
+          else if (method === 'pop') {
+            const pidx = arg === '' ? -1 : Number(arg);
+            const realIdx = pidx < 0 ? vars[vn].length + pidx : pidx;
+            vars[vn].splice(realIdx, 1);
+          }
+          else if (method === 'insert') {
+            const parts = arg.split(',');
+            vars[vn].splice(Number(parts[0].trim()), 0, evalExprSimple(parts[1].trim(), vars));
+          }
+        }
+        continue;
+      }
+      // 인덱스 할당 lst[n] = val
+      const idxAssignM = line.match(/^([a-zA-Z_]\w*)\[(.+)\]\s*=\s*(.+)$/);
+      if (idxAssignM) {
+        const vn = idxAssignM[1], idx = evalExprSimple(idxAssignM[2].trim(), vars), val = evalExprSimple(idxAssignM[3].trim(), vars);
+        if (Array.isArray(vars[vn])) {
+          const realIdx = idx < 0 ? vars[vn].length + idx : idx;
+          vars[vn][realIdx] = val;
+        }
+        continue;
+      }
+      const m = line.match(/^print\(([\s\S]*)\)\s*(?:#.*)?$/);
+      if (!m) return null;
+      const result = evalPrint(m[1].trim(), vars);
+      if (result === null) return null;
+      output += result;
+    }
+    return output.replace(/\n$/, '');
+  }
+
+  function evalExprSimple(expr, vars) {
+    expr = expr.trim();
+    // 문자열
+    const strM = expr.match(/^"([^"]*)"$/) || expr.match(/^'([^']*)'$/);
+    if (strM) return strM[1];
+    // 숫자
+    if (/^-?\d+$/.test(expr)) return Number(expr);
+    if (/^-?\d+\.\d+$/.test(expr)) return Number(expr);
+    // 리스트 리터럴
+    if (expr.startsWith('[') && expr.endsWith(']')) {
+      try {
+        const inner = expr.slice(1, -1).trim();
+        if (!inner) return [];
+        return parseListLiteral(inner, vars);
+      } catch(e) { return null; }
+    }
+    // 변수
+    if (vars && vars[expr] !== undefined) return vars[expr];
+    // 산술
+    try { return Function('"use strict";return (' + expr + ')')(); } catch(e) {}
+    return expr;
+  }
+
+  function parseListLiteral(inner, vars) {
+    const items = []; let depth = 0, cur = '', inStr = false, strChar = '';
+    for (let i = 0; i < inner.length; i++) {
+      const c = inner[i];
+      if (inStr) { cur += c; if (c === strChar && inner[i-1] !== '\\') inStr = false; }
+      else if (c === '"' || c === "'") { inStr = true; strChar = c; cur += c; }
+      else if (c === '[' || c === '(') { depth++; cur += c; }
+      else if (c === ']' || c === ')') { depth--; cur += c; }
+      else if (c === ',' && depth === 0) { items.push(evalExprSimple(cur.trim(), vars)); cur = ''; }
+      else cur += c;
+    }
+    if (cur.trim()) items.push(evalExprSimple(cur.trim(), vars));
+    return items;
+  }
+
+  function pyRepr(val) {
+    if (Array.isArray(val)) return '[' + val.map(pyRepr).join(', ') + ']';
+    if (typeof val === 'string') return "'" + val + "'";
+    if (val === true) return 'True';
+    if (val === false) return 'False';
+    if (val === null || val === undefined) return 'None';
+    return String(val);
+  }
+
+  function evalPrint(inner, vars) {
+    if (!inner) return '\n';
+    let sep = ' ', end = '\n';
+    const sepM = inner.match(/[,\s]sep\s*=\s*("([^"]*)"|'([^']*)')/);
+    const endM = inner.match(/[,\s]end\s*=\s*("([^"]*)"|'([^']*)')/);
+    if (sepM) { sep = sepM[2] !== undefined ? sepM[2] : sepM[3]; inner = inner.replace(sepM[0], ''); }
+    if (endM) { end = endM[2] !== undefined ? endM[2] : endM[3]; inner = inner.replace(endM[0], ''); }
+    const args = parseArgs(inner);
+    if (!args) return null;
+    const parts = args.map(a => evalArg(a.trim(), vars));
+    if (parts.includes(null)) return null;
+    return parts.join(sep) + end;
+  }
+
+  function parseArgs(s) {
+    const args = []; let depth = 0, cur = '', inStr = false, strChar = '';
+    for (let i = 0; i < s.length; i++) {
+      const c = s[i];
+      if (inStr) { cur += c; if (c === strChar && s[i-1] !== '\\') inStr = false; }
+      else if (c === '"' || c === "'") { inStr = true; strChar = c; cur += c; }
+      else if (c === '(' || c === '[') { depth++; cur += c; }
+      else if (c === ')' || c === ']') { depth--; cur += c; }
+      else if (c === ',' && depth === 0) { args.push(cur.trim()); cur = ''; }
+      else cur += c;
+    }
+    if (cur.trim()) args.push(cur.trim());
+    return args;
+  }
+
+  function evalArg(a, vars) {
+    a = a.trim();
+    // f-string
+    const fM = a.match(/^f"(.*)"$/) || a.match(/^f'(.*)'$/);
+    if (fM) {
+      return fM[1].replace(/\{([^}]+)\}/g, (_, expr) => {
+        const fmtM = expr.match(/^(.+):(.+)$/);
+        if (fmtM) {
+          const val = evalExprSimple(fmtM[1].trim(), vars);
+          const fmt = fmtM[2];
+          if (fmt.endsWith('f')) { const dec = parseInt(fmt); return Number(val).toFixed(isNaN(dec) ? 1 : dec); }
+          if (fmt === ',') return Number(val).toLocaleString('en-US');
+          if (fmt.endsWith(',')) return Number(val).toLocaleString('en-US');
+        }
+        const v = evalExprSimple(expr.trim(), vars);
+        if (Array.isArray(v)) return pyRepr(v);
+        return String(v);
+      });
+    }
+    // 문자열
+    const strM = a.match(/^"([^"]*)"$/) || a.match(/^'([^']*)'$/);
+    if (strM) return strM[1];
+    // 숫자
+    if (/^-?\d+$/.test(a)) return String(Number(a));
+    if (/^-?\d+\.\d+$/.test(a)) return String(Number(a));
+    // 불린
+    if (a === 'True') return 'True';
+    if (a === 'False') return 'False';
+    // 변수
+    if (vars && vars[a] !== undefined) {
+      const v = vars[a];
+      return Array.isArray(v) ? pyRepr(v) : String(v);
+    }
+    // len(), sum(), max(), min(), sorted() 등 내장함수
+    const builtinM = a.match(/^(len|sum|max|min|sorted|list)\((.+)\)$/);
+    if (builtinM) {
+      const fn = builtinM[1], argStr = builtinM[2].trim();
+      // max(lst, key=len) 패턴
+      const keyM = argStr.match(/^(.+),\s*key\s*=\s*len$/);
+      const listArg = keyM ? evalExprSimple(keyM[1].trim(), vars) : evalExprSimple(argStr, vars);
+      if (Array.isArray(listArg)) {
+        if (fn === 'len') return String(listArg.length);
+        if (fn === 'sum') return String(listArg.reduce((s,v)=>s+v, 0));
+        if (fn === 'max') {
+          if (keyM) return String(listArg.reduce((a,b) => String(a).length >= String(b).length ? a : b));
+          return String(Math.max(...listArg));
+        }
+        if (fn === 'min') return String(Math.min(...listArg));
+        if (fn === 'sorted') return pyRepr([...listArg].sort((a,b)=>a-b||String(a).localeCompare(String(b))));
+        if (fn === 'list') return pyRepr(listArg);
+      }
+      if (fn === 'list' && typeof listArg === 'string') return pyRepr(listArg.split(''));
+    }
+    // 인덱싱 & 슬라이싱 (변수[...])
+    const idxM = a.match(/^([a-zA-Z_]\w*)\[(.+)\]$/);
+    if (idxM && vars) {
+      const vn = idxM[1], idxExpr = idxM[2].trim();
+      const lst = vars[vn];
+      if (Array.isArray(lst)) {
+        // 슬라이싱
+        const sliceM = idxExpr.match(/^(-?\d*):(-?\d*)(?::(-?\d+))?$/);
+        if (sliceM) {
+          const len = lst.length;
+          let st = sliceM[1] === '' ? 0 : Number(sliceM[1]);
+          let en = sliceM[2] === '' ? len : Number(sliceM[2]);
+          const step = sliceM[3] !== undefined ? Number(sliceM[3]) : 1;
+          if (st < 0) st = Math.max(0, len + st);
+          if (en < 0) en = Math.max(0, len + en);
+          if (step === -1) { const r = [...lst].reverse(); return pyRepr(r); }
+          const result = [];
+          for (let i = st; i < en && i < len; i += step) result.push(lst[i]);
+          return pyRepr(result);
+        }
+        // 단일 인덱스
+        const idx = Number(evalExprSimple(idxExpr, vars));
+        const realIdx = idx < 0 ? lst.length + idx : idx;
+        const v = lst[realIdx];
+        return Array.isArray(v) ? pyRepr(v) : String(v);
+      }
+    }
+    // 연결 슬라이싱 lst[a:b][c]
+    const chainM = a.match(/^([a-zA-Z_]\w*)\[(.+?)\]\[(.+?)\]$/);
+    if (chainM && vars) {
+      const vn = chainM[1], slice1 = chainM[2], idx2 = Number(chainM[3]);
+      const lst = vars[vn];
+      if (Array.isArray(lst)) {
+        const sliceM = slice1.match(/^(-?\d*):(-?\d*)$/);
+        if (sliceM) {
+          const len = lst.length;
+          let st = sliceM[1] === '' ? 0 : Number(sliceM[1]);
+          let en = sliceM[2] === '' ? len : Number(sliceM[2]);
+          if (st < 0) st = Math.max(0, len+st); if (en < 0) en = Math.max(0, len+en);
+          const sliced = lst.slice(st, en);
+          const realIdx = idx2 < 0 ? sliced.length+idx2 : idx2;
+          return String(sliced[realIdx]);
+        }
+      }
+    }
+    // not in
+    const notInM = a.match(/^(.+)\s+not\s+in\s+(.+)$/);
+    if (notInM) {
+      const val = evalExprSimple(notInM[1].trim(), vars);
+      const lst = evalExprSimple(notInM[2].trim(), vars);
+      if (Array.isArray(lst)) return lst.indexOf(val) === -1 ? 'True' : 'False';
+    }
+    // in
+    const inM = a.match(/^(.+)\s+in\s+(.+)$/);
+    if (inM) {
+      const val = evalExprSimple(inM[1].trim(), vars);
+      const lst = evalExprSimple(inM[2].trim(), vars);
+      if (Array.isArray(lst)) return lst.indexOf(val) !== -1 ? 'True' : 'False';
+    }
+    // .count() .index() .pop()
+    const countM = a.match(/^([a-zA-Z_]\w*)\.(count|index)\((.+)\)$/);
+    if (countM && vars) {
+      const vn = countM[1], method = countM[2], arg = evalExprSimple(countM[3].trim(), vars);
+      if (Array.isArray(vars[vn])) {
+        if (method === 'count') return String(vars[vn].filter(x=>x===arg).length);
+        if (method === 'index') return String(vars[vn].indexOf(arg));
+      }
+    }
+    const popM = a.match(/^([a-zA-Z_]\w*)\.pop\((.*)\)$/);
+    if (popM && vars) {
+      const vn = popM[1], argStr = popM[2].trim();
+      if (Array.isArray(vars[vn])) {
+        const pidx = argStr === '' ? -1 : Number(argStr);
+        const realIdx = pidx < 0 ? vars[vn].length + pidx : pidx;
+        const popped = vars[vn].splice(realIdx, 1)[0];
+        return String(popped);
+      }
+    }
+    // 산술
+    if (/^[\d\s\+\-\*\/\.()]+$/.test(a)) {
+      try { return String(Function('"use strict";return (' + a + ')')()) } catch(e) {}
+    }
+    return null;
+  }
+</script>
+</body>
+</html>

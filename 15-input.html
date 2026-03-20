@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>15. input() 함수 — 브론즈 | 슈퍼파이썬</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#111111;--bg-nav:#0A0A0A;--bg-side:#0E0E0E;--bg-card:#181818;
+      --bg-code:#1A1A1A;--bg-tip:#131A13;--bg-warn:#1A1410;--bg-info:#101520;
+      --accent:#00CC70;--accent-dim:#007A42;--accent-bg:rgba(0,204,112,0.07);
+      --accent2:#C8A000;--text:#D8D8D8;--text-head:#EFEFEF;
+      --text2:#888888;--text3:#444444;--border:#222222;--border2:#2E2E2E;
+      --sy-kw:#C792EA;--sy-fn:#82AAFF;--sy-str:#C3E88D;
+      --sy-cm:#546E7A;--sy-num:#F78C6C;--sy-pn:#89DDFF;
+      --sidebar-w:248px;--content-max:740px;--header-h:48px;
+      font-variant-ligatures: none;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:15px;line-height:1.8;overflow-x:hidden}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}
+    ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+    ::-webkit-scrollbar-thumb:hover{background:var(--accent-dim)}
+
+    /* HEADER */
+    .top-header{position:fixed;top:0;left:0;right:0;z-index:200;height:var(--header-h);background:var(--bg-nav);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px}
+    .header-open-btn{display:none;align-items:center;justify-content:center;width:28px;height:28px;flex-shrink:0;margin-right:12px;background:var(--bg-card);border:1px solid var(--border2);border-radius:4px;cursor:pointer;color:var(--text2);font-size:12px;transition:background .15s,color .15s,border-color .15s}
+    .header-open-btn:hover{background:var(--accent-bg);color:var(--accent);border-color:var(--accent)}
+    body.sidebar-closed .header-open-btn{display:flex}
+    .header-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0;font-family:'JetBrains Mono',monospace;font-size:12px;overflow:hidden}
+    .header-logo{color:var(--accent);text-decoration:none;font-weight:700;white-space:nowrap}
+    .header-sep{color:var(--text3);flex-shrink:0}
+    .header-grade{color:var(--text2);white-space:nowrap}
+    .header-chap{color:var(--text-head);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .header-center{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);display:flex;align-items:center;gap:8px;flex-shrink:0;padding:0 16px}
+    .progress-mini{width:80px;height:3px;background:var(--border2);border-radius:2px;overflow:hidden}
+    .progress-mini-fill{height:100%;background:var(--accent);border-radius:2px}
+    .header-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+    .nav-btn{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);background:transparent;border:1px solid var(--border2);padding:4px 12px;text-decoration:none;transition:border-color .15s,color .15s;white-space:nowrap}
+    .nav-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .nav-btn.primary{color:var(--bg-nav);background:var(--accent);border-color:var(--accent);font-weight:700}
+    .nav-btn.primary:hover{filter:brightness(1.1)}
+
+    /* LAYOUT */
+    .layout{display:flex;padding-top:var(--header-h);min-height:100vh}
+
+    /* SIDEBAR */
+    .sidebar{width:var(--sidebar-w);flex-shrink:0;position:fixed;top:var(--header-h);bottom:0;left:0;background:var(--bg-side);border-right:1px solid var(--border);overflow-y:auto;overflow-x:hidden;transition:transform .22s ease;z-index:150;padding-top:8px}
+    body.sidebar-closed .sidebar{transform:translateX(calc(-1 * var(--sidebar-w)))}
+    body.sidebar-closed .content{margin-left:0}
+    .sidebar-toggle{position:absolute;top:10px;right:10px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:var(--bg-card);border:1px solid var(--border2);border-radius:4px;cursor:pointer;color:var(--text2);font-size:12px;z-index:10;transition:background .15s,color .15s,border-color .15s}
+    .sidebar-toggle:hover{background:var(--accent-bg);color:var(--accent);border-color:var(--accent)}
+    body.sidebar-closed .sidebar-toggle{display:none}
+    .sidebar-progress{margin:44px 12px 12px;padding:12px 14px;background:var(--bg-card);border:1px solid var(--border)}
+    .sp-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);margin-bottom:6px;letter-spacing:.08em}
+    .sp-bar{height:4px;background:var(--border2);border-radius:2px;overflow:hidden;margin-bottom:5px}
+    .sp-fill{height:100%;background:var(--accent);border-radius:2px}
+    .sp-text{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2)}
+    .sp-text span{color:var(--accent)}
+    .sb-group{border-bottom:1px solid var(--border)}
+    .sb-group-header{display:flex;align-items:center;justify-content:space-between;padding:9px 14px 9px 12px;cursor:pointer;user-select:none;transition:background .12s;gap:8px}
+    .sb-group-header:hover{background:rgba(255,255,255,.03)}
+    .sb-group-title{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--text2);text-transform:uppercase;flex:1}
+    .sb-group.current .sb-group-title{color:var(--accent)}
+    .sb-group-arrow{font-size:9px;color:var(--text3);transition:transform .2s;flex-shrink:0}
+    .sb-group.open .sb-group-arrow{transform:rotate(90deg);color:var(--accent)}
+    .sb-items{overflow:hidden;max-height:0;transition:max-height .28s ease}
+    .sb-group.open .sb-items{max-height:1200px}
+    .sb-item{display:flex;align-items:baseline;gap:8px;padding:6px 14px 6px 20px;font-size:13px;color:var(--text2);text-decoration:none;border-left:2px solid transparent;transition:background .1s,color .1s,border-color .1s;line-height:1.45}
+    .sb-item:hover{background:rgba(255,255,255,.03);color:var(--text)}
+    .sb-item.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-bg);font-weight:500}
+    .sb-item.done{color:var(--text3)}
+    .sb-icon{font-size:9px;flex-shrink:0;font-family:'JetBrains Mono',monospace;width:10px;text-align:center;color:var(--text3)}
+    .sb-item.active .sb-icon{color:var(--accent)}
+    .sb-item.done .sb-icon{color:var(--accent-dim)}
+    .sb-num{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);flex-shrink:0;min-width:22px}
+
+    /* CONTENT */
+    .content{margin-left:var(--sidebar-w);flex:1;min-width:0;padding:48px 52px 96px;transition:margin-left .22s ease}
+    .content-inner{max-width:var(--content-max);margin:0 auto}
+
+    /* TYPOGRAPHY */
+    .chap-meta{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .badge{font-size:10px;padding:2px 8px;background:var(--accent-bg);color:var(--accent);border:1px solid rgba(0,204,112,.25);letter-spacing:.06em}
+    .chap-title{font-family:'JetBrains Mono',monospace;font-size:clamp(22px,3.5vw,30px);font-weight:700;color:var(--text-head);line-height:1.25;margin-bottom:8px}
+    .chap-title .hl{color:var(--accent)}
+    .chap-subtitle{font-size:15px;color:var(--text2);margin-bottom:40px;line-height:1.65}
+    h2{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--text-head);margin:48px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+    h3{font-size:15px;font-weight:700;color:var(--text-head);margin:28px 0 10px}
+    p{color:var(--text);margin-bottom:16px;line-height:1.9;font-size:15px}
+    code{font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--bg-code);color:var(--accent);padding:1px 6px;border:1px solid var(--border2);border-radius:2px}
+    strong{color:var(--text-head);font-weight:700}
+    ul,ol{padding-left:20px;margin-bottom:16px}
+    li{color:var(--text);line-height:1.85;margin-bottom:4px;font-size:15px}
+
+    /* LEARNING OBJECTIVES */
+    .objectives{background:var(--bg-card);border:1px solid var(--border2);border-left:3px solid var(--accent);padding:18px 22px;margin-bottom:40px}
+    .obj-title{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:.1em;margin-bottom:10px}
+    .obj-list{list-style:none;padding:0;margin:0}
+    .obj-list li{font-size:14px;color:var(--text2);padding:3px 0;display:flex;align-items:baseline;gap:8px}
+    .obj-list li::before{content:"▸";color:var(--accent);font-size:10px;flex-shrink:0}
+
+    /* CODE BLOCKS */
+    .code-block{background:var(--bg-code);border:1px solid var(--border2);margin:16px 0;overflow:hidden}
+    .code-block-header{display:flex;align-items:center;justify-content:space-between;padding:7px 16px;background:var(--bg-card);border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.06em}
+    .code-block-label{color:var(--accent2)}
+    .code-block pre{padding:16px 20px;line-height:1.75;overflow-x:auto}
+    .code-block code{background:none;border:none;padding:0;font-size:13px;color:var(--text)}
+    .kw{color:#C792EA}.fn{color:#82AAFF}.str{color:#C3E88D}
+    .cm{color:#546E7A}.num{color:#F78C6C}.pn{color:#89DDFF}
+
+    /* OUTPUT BLOCK */
+    .output-block{background:#0A0A0A;border:1px solid var(--border);border-left:3px solid var(--accent);margin:0 0 20px;padding:12px 18px}
+    .output-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.08em;margin-bottom:6px}
+    .output-block pre{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);line-height:1.7;white-space:pre-wrap}
+
+    /* INPUT VISUAL — terminal-style */
+    .input-visual{background:#0D0D0D;border:1px solid var(--border2);margin:16px 0 20px;padding:14px 18px;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.9}
+    .iv-prompt{color:var(--accent2)}
+    .iv-typed{color:var(--text-head);text-decoration:underline;text-decoration-color:rgba(255,255,255,.3)}
+    .iv-cursor{display:inline-block;width:8px;height:14px;background:var(--accent);vertical-align:middle;margin-left:2px;animation:blink 1s step-end infinite}
+    @keyframes blink{50%{opacity:0}}
+
+    /* BOXES */
+    .tip-box{background:var(--bg-tip);border:1px solid rgba(0,204,112,.2);border-left:3px solid var(--accent);padding:14px 18px;margin:20px 0}
+    .tip-box .box-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:.08em;margin-bottom:6px}
+    .warn-box{background:var(--bg-warn);border:1px solid rgba(200,160,0,.2);border-left:3px solid var(--accent2);padding:14px 18px;margin:20px 0}
+    .warn-box .box-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent2);letter-spacing:.08em;margin-bottom:6px}
+    .info-box{background:var(--bg-info);border:1px solid rgba(100,150,255,.15);border-left:3px solid #6496FF;padding:14px 18px;margin:20px 0}
+    .info-box .box-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:#6496FF;letter-spacing:.08em;margin-bottom:6px}
+    .box-label{margin-bottom:6px}
+    .tip-box p,.warn-box p,.info-box p{margin:0;font-size:14px;line-height:1.75}
+    .tip-box p+p,.warn-box p+p,.info-box p+p{margin-top:8px}
+
+    /* TYPE CONVERSION TABLE */
+    .conv-table{width:100%;border-collapse:collapse;margin:16px 0 24px;font-size:14px}
+    .conv-table th{font-family:'JetBrains Mono',monospace;font-size:11px;text-align:left;padding:8px 14px;background:var(--bg-card);color:var(--text3);border-bottom:2px solid var(--border2);letter-spacing:.06em}
+    .conv-table td{padding:9px 14px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:top}
+    .conv-table tr:last-child td{border-bottom:none}
+    .conv-table td:first-child{font-family:'JetBrains Mono',monospace;color:var(--accent);font-size:13px}
+    .conv-table td:nth-child(2){color:var(--text2)}
+
+    /* FLOW DIAGRAM */
+    .flow-diagram{display:flex;align-items:center;gap:0;margin:20px 0 24px;flex-wrap:wrap;gap:4px}
+    .flow-box{background:var(--bg-card);border:1px solid var(--border2);padding:10px 16px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text);text-align:center;min-width:90px}
+    .flow-box.accent{background:var(--accent-bg);border-color:rgba(0,204,112,.35);color:var(--accent)}
+    .flow-box.warn{background:rgba(200,160,0,.08);border-color:rgba(200,160,0,.25);color:var(--accent2)}
+    .flow-arrow{color:var(--text3);font-size:16px;flex-shrink:0}
+
+    /* TRY SECTION */
+    .try-section{background:var(--bg-card);border:1px solid var(--border2);padding:22px 24px;margin:32px 0}
+    .try-title{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);letter-spacing:.08em;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+    .try-title::before{content:"▶";font-size:10px}
+
+    /* ERROR BLOCK */
+    .error-block{background:#160A0A;border:1px solid #3A1A1A;border-left:3px solid #FF5555;padding:12px 18px;margin:16px 0}
+    .error-block pre{font-family:'JetBrains Mono',monospace;font-size:13px;color:#FF8080;line-height:1.7;white-space:pre-wrap}
+
+    /* SUMMARY */
+    .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:16px 0 32px}
+    .summary-card{background:var(--bg-card);border:1px solid var(--border2);padding:14px 16px}
+    .sc-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.07em;margin-bottom:6px}
+    .sc-code{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);line-height:1.6}
+    .sc-desc{font-size:12px;color:var(--text2);margin-top:4px;line-height:1.5}
+
+    /* CHEER & NAV */
+    .section-divider{height:1px;background:var(--border);margin:48px 0}
+    .cheer-box{border:1px solid var(--border);background:var(--bg);padding:18px 22px;margin-bottom:44px;display:flex;gap:14px;align-items:flex-start}
+    .cheer-icon{font-size:18px;flex-shrink:0;line-height:1.5}
+    .cheer-text{font-size:14px;color:var(--text2);line-height:1.85}
+    .cheer-text strong{color:var(--text-head)}
+    .chap-nav{display:flex;justify-content:space-between;padding-top:32px;border-top:1px solid var(--border);gap:12px;flex-wrap:wrap}
+    .chap-nav-btn{display:flex;flex-direction:column;gap:4px;text-decoration:none;padding:14px 18px;border:1px solid var(--border2);background:var(--bg-card);flex:1;max-width:300px;transition:border-color .15s}
+    .chap-nav-btn:hover{border-color:var(--accent)}
+    .chap-nav-btn.next{text-align:right}
+    .cnb-dir{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.07em}
+    .cnb-title{font-size:13px;color:var(--text2);line-height:1.45}
+    .cnb-title span{color:var(--accent);font-family:'JetBrains Mono',monospace}
+
+    /* OVERLAY / RESPONSIVE */
+    .sidebar-overlay{display:none;position:fixed;inset:0;top:var(--header-h);z-index:140;background:rgba(0,0,0,.65)}
+    @media(max-width:720px){
+      .sidebar-overlay.visible{display:block}
+      .content{margin-left:0;padding:28px 20px 72px}
+      .header-center{display:none}
+      .flow-diagram{flex-direction:column;align-items:flex-start}
+    }
+    @media(max-width:480px){
+      .header-grade{display:none}
+      .chap-nav-btn{max-width:100%}
+      .header-right .nav-btn:not(.primary){display:none}
+    }
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
+  </style>
+</head>
+<body>
+
+<header class="top-header">
+  <button class="header-open-btn" onclick="toggleSidebar()">▶</button>
+  <div class="header-left">
+    <a href="../index.html" class="header-logo">SUPERPYTHON</a>
+    <span class="header-sep">/</span>
+    <span class="header-grade">🟤 BRONZE</span>
+    <span class="header-sep">/</span>
+    <span class="header-chap">15. input() 함수</span>
+  </div>
+  <div class="header-center">
+    <span>15 / 48</span>
+    <div class="progress-mini"><div class="progress-mini-fill" style="width:31.25%"></div></div>
+    <span>31%</span>
+  </div>
+  <div class="header-right">
+    <a href="14-quiz-list.html" class="nav-btn">← 이전</a>
+    <a href="16-quiz-input.html" class="nav-btn primary">다음 →</a>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<div class="layout">
+<aside class="sidebar" id="sidebar">
+  <button class="sidebar-toggle" onclick="toggleSidebar()">◀</button>
+  <div class="sidebar-progress">
+    <div class="sp-label">BRONZE 진행률</div>
+    <div class="sp-bar"><div class="sp-fill" style="width:31.25%"></div></div>
+    <div class="sp-text"><span>15</span> / 48 챕터 완료</div>
+  </div>
+  <div class="sb-group" id="grp-env">
+    <div class="sb-group-header" onclick="toggleGroup('grp-env')"><span class="sb-group-title">환경 설정</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="01-what-is-python.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">01</span>파이썬이란?</a>
+      <a href="02-setup.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">02</span>개발환경 설치</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-basic1">
+    <div class="sb-group-header" onclick="toggleGroup('grp-basic1')"><span class="sb-group-title">기초 문법 1</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="03-print.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">03</span>print()란?</a>
+      <a href="04-quiz-print.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">04</span>연습문제</a>
+      <a href="05-variables.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">05</span>변수와 데이터 타입</a>
+      <a href="06-operators.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">06</span>연산자</a>
+      <a href="07-quiz-variables-operators.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">07</span>연습문제</a>
+      <a href="08-string.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">08</span>문자열 String</a>
+      <a href="09-quiz-string.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">09</span>연습문제</a>
+      <a href="10-fstring.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">10</span>f-string 완전정리</a>
+      <a href="11-quiz-fstring.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">11</span>연습문제</a>
+      <a href="12-mini-project-01.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">12</span>🎮 미니 프로젝트 ①</a>
+    </div>
+  </div>
+  <div class="sb-group current open" id="grp-basic2">
+    <div class="sb-group-header" onclick="toggleGroup('grp-basic2')"><span class="sb-group-title">기초 문법 2</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="13-list.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">13</span>리스트</a>
+      <a href="14-quiz-list.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">14</span>연습문제</a>
+      <a href="15-input.html" class="sb-item active"><span class="sb-icon">▶</span><span class="sb-num">15</span>input() 함수</a>
+      <a href="16-quiz-input.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">16</span>연습문제</a>
+      <a href="17-mini-project-02.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">17</span>🎮 미니 프로젝트 ②</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-flow">
+    <div class="sb-group-header" onclick="toggleGroup('grp-flow')"><span class="sb-group-title">흐름 제어</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="18-if.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">18</span>조건문 (if)</a>
+      <a href="19-quiz-if.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">19</span>연습문제</a>
+      <a href="20-mini-project-03.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">20</span>🎮 미니 프로젝트 ③</a>
+      <a href="21-for-range.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">21</span>for문과 range()</a>
+      <a href="22-quiz-for.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">22</span>연습문제</a>
+      <a href="23-while.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">23</span>while문</a>
+      <a href="24-quiz-while.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">24</span>연습문제</a>
+      <a href="25-mini-project-04.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">25</span>🎮 미니 프로젝트 ④</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-error">
+    <div class="sb-group-header" onclick="toggleGroup('grp-error')"><span class="sb-group-title">에러 &amp; 디버깅</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="26-error-types.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">26</span>에러 읽는 법</a>
+      <a href="27-debugging.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">27</span>기초 디버깅 실습</a>
+      <a href="28-quiz-debugging.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">28</span>연습문제</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-func">
+    <div class="sb-group-header" onclick="toggleGroup('grp-func')"><span class="sb-group-title">함수</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="29-function-basic.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">29</span>함수 기초</a>
+      <a href="30-quiz-function-basic.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">30</span>연습문제</a>
+      <a href="31-mini-project-05.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">31</span>🎮 미니 프로젝트 ⑤</a>
+      <a href="32-function-advanced.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">32</span>함수 심화</a>
+      <a href="33-quiz-function-advanced.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">33</span>연습문제</a>
+      <a href="34-module.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">34</span>모듈</a>
+      <a href="35-quiz-module.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">35</span>연습문제</a>
+      <a href="36-mini-project-06.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">36</span>🎮 미니 프로젝트 ⑥</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-ds">
+    <div class="sb-group-header" onclick="toggleGroup('grp-ds')"><span class="sb-group-title">자료구조</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="37-dictionary.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">37</span>딕셔너리</a>
+      <a href="38-quiz-dictionary.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">38</span>연습문제</a>
+      <a href="39-tuple-set.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">39</span>튜플과 셋</a>
+      <a href="40-quiz-tuple-set.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">40</span>연습문제</a>
+      <a href="41-mini-project-07.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">41</span>🎮 미니 프로젝트 ⑦</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-file">
+    <div class="sb-group-header" onclick="toggleGroup('grp-file')"><span class="sb-group-title">파일 &amp; 예외처리</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="42-file-io.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">42</span>파일 입출력</a>
+      <a href="43-quiz-file-io.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">43</span>연습문제</a>
+      <a href="44-exception-basic.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">44</span>예외처리 기초</a>
+      <a href="45-quiz-exception.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">45</span>연습문제</a>
+      <a href="46-mini-project-08.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">46</span>🎮 미니 프로젝트 ⑧</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-end">
+    <div class="sb-group-header" onclick="toggleGroup('grp-end')"><span class="sb-group-title">마무리</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="47-final-project.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">47</span>★ 최종 프로젝트</a>
+      <a href="48-next-step.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">48</span>다음 단계 미리보기</a>
+    </div>
+  </div>
+</aside>
+
+<main class="content" id="mainContent">
+<div class="content-inner">
+
+  <div class="chap-meta">
+    <span class="badge">LESSON</span>
+    <span>기초 문법 2</span>
+    <span style="color:var(--text3)">·</span>
+    <span>챕터 15 / 48</span>
+  </div>
+  <h1 class="chap-title">input() — <span class="hl">사용자와 대화하기</span></h1>
+  <p class="chap-subtitle">지금까지는 코드를 실행하면 항상 같은 결과가 나왔습니다. 이제 사용자가 직접 값을 입력하면 그에 따라 다르게 반응하는 <strong>진짜 프로그램</strong>을 만들 수 있습니다.</p>
+
+  <div class="objectives">
+    <div class="obj-title">LEARNING OBJECTIVES</div>
+    <ul class="obj-list">
+      <li>input()으로 사용자 입력을 받는 방법을 이해한다</li>
+      <li>input()이 항상 문자열을 반환한다는 것을 안다</li>
+      <li>int(), float(), str()로 타입을 변환할 수 있다</li>
+      <li>입력값을 변수에 저장하고 활용할 수 있다</li>
+      <li>prompt 메시지를 잘 쓰는 방법을 익힌다</li>
+    </ul>
+  </div>
+
+  <!-- ═══ 1. input()이 뭔가요? ═══ -->
+  <h2>1. input()이 뭔가요?</h2>
+
+  <p>지금까지 만든 프로그램은 어떤 값을 쓸지 코드 안에 다 정해져 있었습니다. 예를 들어 <code>name = "지수"</code>처럼요. 이렇게 하면 지수가 아닌 다른 사람이 쓸 때도 항상 "지수"라고 나옵니다.</p>
+
+  <p><strong>input()</strong>은 프로그램이 실행되는 도중에 사용자에게 "잠깐, 뭔가 입력해줘!"라고 요청하는 함수입니다. 마치 자판기 화면에 "음료를 선택하세요"라고 뜨는 것처럼, 파이썬이 실행을 멈추고 사용자가 뭔가를 타이핑할 때까지 기다립니다.</p>
+
+  <div class="input-visual">
+    <span class="iv-prompt">이름을 입력하세요: </span><span class="iv-typed">김민준</span><span class="iv-cursor"></span>
+  </div>
+
+  <p>기본 문법은 아주 간단합니다:</p>
+
+  <div class="code-block">
+    <div class="code-block-header"><span class="code-block-label">문법</span></div>
+    <pre><code><span class="fn">변수</span> <span class="pn">=</span> <span class="fn">input</span><span class="pn">(</span><span class="str">"화면에 보여줄 안내 메시지"</span><span class="pn">)</span></code></pre>
+  </div>
+
+  <p>가장 기본적인 예제를 실행해보겠습니다:</p>
+
+  <div class="code-block">
+    <div class="code-block-header"><span>예제 1 — 이름 입력받기</span></div>
+    <pre><code><span class="fn">name</span> <span class="pn">=</span> <span class="fn">input</span><span class="pn">(</span><span class="str">"이름을 입력하세요: "</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"안녕하세요, {name}님!"</span><span class="pn">)</span></code></pre>
+  </div>
+
+  <div class="input-visual">
+    <div><span class="iv-prompt">이름을 입력하세요: </span><span class="iv-typed">김민준</span></div>
+    <div style="color:var(--accent);margin-top:4px">안녕하세요, 김민준님!</div>
+  </div>
+
+  <p>코드가 딱 두 줄인데, 이 프로그램은 누가 실행하느냐에 따라 다른 결과를 출력합니다. 이것이 <strong>input()의 핵심</strong>입니다.</p>
+
+  <div class="tip-box">
+    <div class="box-label">💡 prompt 메시지 끝에 공백을 넣으세요</div>
+    <p><code>input("이름: ")</code>처럼 메시지 끝에 띄어쓰기를 하나 넣으면, 사용자가 입력할 때 커서가 메시지 바로 옆에 붙지 않고 한 칸 떨어져서 더 읽기 편합니다. 작은 차이지만 UX가 훨씬 좋아집니다.</p>
+  </div>
+
+  <!-- ═══ 2. input()은 항상 문자열을 반환한다 ═══ -->
+  <h2>2. input()은 항상 문자열을 반환한다</h2>
+
+  <p>여기서 가장 중요한 규칙 하나를 반드시 기억해야 합니다:</p>
+
+  <div class="warn-box">
+    <div class="box-label">⚠️ 핵심 규칙</div>
+    <p><strong>input()은 사용자가 무엇을 입력하든, 항상 문자열(str)로 반환합니다.</strong><br>숫자 <code>42</code>를 입력해도 파이썬은 이것을 숫자가 아닌 문자열 <code>"42"</code>로 받아들입니다.</p>
+  </div>
+
+  <p>이게 왜 중요한지 실제 예제로 확인해봅시다:</p>
+
+  <div class="code-block">
+    <div class="code-block-header"><span>예제 2 — 문자열로 받아오는 문제</span></div>
+    <pre><code><span class="fn">age</span> <span class="pn">=</span> <span class="fn">input</span><span class="pn">(</span><span class="str">"나이를 입력하세요: "</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="fn">type</span><span class="pn">(</span>age<span class="pn">))</span>   <span class="cm"># 타입 확인</span>
+<span class="fn">print</span><span class="pn">(</span>age <span class="pn">+</span> <span class="num">1</span><span class="pn">)</span>     <span class="cm"># ← 이 줄에서 오류 발생!</span></code></pre>
+  </div>
+
+  <div class="error-block"><pre>이름을 입력하세요: 20
+&lt;class 'str'&gt;
+TypeError: can only concatenate str (not "int") to str</pre></div>
+
+  <p>분명히 <code>20</code>을 입력했는데 <code>str</code>(문자열) 타입이라고 나옵니다. 그래서 숫자 1을 더하려고 하면 "문자열에는 문자열만 붙일 수 있어요"라는 오류가 발생합니다.</p>
+
+  <p>이 문제를 해결하는 방법이 <strong>타입 변환(Type Conversion)</strong>입니다.</p>
+
+  <!-- ═══ 3. 타입 변환 ═══ -->
+  <h2>3. 타입 변환 — int(), float(), str()</h2>
+
+  <p>input()이 문자열로 준 값을 원하는 타입으로 바꿔주는 함수들이 있습니다:</p>
+
+  <table class="conv-table">
+    <thead>
+      <tr><th>함수</th><th>변환 결과</th><th>예시</th><th>결과</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>int()</td><td>정수 (소수점 없음)</td><td><code>int("42")</code></td><td><code>42</code></td></tr>
+      <tr><td>float()</td><td>실수 (소수점 있음)</td><td><code>float("3.14")</code></td><td><code>3.14</code></td></tr>
+      <tr><td>str()</td><td>다시 문자열로</td><td><code>str(42)</code></td><td><code>"42"</code></td></tr>
+    </tbody>
+  </table>
+
+  <h3>정수 입력받기</h3>
+  <p>숫자를 입력받아 계산에 쓰려면 <code>int()</code>로 감싸주세요:</p>
+
+  <div class="code-block">
+    <div class="code-block-header"><span>예제 3 — 나이 계산</span></div>
+    <pre><code><span class="fn">age</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"나이를 입력하세요: "</span><span class="pn">))</span>   <span class="cm"># 문자열 → 정수로 변환</span>
+<span class="fn">next_year</span> <span class="pn">=</span> age <span class="pn">+</span> <span class="num">1</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"내년에는 {next_year}살이 됩니다."</span><span class="pn">)</span></code></pre>
+  </div>
+
+  <div class="input-visual">
+    <div><span class="iv-prompt">나이를 입력하세요: </span><span class="iv-typed">25</span></div>
+    <div style="color:var(--accent);margin-top:4px">내년에는 26살이 됩니다.</div>
+  </div>
+
+  <p><code>int(input(...))</code> — 이렇게 두 함수를 겹쳐 쓰는 것이 파이썬에서 가장 흔한 패턴입니다. 안쪽에서 바깥쪽 순서로 실행됩니다: 먼저 input()이 값을 받고, 그 결과를 int()가 변환합니다.</p>
+
+  <div class="flow-diagram">
+    <div class="flow-box">사용자 입력<br><span style="color:var(--text3);font-size:11px">"25"</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box accent">input()<br><span style="font-size:11px">str 반환</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box warn">int()<br><span style="font-size:11px">int 변환</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">변수에 저장<br><span style="color:var(--text3);font-size:11px">age = 25</span></div>
+  </div>
+
+  <h3>실수 입력받기</h3>
+  <p>소수점이 있는 숫자를 입력받을 때는 <code>float()</code>를 사용합니다:</p>
+
+  <div class="code-block">
+    <div class="code-block-header"><span>예제 4 — 키와 BMI</span></div>
+    <pre><code><span class="fn">height</span> <span class="pn">=</span> <span class="fn">float</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"키를 입력하세요 (cm): "</span><span class="pn">))</span>
+<span class="fn">weight</span> <span class="pn">=</span> <span class="fn">float</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"몸무게를 입력하세요 (kg): "</span><span class="pn">))</span>
+<span class="fn">h_m</span> <span class="pn">=</span> height <span class="pn">/</span> <span class="num">100</span>              <span class="cm"># cm → m</span>
+<span class="fn">bmi</span> <span class="pn">=</span> weight <span class="pn">/</span> <span class="pn">(</span>h_m <span class="pn">*</span> h_m<span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"BMI: {bmi:.1f}"</span><span class="pn">)</span></code></pre>
+  </div>
+
+  <div class="input-visual">
+    <div><span class="iv-prompt">키를 입력하세요 (cm): </span><span class="iv-typed">172</span></div>
+    <div><span class="iv-prompt">몸무게를 입력하세요 (kg): </span><span class="iv-typed">68.5</span></div>
+    <div style="color:var(--accent);margin-top:4px">BMI: 23.2</div>
+  </div>
+
+  <div class="info-box">
+    <div class="box-label">📌 int vs float — 언제 뭘 쓸까?</div>
+    <p>사람 수, 나이, 점수(정수)처럼 소수점이 절대 없는 값 → <code>int()</code><br>키, 몸무게, 온도, 가격처럼 소수점이 있을 수 있는 값 → <code>float()</code></p>
+  </div>
+
+  <!-- ═══ 4. 여러 개 입력받기 ═══ -->
+  <h2>4. 여러 개 입력받기</h2>
+
+  <p>input()을 여러 번 써서 여러 값을 받을 수 있습니다. 각 input()은 Enter를 누를 때까지 대기합니다:</p>
+
+  <div class="code-block">
+    <div class="code-block-header"><span>예제 5 — 여러 정보 입력받기</span></div>
+    <pre><code><span class="fn">name</span> <span class="pn">=</span> <span class="fn">input</span><span class="pn">(</span><span class="str">"이름: "</span><span class="pn">)</span>
+<span class="fn">age</span>  <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"나이: "</span><span class="pn">))</span>
+<span class="fn">city</span> <span class="pn">=</span> <span class="fn">input</span><span class="pn">(</span><span class="str">"사는 곳: "</span><span class="pn">)</span>
+
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"안녕하세요! {city}에 사는 {age}살 {name}입니다."</span><span class="pn">)</span></code></pre>
+  </div>
+
+  <div class="input-visual">
+    <div><span class="iv-prompt">이름: </span><span class="iv-typed">박서연</span></div>
+    <div><span class="iv-prompt">나이: </span><span class="iv-typed">22</span></div>
+    <div><span class="iv-prompt">사는 곳: </span><span class="iv-typed">부산</span></div>
+    <div style="color:var(--accent);margin-top:4px">안녕하세요! 부산에 사는 22살 박서연입니다.</div>
+  </div>
+
+  <h3>input()과 리스트 함께 쓰기</h3>
+  <p>입력받은 값들을 리스트에 담아두면 나중에 활용하기 편합니다:</p>
+
+  <div class="code-block">
+    <div class="code-block-header"><span>예제 6 — 점수 3개 입력받아 평균 계산</span></div>
+    <pre><code><span class="fn">scores</span> <span class="pn">=</span> <span class="pn">[]</span>                        <span class="cm"># 빈 리스트 준비</span>
+
+<span class="fn">s1</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"국어 점수: "</span><span class="pn">))</span>
+<span class="fn">s2</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"영어 점수: "</span><span class="pn">))</span>
+<span class="fn">s3</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"수학 점수: "</span><span class="pn">))</span>
+
+scores<span class="pn">.</span><span class="fn">append</span><span class="pn">(</span>s1<span class="pn">)</span>
+scores<span class="pn">.</span><span class="fn">append</span><span class="pn">(</span>s2<span class="pn">)</span>
+scores<span class="pn">.</span><span class="fn">append</span><span class="pn">(</span>s3<span class="pn">)</span>
+
+<span class="fn">avg</span> <span class="pn">=</span> <span class="fn">sum</span><span class="pn">(</span>scores<span class="pn">)</span> <span class="pn">/</span> <span class="fn">len</span><span class="pn">(</span>scores<span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"평균: {avg:.1f}점  |  최고: {max(scores)}점  |  최저: {min(scores)}점"</span><span class="pn">)</span></code></pre>
+  </div>
+
+  <div class="input-visual">
+    <div><span class="iv-prompt">국어 점수: </span><span class="iv-typed">88</span></div>
+    <div><span class="iv-prompt">영어 점수: </span><span class="iv-typed">92</span></div>
+    <div><span class="iv-prompt">수학 점수: </span><span class="iv-typed">79</span></div>
+    <div style="color:var(--accent);margin-top:4px">평균: 86.3점  |  최고: 92점  |  최저: 79점</div>
+  </div>
+
+  <!-- ═══ 5. 변환 오류 처리 ═══ -->
+  <h2>5. 변환 실패 — 흔한 실수</h2>
+
+  <p>숫자를 기대하고 <code>int(input(...))</code>를 썼는데, 사용자가 문자를 입력하면 어떻게 될까요?</p>
+
+  <div class="code-block">
+    <div class="code-block-header"><span>예제 7 — 변환 실패 상황</span></div>
+    <pre><code><span class="fn">age</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"나이를 입력하세요: "</span><span class="pn">))</span>   <span class="cm"># 사용자가 "스물다섯" 입력</span></code></pre>
+  </div>
+
+  <div class="error-block"><pre>나이를 입력하세요: 스물다섯
+ValueError: invalid literal for int() with base 10: '스물다섯'</pre></div>
+
+  <p><code>ValueError</code>가 발생합니다. "스물다섯"이라는 문자열을 정수로 바꿀 수 없기 때문입니다. 이런 상황을 안전하게 처리하는 방법은 나중에 <strong>예외처리(try/except)</strong> 챕터에서 배웁니다. 지금은 사용자가 올바른 값을 입력한다고 가정하고 진행합니다.</p>
+
+  <div class="warn-box">
+    <div class="box-label">⚠️ 자주 하는 실수들</div>
+    <p><strong>① int()로 소수점 문자열 변환 시도</strong><br>
+    <code>int("3.14")</code> → <code>ValueError</code> 발생. 소수점 문자열은 먼저 <code>float()</code>로, 그다음 필요하면 <code>int()</code>로 변환하세요.</p>
+    <p><strong>② 변환 없이 숫자 계산 시도</strong><br>
+    <code>input()</code> 결과를 그냥 <code>+ 1</code>하면 <code>TypeError</code>. 반드시 <code>int()</code>나 <code>float()</code>로 감싸야 합니다.</p>
+    <p><strong>③ 공백 문자열 주의</strong><br>
+    아무것도 입력하지 않고 Enter를 누르면 <code>""</code>(빈 문자열)이 옵니다. <code>int("")</code>는 오류입니다.</p>
+  </div>
+
+  <!-- ═══ 6. split()으로 한 줄에 여러 값 받기 ═══ -->
+  <h2>6. 한 줄에 여러 값 받기 — split()</h2>
+
+  <p>간단한 프로그램에서는 값을 하나씩 받는 대신, 한 줄에 공백으로 구분해서 여러 값을 한꺼번에 받기도 합니다. 이때 문자열의 <code>.split()</code> 메서드를 씁니다:</p>
+
+  <div class="code-block">
+    <div class="code-block-header"><span>예제 8 — split()으로 여러 값 한 번에 받기</span></div>
+    <pre><code><span class="cm"># "10 20 30" 형태로 입력받기</span>
+<span class="fn">line</span> <span class="pn">=</span> <span class="fn">input</span><span class="pn">(</span><span class="str">"세 수를 공백으로 구분해 입력하세요: "</span><span class="pn">)</span>
+<span class="fn">parts</span> <span class="pn">=</span> line<span class="pn">.</span><span class="fn">split</span><span class="pn">()</span>         <span class="cm"># ["10", "20", "30"] — 아직 문자열</span>
+<span class="fn">a</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span>parts<span class="pn">[</span><span class="num">0</span><span class="pn">])</span>
+<span class="fn">b</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span>parts<span class="pn">[</span><span class="num">1</span><span class="pn">])</span>
+<span class="fn">c</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span>parts<span class="pn">[</span><span class="num">2</span><span class="pn">])</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"합계: {a + b + c}"</span><span class="pn">)</span></code></pre>
+  </div>
+
+  <div class="input-visual">
+    <div><span class="iv-prompt">세 수를 공백으로 구분해 입력하세요: </span><span class="iv-typed">10 20 30</span></div>
+    <div style="color:var(--accent);margin-top:4px">합계: 60</div>
+  </div>
+
+  <p><code>.split()</code>은 공백(스페이스, 탭)을 기준으로 문자열을 잘라서 리스트로 만들어 줍니다. 아직 배우지 않은 내용이라 처음엔 낯설 수 있지만 패턴만 기억해 두면 됩니다.</p>
+
+  <div class="tip-box">
+    <div class="box-label">💡 split()을 더 짧게 쓰는 방법</div>
+    <p>파이썬에는 위 코드를 한 줄로 줄이는 방법도 있습니다. 아직 배우지 않은 내용이라 지금 당장 외울 필요는 없지만, 나중에 보게 될 코드들입니다:</p>
+    <p><code>a, b, c = input("세 수: ").split()</code> — 공백 구분 문자열을 세 변수에 한 번에 대입<br>
+    <code>a, b, c = map(int, input("세 수: ").split())</code> — 변환까지 한 번에</p>
+  </div>
+
+  <!-- ═══ 7. 실전 예제 ═══ -->
+  <h2>7. 직접 해보기 — 간단한 계산기</h2>
+
+  <div class="try-section">
+    <div class="try-title">간단한 계산기 만들기</div>
+    <p>두 수를 입력받아 사칙연산 결과를 모두 출력하는 프로그램입니다:</p>
+
+    <div class="code-block">
+      <div class="code-block-header"><span>따라하기 — 사칙연산 계산기</span></div>
+      <pre><code><span class="cm"># 두 수 입력받기</span>
+<span class="fn">a</span> <span class="pn">=</span> <span class="fn">float</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"첫 번째 수: "</span><span class="pn">))</span>
+<span class="fn">b</span> <span class="pn">=</span> <span class="fn">float</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"두 번째 수: "</span><span class="pn">))</span>
+
+<span class="cm"># 계산 결과 출력</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"{a} + {b} = {a + b}"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"{a} - {b} = {a - b}"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"{a} × {b} = {a * b}"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"{a} ÷ {b} = {a / b:.2f}"</span><span class="pn">)</span></code></pre>
+    </div>
+
+    <div class="input-visual">
+      <div><span class="iv-prompt">첫 번째 수: </span><span class="iv-typed">12</span></div>
+      <div><span class="iv-prompt">두 번째 수: </span><span class="iv-typed">4</span></div>
+      <div style="color:var(--accent);margin-top:4px">12.0 + 4.0 = 16.0<br>12.0 - 4.0 = 8.0<br>12.0 × 4.0 = 48.0<br>12.0 ÷ 4.0 = 3.00</div>
+    </div>
+
+    <p style="margin-top:16px">이렇게 바꿔보세요:</p>
+    <ul>
+      <li>정수로 깔끔하게 출력하려면 <code>float</code> 대신 <code>int</code>로 바꿔보세요</li>
+      <li><code>a % b</code>로 나머지도 추가해보세요</li>
+      <li>prompt 메시지를 더 친절하게 바꿔보세요</li>
+    </ul>
+  </div>
+
+  <!-- ═══ 8. 자주 발생하는 오류 패턴 ═══ -->
+  <h2>8. 자주 발생하는 오류 패턴</h2>
+
+  <div class="code-block">
+    <div class="code-block-header"><span class="code-block-label">❌ 틀린 코드</span><span>변환 없이 덧셈</span></div>
+    <pre><code><span class="fn">num</span> <span class="pn">=</span> <span class="fn">input</span><span class="pn">(</span><span class="str">"숫자: "</span><span class="pn">)</span>   <span class="cm"># "10" 입력</span>
+<span class="fn">print</span><span class="pn">(</span>num <span class="pn">+</span> <span class="num">5</span><span class="pn">)</span>       <span class="cm"># TypeError!</span></code></pre>
+  </div>
+  <div class="code-block">
+    <div class="code-block-header"><span class="code-block-label">✅ 올바른 코드</span></div>
+    <pre><code><span class="fn">num</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"숫자: "</span><span class="pn">))</span>  <span class="cm"># int()로 변환</span>
+<span class="fn">print</span><span class="pn">(</span>num <span class="pn">+</span> <span class="num">5</span><span class="pn">)</span>            <span class="cm"># 정상 동작</span></code></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-block-header"><span class="code-block-label">❌ 틀린 코드</span><span>소수점 문자열을 int()로</span></div>
+    <pre><code><span class="fn">h</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"키(cm): "</span><span class="pn">))</span>   <span class="cm"># 172.5 입력 → ValueError!</span></code></pre>
+  </div>
+  <div class="code-block">
+    <div class="code-block-header"><span class="code-block-label">✅ 올바른 코드</span></div>
+    <pre><code><span class="fn">h</span> <span class="pn">=</span> <span class="fn">float</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"키(cm): "</span><span class="pn">))</span>  <span class="cm"># float()로 소수점 허용</span></code></pre>
+  </div>
+
+  <!-- ═══ 정리 ═══ -->
+  <h2>핵심 정리</h2>
+
+  <div class="summary-grid">
+    <div class="summary-card">
+      <div class="sc-label">기본 입력</div>
+      <div class="sc-code">x = input("메시지: ")</div>
+      <div class="sc-desc">항상 문자열(str) 반환</div>
+    </div>
+    <div class="summary-card">
+      <div class="sc-label">정수 입력</div>
+      <div class="sc-code">n = int(input("숫자: "))</div>
+      <div class="sc-desc">정수 계산 시 필수</div>
+    </div>
+    <div class="summary-card">
+      <div class="sc-label">실수 입력</div>
+      <div class="sc-code">f = float(input("값: "))</div>
+      <div class="sc-desc">소수점 있는 숫자</div>
+    </div>
+    <div class="summary-card">
+      <div class="sc-label">여러 값 (split)</div>
+      <div class="sc-code">parts = input().split()</div>
+      <div class="sc-desc">공백으로 구분된 값 → 리스트</div>
+    </div>
+  </div>
+
+  <div class="tip-box">
+    <div class="box-label">💡 input()을 쓸 때 체크리스트</div>
+    <p>① prompt 메시지 끝에 띄어쓰기 한 칸 넣기<br>
+    ② 숫자로 계산할 거라면 반드시 int() 또는 float() 씌우기<br>
+    ③ 소수점이 있을 수 있으면 int()가 아닌 float() 사용하기</p>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <div class="cheer-box">
+    <span class="cheer-icon">🎉</span>
+    <div class="cheer-text">
+      <strong>드디어 진짜 대화하는 프로그램을 만들 수 있게 됐습니다!</strong><br>
+      input()은 앞으로 모든 프로그램에서 계속 쓰게 될 핵심 도구입니다. 다음 챕터에서 input()을 주제로 50문제를 풀어보면서 완벽하게 손에 익혀봅시다.
+    </div>
+  </div>
+
+  <div class="chap-nav">
+    <a href="14-quiz-list.html" class="chap-nav-btn">
+      <span class="cnb-dir">← 이전 챕터</span>
+      <span class="cnb-title"><span>14.</span> 연습문제 — 리스트</span>
+    </a>
+    <a href="16-quiz-input.html" class="chap-nav-btn next">
+      <span class="cnb-dir">다음 챕터 →</span>
+      <span class="cnb-title"><span>16.</span> 연습문제 — input()</span>
+    </a>
+  </div>
+
+</div>
+</main>
+</div>
+
+<script>
+  const isMobile = () => window.innerWidth <= 720;
+  const overlay  = document.getElementById('sidebarOverlay');
+  function toggleSidebar() { document.body.classList.toggle('sidebar-closed'); if (isMobile()) overlay.classList.toggle('visible', !document.body.classList.contains('sidebar-closed')); localStorage.setItem('sp-sidebar', document.body.classList.contains('sidebar-closed') ? 'closed' : 'open'); }
+  function closeSidebar()  { document.body.classList.add('sidebar-closed'); overlay.classList.remove('visible'); localStorage.setItem('sp-sidebar','closed'); }
+  function toggleGroup(id) { document.getElementById(id).classList.toggle('open'); }
+  window.addEventListener('DOMContentLoaded', () => {
+    if (isMobile()) document.body.classList.add('sidebar-closed');
+    else if (localStorage.getItem('sp-sidebar') === 'closed') document.body.classList.add('sidebar-closed');
+  });
+  window.addEventListener('resize', () => { if (!isMobile()) overlay.classList.remove('visible'); });
+</script>
+</body>
+</html>

@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>05. 변수와 데이터 타입 — 브론즈 | 슈퍼파이썬</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:          #111111;
+      --bg-nav:      #0A0A0A;
+      --bg-side:     #0E0E0E;
+      --bg-card:     #181818;
+      --bg-code:     #1A1A1A;
+      --bg-tip:      #131A13;
+      --bg-warn:     #1A1410;
+      --bg-info:     #101520;
+      --accent:      #00CC70;
+      --accent-dim:  #007A42;
+      --accent-bg:   rgba(0,204,112,0.07);
+      --accent2:     #C8A000;
+      --text:        #D8D8D8;
+      --text-head:   #EFEFEF;
+      --text2:       #888888;
+      --text3:       #444444;
+      --border:      #222222;
+      --border2:     #2E2E2E;
+      --sy-kw:       #C792EA;
+      --sy-fn:       #82AAFF;
+      --sy-str:      #C3E88D;
+      --sy-cm:       #546E7A;
+      --sy-num:      #F78C6C;
+      --sy-pn:       #89DDFF;
+      --sy-ln-t:     #555555;
+      --sidebar-w:   248px;
+      --content-max: 720px;
+      --header-h:    48px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Noto Sans KR', sans-serif; font-size: 15px; line-height: 1.8; overflow-x: hidden; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent-dim); }
+
+    /* ━━━ HEADER ━━━ */
+    .top-header { position: fixed; top: 0; left: 0; right: 0; z-index: 200; height: var(--header-h); background: var(--bg-nav); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 16px; }
+    .header-open-btn { display: none; align-items: center; justify-content: center; width: 28px; height: 28px; flex-shrink: 0; margin-right: 12px; background: var(--bg-card); border: 1px solid var(--border2); border-radius: 4px; cursor: pointer; color: var(--text2); font-size: 12px; transition: background 0.15s, color 0.15s, border-color 0.15s; }
+    .header-open-btn:hover { background: var(--accent-bg); color: var(--accent); border-color: var(--accent); }
+    body.sidebar-closed .header-open-btn { display: flex; }
+    .header-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; font-family: 'JetBrains Mono', monospace; font-size: 12px; overflow: hidden; }
+    .header-logo { color: var(--accent); text-decoration: none; font-weight: 700; white-space: nowrap; }
+    .header-sep  { color: var(--text3); flex-shrink: 0; }
+    .header-grade { color: var(--text2); white-space: nowrap; }
+    .header-chap  { color: var(--text-head); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .header-center { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text3); display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding: 0 16px; }
+    .progress-mini { width: 80px; height: 3px; background: var(--border2); border-radius: 2px; overflow: hidden; }
+    .progress-mini-fill { height: 100%; background: var(--accent); width: 10.42%; border-radius: 2px; } /* 5/48 */
+    .header-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .nav-btn { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text2); background: transparent; border: 1px solid var(--border2); padding: 4px 12px; text-decoration: none; transition: border-color 0.15s, color 0.15s; white-space: nowrap; }
+    .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .nav-btn.primary { color: var(--bg-nav); background: var(--accent); border-color: var(--accent); font-weight: 700; }
+    .nav-btn.primary:hover { filter: brightness(1.1); }
+
+    /* ━━━ LAYOUT ━━━ */
+    .layout { display: flex; padding-top: var(--header-h); min-height: 100vh; }
+
+    /* ━━━ SIDEBAR ━━━ */
+    .sidebar { width: var(--sidebar-w); flex-shrink: 0; position: fixed; top: var(--header-h); bottom: 0; left: 0; background: var(--bg-side); border-right: 1px solid var(--border); overflow-y: auto; overflow-x: hidden; transition: transform 0.22s ease; z-index: 150; padding-top: 8px; }
+    body.sidebar-closed .sidebar { transform: translateX(calc(-1 * var(--sidebar-w))); }
+    body.sidebar-closed .content { margin-left: 0; }
+    .sidebar-toggle { position: absolute; top: 10px; right: 10px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: var(--bg-card); border: 1px solid var(--border2); border-radius: 4px; cursor: pointer; color: var(--text2); font-size: 12px; transition: background 0.15s, color 0.15s, border-color 0.15s; z-index: 10; }
+    .sidebar-toggle:hover { background: var(--accent-bg); color: var(--accent); border-color: var(--accent); }
+    body.sidebar-closed .sidebar-toggle { display: none; }
+    .sidebar-progress { margin: 44px 12px 12px; padding: 12px 14px; background: var(--bg-card); border: 1px solid var(--border); }
+    .sp-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); margin-bottom: 6px; letter-spacing: 0.08em; }
+    .sp-bar { height: 4px; background: var(--border2); border-radius: 2px; overflow: hidden; margin-bottom: 5px; }
+    .sp-fill { height: 100%; background: var(--accent); width: 10.42%; border-radius: 2px; }
+    .sp-text { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text2); }
+    .sp-text span { color: var(--accent); }
+    .sb-group { border-bottom: 1px solid var(--border); }
+    .sb-group-header { display: flex; align-items: center; justify-content: space-between; padding: 9px 14px 9px 12px; cursor: pointer; user-select: none; transition: background 0.12s; gap: 8px; }
+    .sb-group-header:hover { background: rgba(255,255,255,0.03); }
+    .sb-group-title { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; letter-spacing: 0.06em; color: var(--text2); text-transform: uppercase; flex: 1; }
+    .sb-group-arrow { font-size: 9px; color: var(--text3); transition: transform 0.18s; }
+    .sb-group.open .sb-group-arrow { transform: rotate(90deg); }
+    .sb-group.current .sb-group-title { color: var(--accent); }
+    .sb-items { display: none; padding-bottom: 4px; }
+    .sb-group.open .sb-items { display: block; }
+    .sb-item { display: flex; align-items: center; gap: 0; padding: 5px 14px 5px 10px; text-decoration: none; color: var(--text2); font-size: 13px; transition: background 0.1s, color 0.1s; line-height: 1.4; }
+    .sb-item:hover { background: rgba(255,255,255,0.03); color: var(--text); }
+    .sb-item.active { color: var(--accent); background: var(--accent-bg); }
+    .sb-item.done { color: var(--text3); }
+    .sb-item.done:hover { color: var(--text2); }
+    .sb-icon { font-family: 'JetBrains Mono', monospace; font-size: 10px; width: 18px; flex-shrink: 0; color: var(--accent); }
+    .sb-item.done .sb-icon { color: var(--text3); }
+    .sb-num  { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); margin-right: 8px; flex-shrink: 0; }
+
+    /* ━━━ CONTENT ━━━ */
+    .content { margin-left: var(--sidebar-w); flex: 1; padding: 44px 48px 80px; transition: margin-left 0.22s ease; }
+    .content-inner { max-width: var(--content-max); margin: 0 auto; }
+
+    /* 챕터 메타 */
+    .chap-meta { display: flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text3); margin-bottom: 14px; letter-spacing: 0.05em; }
+    .badge { background: var(--accent); color: var(--bg-nav); font-weight: 700; padding: 2px 8px; font-size: 10px; letter-spacing: 0.1em; }
+    .badge.quiz { background: var(--accent2); }
+
+    /* 챕터 제목 */
+    .chap-title { font-size: 28px; font-weight: 700; color: var(--text-head); line-height: 1.3; margin-bottom: 10px; }
+    .chap-title .hl { color: var(--accent); }
+    .chap-subtitle { font-size: 15px; color: var(--text2); margin-bottom: 32px; line-height: 1.6; }
+
+    /* 학습 목표 */
+    .goal-box { border: 1px solid var(--border2); border-left: 3px solid var(--accent); background: var(--bg-card); padding: 16px 20px; margin-bottom: 44px; }
+    .goal-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--accent); letter-spacing: 0.1em; margin-bottom: 10px; }
+    .goal-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+    .goal-list li { font-size: 14px; color: var(--text2); padding-left: 16px; position: relative; line-height: 1.65; }
+    .goal-list li::before { content: "▸"; position: absolute; left: 0; color: var(--accent); }
+
+    /* 섹션 제목 */
+    h2 { font-size: 18px; font-weight: 700; color: var(--text-head); margin: 44px 0 14px; display: flex; align-items: baseline; gap: 10px; }
+    h2 .n { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--accent); }
+    h3 { font-size: 15px; font-weight: 700; color: var(--text-head); margin: 28px 0 10px; }
+    p  { color: var(--text2); margin-bottom: 14px; line-height: 1.85; font-size: 15px; }
+    p:last-child { margin-bottom: 0; }
+    code { font-family: 'JetBrains Mono', monospace; font-size: 13px; background: var(--bg-code); border: 1px solid var(--border2); padding: 1px 6px; color: var(--accent); }
+    strong { color: var(--text-head); font-weight: 700; }
+    em { color: var(--text); font-style: normal; border-bottom: 1px dashed var(--text3); }
+
+    /* 코드 블록 */
+    .code-block { background: var(--bg-code); border: 1px solid var(--border2); margin: 16px 0; overflow: hidden; }
+    .code-block-header { display: flex; justify-content: space-between; align-items: center; padding: 6px 14px; border-bottom: 1px solid var(--border); }
+    .cb-lang { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); letter-spacing: 0.08em; }
+    .cb-copy { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); background: none; border: 1px solid var(--border2); padding: 2px 8px; cursor: pointer; transition: color 0.15s, border-color 0.15s; }
+    .cb-copy:hover { color: var(--accent); border-color: var(--accent); }
+    .code-block-body { display: flex; }
+    .ln-col { padding: 14px 10px 14px 14px; text-align: right; user-select: none; display: flex; flex-direction: column; gap: 0; }
+    .ln-col span { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--sy-ln-t); line-height: 1.7; }
+    .code-pre-col { padding: 14px 18px 14px 0; overflow-x: auto; flex: 1; }
+    .code-pre-col pre { font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.7; color: var(--text); white-space: pre; margin: 0; }
+    /* 구문 강조 */
+    .kw  { color: var(--sy-kw); }
+    .fn  { color: var(--sy-fn); }
+    .str { color: var(--sy-str); }
+    .cm  { color: var(--sy-cm); }
+    .num { color: var(--sy-num); }
+    .pn  { color: var(--sy-pn); }
+
+    /* 실행 결과 */
+    .output-block { background: #0D0D0D; border: 1px solid var(--border); border-top: none; padding: 12px 18px; margin-bottom: 20px; }
+    .out-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); margin-bottom: 6px; letter-spacing: 0.08em; }
+    .output-block pre { font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.7; color: var(--text2); margin: 0; white-space: pre-wrap; }
+    .out-g { color: #A8D8B0; }
+
+    /* 팁/경고/정보 */
+    .tip-box, .warn-box, .info-box { padding: 14px 18px; margin: 20px 0; border-left: 3px solid; }
+    .tip-box  { background: var(--bg-tip);  border-color: var(--accent); }
+    .warn-box { background: var(--bg-warn); border-color: var(--accent2); }
+    .info-box { background: var(--bg-info); border-color: #4FC3F7; }
+    .box-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; margin-bottom: 8px; font-weight: 700; }
+    .tip-box  .box-label { color: var(--accent); }
+    .warn-box .box-label { color: var(--accent2); }
+    .info-box .box-label { color: #4FC3F7; }
+    .tip-box p, .warn-box p, .info-box p { font-size: 14px; color: var(--text2); margin-bottom: 0; line-height: 1.8; }
+
+    /* 오류 블록 */
+    .error-block { background: #160A0A; border: 1px solid #3A1A1A; border-left: 3px solid #FF4444; margin: 16px 0; padding: 12px 18px; }
+    .error-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #FF4444; letter-spacing: 0.08em; margin-bottom: 6px; }
+    .error-block pre { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #FF8080; line-height: 1.7; margin: 0; white-space: pre-wrap; }
+
+    /* 타입 테이블 */
+    .type-table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px; }
+    .type-table th { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); letter-spacing: 0.08em; padding: 8px 14px; background: var(--bg-card); border: 1px solid var(--border); text-align: left; font-weight: 700; }
+    .type-table td { padding: 10px 14px; border: 1px solid var(--border); color: var(--text2); line-height: 1.6; }
+    .type-table tr:hover td { background: rgba(255,255,255,0.02); }
+    .type-table code { font-size: 12px; }
+    .type-name { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; }
+    .type-int   { color: var(--sy-num); }
+    .type-float { color: #FFB347; }
+    .type-str   { color: var(--sy-str); }
+    .type-bool  { color: var(--sy-kw); }
+
+    /* 변수 해부 다이어그램 */
+    .anatomy-box { background: var(--bg-card); border: 1px solid var(--border2); padding: 24px 28px; margin: 20px 0; text-align: center; }
+    .anatomy-code { font-family: 'JetBrains Mono', monospace; font-size: 20px; margin-bottom: 20px; letter-spacing: 0.05em; }
+    .an-var  { color: var(--sy-fn); }
+    .an-eq   { color: var(--sy-pn); }
+    .an-val  { color: var(--sy-num); }
+    .an-vals { color: var(--sy-str); }
+    .anatomy-labels { display: flex; justify-content: center; gap: 32px; flex-wrap: wrap; }
+    .an-label { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .an-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .an-dot.var-c  { background: var(--sy-fn); }
+    .an-dot.eq-c   { background: var(--sy-pn); }
+    .an-dot.val-c  { background: var(--sy-num); }
+    .an-dot.vals-c { background: var(--sy-str); }
+    .an-text { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); letter-spacing: 0.06em; }
+    .an-desc { font-size: 12px; color: var(--text2); }
+
+    /* 따라하기 */
+    .try-section { border: 1px solid var(--border2); background: var(--bg-card); margin: 36px 0; }
+    .try-header { padding: 11px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+    .try-title { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; color: var(--accent); }
+    .try-body { padding: 18px 20px; }
+    .try-body > p { font-size: 14px; margin-bottom: 16px; color: var(--text2); }
+    .try-step { display: flex; gap: 12px; margin-bottom: 10px; align-items: baseline; }
+    .try-step-n { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent); flex-shrink: 0; min-width: 26px; }
+    .try-step-t { font-size: 14px; color: var(--text2); line-height: 1.75; }
+
+    /* 요약 */
+    .summary-box { border: 1px solid var(--border2); border-top: 2px solid var(--accent); background: var(--bg-card); padding: 20px 22px; margin: 44px 0 32px; }
+    .summary-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--accent); letter-spacing: 0.1em; margin-bottom: 16px; }
+    .summary-grid { display: grid; grid-template-columns: 150px 1fr; gap: 10px 18px; }
+    .sg-key { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text3); padding-top: 2px; }
+    .sg-val { font-size: 14px; color: var(--text2); line-height: 1.65; }
+
+    /* 격려 */
+    .cheer-box { border: 1px solid var(--border); background: var(--bg); padding: 18px 22px; margin-bottom: 44px; display: flex; gap: 14px; align-items: flex-start; }
+    .cheer-icon { font-size: 18px; flex-shrink: 0; line-height: 1.5; }
+    .cheer-text { font-size: 14px; color: var(--text2); line-height: 1.85; }
+    .cheer-text strong { color: var(--text-head); }
+
+    /* 섹션 구분선 */
+    .section-divider { border: none; border-top: 1px solid var(--border); margin: 44px 0; }
+
+    /* 챕터 네비 */
+    .chap-nav { display: flex; justify-content: space-between; padding-top: 32px; border-top: 1px solid var(--border); gap: 12px; flex-wrap: wrap; }
+    .chap-nav-btn { display: flex; flex-direction: column; gap: 4px; text-decoration: none; padding: 14px 18px; border: 1px solid var(--border2); background: var(--bg-card); flex: 1; max-width: 300px; transition: border-color 0.15s; }
+    .chap-nav-btn:hover { border-color: var(--accent); }
+    .chap-nav-btn.next { text-align: right; }
+    .cnb-dir { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); letter-spacing: 0.07em; }
+    .cnb-title { font-size: 13px; color: var(--text2); line-height: 1.45; }
+    .cnb-title span { color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+
+    /* 반응형 */
+    .sidebar-overlay { display: none; position: fixed; inset: 0; top: var(--header-h); z-index: 140; background: rgba(0,0,0,0.65); }
+    @media (max-width: 720px) {
+      .sidebar-overlay.visible { display: block; }
+      .content { margin-left: 0; padding: 28px 20px 72px; }
+      .header-center { display: none; }
+      .summary-grid { grid-template-columns: 1fr; gap: 6px; }
+      .anatomy-code { font-size: 16px; }
+    }
+    @media (max-width: 480px) {
+      .header-grade { display: none; }
+      .chap-nav-btn { max-width: 100%; }
+      .header-right .nav-btn:not(.primary) { display: none; }
+      .anatomy-labels { gap: 14px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ━━━ TOP HEADER ━━━ -->
+<header class="top-header">
+  <button class="header-open-btn" onclick="toggleSidebar()" title="사이드바 열기">▶</button>
+  <div class="header-left">
+    <a href="../index.html" class="header-logo">SUPERPYTHON</a>
+    <span class="header-sep">/</span>
+    <span class="header-grade">🟤 BRONZE</span>
+    <span class="header-sep">/</span>
+    <span class="header-chap">05. 변수와 데이터 타입</span>
+  </div>
+  <div class="header-center">
+    <span>05 / 48</span>
+    <div class="progress-mini"><div class="progress-mini-fill"></div></div>
+    <span>10%</span>
+  </div>
+  <div class="header-right">
+    <a href="04-quiz-print.html" class="nav-btn">← 이전</a>
+    <a href="06-operators.html" class="nav-btn primary">다음 →</a>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<div class="layout">
+
+  <!-- ━━━ SIDEBAR ━━━ -->
+  <aside class="sidebar" id="sidebar">
+    <button class="sidebar-toggle" onclick="toggleSidebar()" title="사이드바 닫기">◀</button>
+    <div class="sidebar-progress">
+      <div class="sp-label">BRONZE 진행률</div>
+      <div class="sp-bar"><div class="sp-fill"></div></div>
+      <div class="sp-text"><span>5</span> / 48 챕터 완료</div>
+    </div>
+
+    <div class="sb-group" id="grp-env">
+      <div class="sb-group-header" onclick="toggleGroup('grp-env')"><span class="sb-group-title">환경 설정</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="01-what-is-python.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">01</span>파이썬이란?</a>
+        <a href="02-setup.html"          class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">02</span>개발환경 설치</a>
+      </div>
+    </div>
+    <div class="sb-group open current" id="grp-basic1">
+      <div class="sb-group-header" onclick="toggleGroup('grp-basic1')"><span class="sb-group-title">기초 문법 1</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="03-print.html"                    class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">03</span>print()란?</a>
+        <a href="04-quiz-print.html"               class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">04</span>연습문제</a>
+        <a href="05-variables.html"                class="sb-item active"><span class="sb-icon">→</span><span class="sb-num">05</span>변수와 데이터 타입</a>
+        <a href="06-operators.html"                class="sb-item"><span class="sb-icon"> </span><span class="sb-num">06</span>연산자</a>
+        <a href="07-quiz-variables-operators.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">07</span>연습문제</a>
+        <a href="08-string.html"                   class="sb-item"><span class="sb-icon"> </span><span class="sb-num">08</span>문자열 String</a>
+        <a href="09-quiz-string.html"              class="sb-item"><span class="sb-icon"> </span><span class="sb-num">09</span>연습문제</a>
+        <a href="10-fstring.html"                  class="sb-item"><span class="sb-icon"> </span><span class="sb-num">10</span>f-string 완전정리</a>
+        <a href="11-quiz-fstring.html"             class="sb-item"><span class="sb-icon"> </span><span class="sb-num">11</span>연습문제</a>
+        <a href="12-mini-project-01.html"          class="sb-item"><span class="sb-icon"> </span><span class="sb-num">12</span>🎮 미니 프로젝트 ①</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-basic2">
+      <div class="sb-group-header" onclick="toggleGroup('grp-basic2')"><span class="sb-group-title">기초 문법 2</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="13-list.html"            class="sb-item"><span class="sb-icon"> </span><span class="sb-num">13</span>리스트</a>
+        <a href="14-quiz-list.html"       class="sb-item"><span class="sb-icon"> </span><span class="sb-num">14</span>연습문제</a>
+        <a href="15-input.html"           class="sb-item"><span class="sb-icon"> </span><span class="sb-num">15</span>input() 함수</a>
+        <a href="16-quiz-input.html"      class="sb-item"><span class="sb-icon"> </span><span class="sb-num">16</span>연습문제</a>
+        <a href="17-mini-project-02.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">17</span>🎮 미니 프로젝트 ②</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-flow">
+      <div class="sb-group-header" onclick="toggleGroup('grp-flow')"><span class="sb-group-title">흐름 제어</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="18-if.html"              class="sb-item"><span class="sb-icon"> </span><span class="sb-num">18</span>조건문 (if)</a>
+        <a href="19-quiz-if.html"         class="sb-item"><span class="sb-icon"> </span><span class="sb-num">19</span>연습문제</a>
+        <a href="20-mini-project-03.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">20</span>🎮 미니 프로젝트 ③</a>
+        <a href="21-for-range.html"       class="sb-item"><span class="sb-icon"> </span><span class="sb-num">21</span>for문과 range()</a>
+        <a href="22-quiz-for.html"        class="sb-item"><span class="sb-icon"> </span><span class="sb-num">22</span>연습문제</a>
+        <a href="23-while.html"           class="sb-item"><span class="sb-icon"> </span><span class="sb-num">23</span>while문</a>
+        <a href="24-quiz-while.html"      class="sb-item"><span class="sb-icon"> </span><span class="sb-num">24</span>연습문제</a>
+        <a href="25-mini-project-04.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">25</span>🎮 미니 프로젝트 ④</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-error">
+      <div class="sb-group-header" onclick="toggleGroup('grp-error')"><span class="sb-group-title">에러 & 디버깅</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="26-error-types.html"    class="sb-item"><span class="sb-icon"> </span><span class="sb-num">26</span>에러 읽는 법</a>
+        <a href="27-debugging.html"      class="sb-item"><span class="sb-icon"> </span><span class="sb-num">27</span>기초 디버깅 실습</a>
+        <a href="28-quiz-debugging.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">28</span>연습문제</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-func">
+      <div class="sb-group-header" onclick="toggleGroup('grp-func')"><span class="sb-group-title">함수</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="29-function-basic.html"          class="sb-item"><span class="sb-icon"> </span><span class="sb-num">29</span>함수 기초</a>
+        <a href="30-quiz-function-basic.html"     class="sb-item"><span class="sb-icon"> </span><span class="sb-num">30</span>연습문제</a>
+        <a href="31-mini-project-05.html"         class="sb-item"><span class="sb-icon"> </span><span class="sb-num">31</span>🎮 미니 프로젝트 ⑤</a>
+        <a href="32-function-advanced.html"       class="sb-item"><span class="sb-icon"> </span><span class="sb-num">32</span>함수 심화</a>
+        <a href="33-quiz-function-advanced.html"  class="sb-item"><span class="sb-icon"> </span><span class="sb-num">33</span>연습문제</a>
+        <a href="34-module.html"                  class="sb-item"><span class="sb-icon"> </span><span class="sb-num">34</span>모듈</a>
+        <a href="35-quiz-module.html"             class="sb-item"><span class="sb-icon"> </span><span class="sb-num">35</span>연습문제</a>
+        <a href="36-mini-project-06.html"         class="sb-item"><span class="sb-icon"> </span><span class="sb-num">36</span>🎮 미니 프로젝트 ⑥</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-ds">
+      <div class="sb-group-header" onclick="toggleGroup('grp-ds')"><span class="sb-group-title">자료구조</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="37-dictionary.html"      class="sb-item"><span class="sb-icon"> </span><span class="sb-num">37</span>딕셔너리</a>
+        <a href="38-quiz-dictionary.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">38</span>연습문제</a>
+        <a href="39-tuple-set.html"       class="sb-item"><span class="sb-icon"> </span><span class="sb-num">39</span>튜플과 셋</a>
+        <a href="40-quiz-tuple-set.html"  class="sb-item"><span class="sb-icon"> </span><span class="sb-num">40</span>연습문제</a>
+        <a href="41-mini-project-07.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">41</span>🎮 미니 프로젝트 ⑦</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-file">
+      <div class="sb-group-header" onclick="toggleGroup('grp-file')"><span class="sb-group-title">파일 & 예외처리</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="42-file-io.html"          class="sb-item"><span class="sb-icon"> </span><span class="sb-num">42</span>파일 입출력</a>
+        <a href="43-quiz-file-io.html"     class="sb-item"><span class="sb-icon"> </span><span class="sb-num">43</span>연습문제</a>
+        <a href="44-exception-basic.html"  class="sb-item"><span class="sb-icon"> </span><span class="sb-num">44</span>예외처리 기초</a>
+        <a href="45-quiz-exception.html"   class="sb-item"><span class="sb-icon"> </span><span class="sb-num">45</span>연습문제</a>
+        <a href="46-mini-project-08.html"  class="sb-item"><span class="sb-icon"> </span><span class="sb-num">46</span>🎮 미니 프로젝트 ⑧</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-end">
+      <div class="sb-group-header" onclick="toggleGroup('grp-end')"><span class="sb-group-title">마무리</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="47-final-project.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">47</span>★ 최종 프로젝트</a>
+        <a href="48-next-step.html"     class="sb-item"><span class="sb-icon"> </span><span class="sb-num">48</span>다음 단계 미리보기</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ━━━ CONTENT ━━━ -->
+  <main class="content" id="mainContent">
+    <div class="content-inner">
+
+      <div class="chap-meta">
+        <span class="badge">LESSON</span>
+        <span>기초 문법 1</span>
+        <span style="color:var(--text3)">·</span>
+        <span>챕터 05 / 48</span>
+      </div>
+
+      <h1 class="chap-title"><span class="hl">변수</span>와 데이터 타입</h1>
+      <p class="chap-subtitle">파이썬이 정보를 기억하는 방법 — 데이터에 이름을 붙이고 분류하기</p>
+
+      <div class="goal-box">
+        <div class="goal-label">▸ 이 챕터를 마치면</div>
+        <ul class="goal-list">
+          <li>변수가 무엇인지, 왜 필요한지 이해한다</li>
+          <li><code>int</code>, <code>float</code>, <code>str</code>, <code>bool</code> 네 가지 기본 타입을 구분하고 사용할 수 있다</li>
+          <li><code>type()</code>으로 데이터의 타입을 확인할 수 있다</li>
+          <li><code>int()</code>, <code>float()</code>, <code>str()</code>로 타입을 변환할 수 있다</li>
+          <li>변수 이름 짓는 규칙을 이해하고 좋은 이름을 고를 수 있다</li>
+        </ul>
+      </div>
+
+      <!-- ─── 1. 변수란? ─── -->
+      <h2><span class="n">1.</span>변수란 무엇인가요?</h2>
+
+      <p>
+        여러분이 마트에서 물건을 살 때, 총 금액을 계산기로 두드렸다가 잊어버리면 곤란하죠.
+        그 금액을 어딘가에 <strong>메모</strong>해 두면 나중에 다시 쓸 수 있습니다.
+      </p>
+      <p>
+        파이썬에서 <strong>변수(Variable)</strong>는 바로 그 메모장입니다.
+        어떤 값을 <em>이름을 붙여서 컴퓨터 메모리에 저장</em>하고, 나중에 그 이름으로 꺼내 쓸 수 있습니다.
+      </p>
+
+      <div class="anatomy-box">
+        <div class="anatomy-code">
+          <span class="an-var">price</span> <span class="an-eq">=</span> <span class="an-val">3500</span>
+        </div>
+        <div class="anatomy-labels">
+          <div class="an-label">
+            <div class="an-dot var-c"></div>
+            <div class="an-text">변수 이름</div>
+            <div class="an-desc">price</div>
+          </div>
+          <div class="an-label">
+            <div class="an-dot eq-c"></div>
+            <div class="an-text">대입 연산자</div>
+            <div class="an-desc">= (같다는 뜻이 아님!)</div>
+          </div>
+          <div class="an-label">
+            <div class="an-dot val-c"></div>
+            <div class="an-text">저장할 값</div>
+            <div class="an-desc">3500</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="warn-box">
+        <div class="box-label">⚠ 중요 — = 는 "같다"가 아닙니다</div>
+        <p>수학에서 <code>=</code>는 "좌변과 우변이 같다"는 의미지만, 파이썬에서 <code>=</code>는 <strong>"우변의 값을 좌변 변수에 저장하라"</strong>는 명령입니다. 방향이 있습니다. 오른쪽 값 → 왼쪽 변수로 흘러들어간다고 생각하세요.</p>
+      </div>
+
+      <p>변수를 만들고 나면 그 이름으로 값을 꺼내 쓸 수 있습니다.</p>
+
+      <div class="code-block">
+        <div class="code-block-header"><span class="cb-lang">python</span><button class="cb-copy" onclick="copyCode(this)">복사</button></div>
+        <div class="code-block-body">
+          <div class="ln-col"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span></div>
+          <div class="code-pre-col"><pre><span class="cm"># 변수에 값을 저장한다</span>
+price <span class="pn">=</span> <span class="num">3500</span>
+name  <span class="pn">=</span> <span class="str">"아메리카노"</span>
+count <span class="pn">=</span> <span class="num">2</span>
+
+<span class="cm"># 변수를 꺼내 쓴다</span>
+<span class="fn">print</span><span class="pn">(</span>name<span class="pn">,</span> price <span class="pn">*</span> count<span class="pn">)</span></pre></div>
+        </div>
+      </div>
+      <div class="output-block">
+        <div class="out-label">실행 결과</div>
+        <pre><span class="out-g">아메리카노 7000</span></pre>
+      </div>
+
+      <p>변수 덕분에 <code>3500</code>이라는 숫자를 두 번 쓰지 않아도 됩니다. 나중에 가격이 바뀌면 <code>price = 4000</code> 한 줄만 고치면 됩니다. 이게 변수가 존재하는 이유입니다.</p>
+
+      <!-- ─── 2. 변수 이름 규칙 ─── -->
+      <h2><span class="n">2.</span>변수 이름 짓는 규칙</h2>
+
+      <p>변수 이름은 아무렇게나 지을 수 없습니다. 파이썬이 정한 규칙이 있습니다.</p>
+
+      <table class="type-table">
+        <thead>
+          <tr>
+            <th>규칙</th>
+            <th>올바른 예</th>
+            <th>잘못된 예</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>영문자, 숫자, 밑줄(<code>_</code>)만 사용 가능</td>
+            <td><code>user_name</code>, <code>score1</code></td>
+            <td><code>user-name</code>, <code>score!</code></td>
+          </tr>
+          <tr>
+            <td>숫자로 시작할 수 없음</td>
+            <td><code>score1</code></td>
+            <td><code>1score</code></td>
+          </tr>
+          <tr>
+            <td>파이썬 예약어는 사용 불가</td>
+            <td><code>my_if</code>, <code>for_count</code></td>
+            <td><code>if</code>, <code>for</code>, <code>True</code></td>
+          </tr>
+          <tr>
+            <td>대소문자 구분</td>
+            <td><code>name</code>과 <code>Name</code>은 다른 변수</td>
+            <td>—</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="tip-box">
+        <div class="box-label">💡 좋은 변수 이름 짓기 — snake_case</div>
+        <p>파이썬에서는 여러 단어를 연결할 때 <strong>밑줄(<code>_</code>)</strong>을 씁니다. 이를 snake_case라고 합니다. <code>userName</code>보다 <code>user_name</code>, <code>totalScore</code>보다 <code>total_score</code>가 파이썬다운 이름입니다. 또한 변수 이름은 항상 <em>그 값이 무엇인지 알 수 있게</em> 지어야 합니다. <code>x = 3500</code>보다 <code>coffee_price = 3500</code>이 훨씬 읽기 좋은 코드입니다.</p>
+      </div>
+
+      <!-- ─── 3. 데이터 타입 ─── -->
+      <h2><span class="n">3.</span>데이터 타입이란?</h2>
+
+      <p>
+        세상의 정보는 종류가 다양합니다. 나이는 숫자고, 이름은 글자고, "켜짐/꺼짐"은 참/거짓입니다.
+        파이썬은 데이터를 종류별로 분류해서 저장합니다. 이 분류를 <strong>데이터 타입(Data Type)</strong>이라고 합니다.
+      </p>
+      <p>브론즈에서 가장 먼저 배워야 할 기본 타입 네 가지입니다.</p>
+
+      <table class="type-table">
+        <thead>
+          <tr><th>타입</th><th>의미</th><th>예시</th><th>특징</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code class="type-name type-int">int</code></td>
+            <td>정수</td>
+            <td><code>42</code>, <code>-7</code>, <code>0</code></td>
+            <td>소수점 없는 수</td>
+          </tr>
+          <tr>
+            <td><code class="type-name type-float">float</code></td>
+            <td>실수 (소수)</td>
+            <td><code>3.14</code>, <code>-0.5</code>, <code>2.0</code></td>
+            <td>소수점 있는 수</td>
+          </tr>
+          <tr>
+            <td><code class="type-name type-str">str</code></td>
+            <td>문자열</td>
+            <td><code>"안녕"</code>, <code>'Python'</code></td>
+            <td>따옴표로 감싼 텍스트</td>
+          </tr>
+          <tr>
+            <td><code class="type-name type-bool">bool</code></td>
+            <td>불리언 (참/거짓)</td>
+            <td><code>True</code>, <code>False</code></td>
+            <td>딱 두 가지 값만 존재</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="code-block">
+        <div class="code-block-header"><span class="cb-lang">python</span><button class="cb-copy" onclick="copyCode(this)">복사</button></div>
+        <div class="code-block-body">
+          <div class="ln-col"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span></div>
+          <div class="code-pre-col"><pre><span class="cm"># int — 정수</span>
+age <span class="pn">=</span> <span class="num">17</span>
+
+<span class="cm"># float — 소수점이 있는 수</span>
+height <span class="pn">=</span> <span class="num">172.5</span>
+
+<span class="cm"># str — 문자열 (텍스트)</span>
+school <span class="pn">=</span> <span class="str">"슈퍼고등학교"</span>
+
+<span class="cm"># bool — 참(True) 또는 거짓(False)</span>
+is_student <span class="pn">=</span> <span class="kw">True</span></pre></div>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <div class="box-label">ℹ bool의 True / False</div>
+        <p><code>True</code>와 <code>False</code>는 반드시 <strong>첫 글자를 대문자</strong>로 씁니다. <code>true</code>나 <code>false</code>로 쓰면 오류가 납니다. 파이썬이 정한 특별한 값이기 때문입니다.</p>
+      </div>
+
+      <!-- ─── 4. type() ─── -->
+      <h2><span class="n">4.</span>type() — 타입 확인하기</h2>
+
+      <p>변수나 값의 타입이 무엇인지 궁금할 때 <code>type()</code>을 씁니다. 파이썬이 그 값을 어떤 종류로 보고 있는지 알려줍니다.</p>
+
+      <div class="code-block">
+        <div class="code-block-header"><span class="cb-lang">python</span><button class="cb-copy" onclick="copyCode(this)">복사</button></div>
+        <div class="code-block-body">
+          <div class="ln-col"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span></div>
+          <div class="code-pre-col"><pre><span class="fn">print</span><span class="pn">(</span><span class="fn">type</span><span class="pn">(</span><span class="num">42</span><span class="pn">))</span>          <span class="cm"># 정수</span>
+<span class="fn">print</span><span class="pn">(</span><span class="fn">type</span><span class="pn">(</span><span class="num">3.14</span><span class="pn">))</span>        <span class="cm"># 실수</span>
+<span class="fn">print</span><span class="pn">(</span><span class="fn">type</span><span class="pn">(</span><span class="str">"hello"</span><span class="pn">))</span>     <span class="cm"># 문자열</span>
+<span class="fn">print</span><span class="pn">(</span><span class="fn">type</span><span class="pn">(</span><span class="kw">True</span><span class="pn">))</span>        <span class="cm"># 불리언</span>
+
+<span class="cm"># 변수에 담아서도 확인 가능</span>
+name <span class="pn">=</span> <span class="str">"파이썬"</span>
+<span class="fn">print</span><span class="pn">(</span><span class="fn">type</span><span class="pn">(</span>name<span class="pn">))</span></pre></div>
+        </div>
+      </div>
+      <div class="output-block">
+        <div class="out-label">실행 결과</div>
+        <pre><span class="out-g">&lt;class 'int'&gt;
+&lt;class 'float'&gt;
+&lt;class 'str'&gt;
+&lt;class 'bool'&gt;
+&lt;class 'str'&gt;</span></pre>
+      </div>
+
+      <p><code>&lt;class 'int'&gt;</code>처럼 출력됩니다. 지금은 <code>class</code>라는 단어는 무시하고, 작은따옴표 안의 타입 이름만 읽으면 됩니다.</p>
+
+      <!-- ─── 5. 타입 변환 ─── -->
+      <h2><span class="n">5.</span>타입 변환 — 종류를 바꾸기</h2>
+
+      <p>때로는 타입을 직접 바꿔야 할 상황이 생깁니다. 예를 들어 사용자가 입력한 <code>"42"</code>(문자열)를 숫자로 더하려면 먼저 정수로 바꿔야 합니다.</p>
+
+      <h3>int() — 정수로 변환</h3>
+
+      <div class="code-block">
+        <div class="code-block-header"><span class="cb-lang">python</span><button class="cb-copy" onclick="copyCode(this)">복사</button></div>
+        <div class="code-block-body">
+          <div class="ln-col"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+          <div class="code-pre-col"><pre><span class="fn">print</span><span class="pn">(</span><span class="fn">int</span><span class="pn">(</span><span class="str">"42"</span><span class="pn">))</span>       <span class="cm"># 문자열 → 정수</span>
+<span class="fn">print</span><span class="pn">(</span><span class="fn">int</span><span class="pn">(</span><span class="num">3.9</span><span class="pn">))</span>        <span class="cm"># 실수 → 정수 (소수점 버림)</span>
+
+<span class="cm"># 이렇게 쓰면 숫자처럼 더할 수 있음</span>
+num <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="str">"10"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span>num <span class="pn">+</span> <span class="num">5</span><span class="pn">)</span></pre></div>
+        </div>
+      </div>
+      <div class="output-block">
+        <div class="out-label">실행 결과</div>
+        <pre><span class="out-g">42
+3
+15</span></pre>
+      </div>
+
+      <h3>float() — 실수로 변환</h3>
+
+      <div class="code-block">
+        <div class="code-block-header"><span class="cb-lang">python</span><button class="cb-copy" onclick="copyCode(this)">복사</button></div>
+        <div class="code-block-body">
+          <div class="ln-col"><span>1</span><span>2</span></div>
+          <div class="code-pre-col"><pre><span class="fn">print</span><span class="pn">(</span><span class="fn">float</span><span class="pn">(</span><span class="str">"3.14"</span><span class="pn">))</span>   <span class="cm"># 문자열 → 실수</span>
+<span class="fn">print</span><span class="pn">(</span><span class="fn">float</span><span class="pn">(</span><span class="num">5</span><span class="pn">))</span>         <span class="cm"># 정수 → 실수 (5.0)</span></pre></div>
+        </div>
+      </div>
+      <div class="output-block">
+        <div class="out-label">실행 결과</div>
+        <pre><span class="out-g">3.14
+5.0</span></pre>
+      </div>
+
+      <h3>str() — 문자열로 변환</h3>
+
+      <div class="code-block">
+        <div class="code-block-header"><span class="cb-lang">python</span><button class="cb-copy" onclick="copyCode(this)">복사</button></div>
+        <div class="code-block-body">
+          <div class="ln-col"><span>1</span><span>2</span><span>3</span><span>4</span></div>
+          <div class="code-pre-col"><pre>score <span class="pn">=</span> <span class="num">98</span>
+<span class="cm"># 숫자와 문자열을 + 로 합치려면 str()로 변환 필요</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"점수: "</span> <span class="pn">+</span> <span class="fn">str</span><span class="pn">(</span>score<span class="pn">))</span>
+<span class="fn">print</span><span class="pn">(</span><span class="fn">str</span><span class="pn">(</span><span class="num">3.14</span><span class="pn">))</span>         <span class="cm"># 실수 → 문자열</span></pre></div>
+        </div>
+      </div>
+      <div class="output-block">
+        <div class="out-label">실행 결과</div>
+        <pre><span class="out-g">점수: 98
+3.14</span></pre>
+      </div>
+
+      <!-- ─── 6. 흔한 오류 ─── -->
+      <h2><span class="n">6.</span>자주 만나는 오류</h2>
+
+      <h3>① 문자열과 숫자를 그냥 더하기</h3>
+
+      <p>타입이 다른 값을 <code>+</code>로 합치면 오류가 납니다. 파이썬은 문자열과 숫자를 자동으로 바꿔주지 않습니다.</p>
+
+      <div class="code-block">
+        <div class="code-block-header"><span class="cb-lang">python — 잘못된 코드</span><button class="cb-copy" onclick="copyCode(this)">복사</button></div>
+        <div class="code-block-body">
+          <div class="ln-col"><span>1</span><span>2</span></div>
+          <div class="code-pre-col"><pre>age <span class="pn">=</span> <span class="num">20</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"나이는 "</span> <span class="pn">+</span> age<span class="pn">)</span>   <span class="cm"># 오류! str + int 불가</span></pre></div>
+        </div>
+      </div>
+      <div class="error-block">
+        <div class="error-label">오류 메시지</div>
+        <pre>TypeError: can only concatenate str (not "int") to str</pre>
+      </div>
+      <div class="tip-box">
+        <div class="box-label">✅ 수정 방법</div>
+        <p><code>str()</code>로 숫자를 문자열로 바꿔서 더하거나, 다음 챕터에서 배울 f-string을 쓰면 됩니다.<br>
+        <code>print("나이는 " + str(age))</code></p>
+      </div>
+
+      <h3>② 변수를 만들기 전에 사용하기</h3>
+
+      <div class="code-block">
+        <div class="code-block-header"><span class="cb-lang">python — 잘못된 코드</span><button class="cb-copy" onclick="copyCode(this)">복사</button></div>
+        <div class="code-block-body">
+          <div class="ln-col"><span>1</span></div>
+          <div class="code-pre-col"><pre><span class="fn">print</span><span class="pn">(</span>score<span class="pn">)</span>   <span class="cm"># 오류! score를 아직 만들지 않았음</span></pre></div>
+        </div>
+      </div>
+      <div class="error-block">
+        <div class="error-label">오류 메시지</div>
+        <pre>NameError: name 'score' is not defined</pre>
+      </div>
+      <div class="tip-box">
+        <div class="box-label">✅ 수정 방법</div>
+        <p>변수는 반드시 <strong>사용하기 전에</strong> 먼저 만들어야 합니다. <code>score = 100</code>을 먼저 쓰고 나서 <code>print(score)</code>를 써야 합니다.</p>
+      </div>
+
+      <h3>③ int() 변환 불가능한 문자열</h3>
+
+      <div class="code-block">
+        <div class="code-block-header"><span class="cb-lang">python — 잘못된 코드</span><button class="cb-copy" onclick="copyCode(this)">복사</button></div>
+        <div class="code-block-body">
+          <div class="ln-col"><span>1</span></div>
+          <div class="code-pre-col"><pre><span class="fn">print</span><span class="pn">(</span><span class="fn">int</span><span class="pn">(</span><span class="str">"hello"</span><span class="pn">))</span>   <span class="cm"># 오류! "hello"는 숫자가 아님</span></pre></div>
+        </div>
+      </div>
+      <div class="error-block">
+        <div class="error-label">오류 메시지</div>
+        <pre>ValueError: invalid literal for int() with base 10: 'hello'</pre>
+      </div>
+      <div class="tip-box">
+        <div class="box-label">✅ 수정 방법</div>
+        <p><code>int()</code>는 <em>숫자처럼 생긴 문자열</em>만 변환할 수 있습니다. <code>"42"</code>, <code>"100"</code>처럼 실제로 숫자로 된 문자열만 가능합니다.</p>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- ─── 따라하기 ─── -->
+      <div class="try-section">
+        <div class="try-header">
+          <span style="font-size:14px">⌨</span>
+          <span class="try-title">직접 해보기</span>
+        </div>
+        <div class="try-body">
+          <p>VS Code에서 <code>practice05.py</code>를 만들고 아래 순서대로 직접 입력해 보세요.</p>
+          <div class="try-step">
+            <span class="try-step-n">01.</span>
+            <span class="try-step-t">본인의 이름, 나이, 키를 각각 변수에 저장하고 <code>print()</code>로 출력해 보세요.</span>
+          </div>
+          <div class="try-step">
+            <span class="try-step-n">02.</span>
+            <span class="try-step-t"><code>type()</code>으로 각 변수의 타입을 확인해 보세요. 이름은 <code>str</code>, 나이는 <code>int</code>, 키는 <code>float</code>이 나와야 합니다.</span>
+          </div>
+          <div class="try-step">
+            <span class="try-step-n">03.</span>
+            <span class="try-step-t"><code>int("2030")</code>를 실행해 보고, <code>float("98.6")</code>도 실행해 보세요. 두 결과를 더해서 출력해 보세요.</span>
+          </div>
+          <div class="try-step">
+            <span class="try-step-n">04.</span>
+            <span class="try-step-t">변수 <code>x = 10</code>을 만들고, 이어서 <code>x = 20</code>으로 바꿔본 뒤 <code>print(x)</code>를 실행해 보세요. 변수 값이 덮어써지는 것을 확인하세요.</span>
+          </div>
+          <div class="try-step">
+            <span class="try-step-n">도전.</span>
+            <span class="try-step-t">나이를 문자열로 변환하여 <code>"저는 ___살 입니다."</code> 형식으로 <code>+</code> 연산자만 써서 출력해 보세요.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── 핵심 요약 ─── -->
+      <div class="summary-box">
+        <div class="summary-label">▸ 핵심 요약</div>
+        <div class="summary-grid">
+          <span class="sg-key">변수</span>
+          <span class="sg-val">값에 이름을 붙여 저장하는 공간. <code>이름 = 값</code> 형식으로 만든다</span>
+
+          <span class="sg-key">= 의 의미</span>
+          <span class="sg-val">"같다"가 아니라 "오른쪽 값을 왼쪽 변수에 저장하라"는 대입 명령</span>
+
+          <span class="sg-key">int</span>
+          <span class="sg-val">정수. <code>42</code>, <code>-7</code>, <code>0</code></span>
+
+          <span class="sg-key">float</span>
+          <span class="sg-val">소수. <code>3.14</code>, <code>2.0</code>, <code>-0.5</code></span>
+
+          <span class="sg-key">str</span>
+          <span class="sg-val">문자열. <code>"hello"</code>, <code>'안녕'</code> — 따옴표로 감싼 텍스트</span>
+
+          <span class="sg-key">bool</span>
+          <span class="sg-val">참/거짓. <code>True</code> 또는 <code>False</code> (대문자 주의)</span>
+
+          <span class="sg-key">type()</span>
+          <span class="sg-val">값이나 변수의 타입을 확인. <code>type(42)</code> → <code>&lt;class 'int'&gt;</code></span>
+
+          <span class="sg-key">타입 변환</span>
+          <span class="sg-val"><code>int()</code> / <code>float()</code> / <code>str()</code>으로 타입을 바꿀 수 있다</span>
+        </div>
+      </div>
+
+      <!-- ─── 격려 메시지 ─── -->
+      <div class="cheer-box">
+        <span class="cheer-icon">🎉</span>
+        <div class="cheer-text">
+          <strong>변수를 이해했다면 진짜 시작입니다!</strong><br>
+          변수는 모든 프로그래밍의 기초입니다. 앞으로 배울 모든 내용이 변수를 저장하고, 꺼내고, 바꾸는 것의 연장선입니다. 다음 챕터에서는 변수들을 가지고 사칙연산부터 나머지 계산까지 다양한 연산자를 배웁니다.
+        </div>
+      </div>
+
+      <!-- 챕터 네비게이션 -->
+      <div class="chap-nav">
+        <a href="04-quiz-print.html" class="chap-nav-btn">
+          <span class="cnb-dir">← 이전 챕터</span>
+          <span class="cnb-title"><span>04.</span> 연습문제 — print()</span>
+        </a>
+        <a href="06-operators.html" class="chap-nav-btn next">
+          <span class="cnb-dir">다음 챕터 →</span>
+          <span class="cnb-title"><span>06.</span> 연산자</span>
+        </a>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+  const isMobile = () => window.innerWidth <= 720;
+  const overlay  = document.getElementById('sidebarOverlay');
+
+  function toggleSidebar() {
+    document.body.classList.toggle('sidebar-closed');
+    if (isMobile()) overlay.classList.toggle('visible', !document.body.classList.contains('sidebar-closed'));
+    localStorage.setItem('sp-sidebar', document.body.classList.contains('sidebar-closed') ? 'closed' : 'open');
+  }
+  function closeSidebar() {
+    document.body.classList.add('sidebar-closed');
+    overlay.classList.remove('visible');
+    localStorage.setItem('sp-sidebar', 'closed');
+  }
+  function toggleGroup(id) { document.getElementById(id).classList.toggle('open'); }
+  function copyCode(btn) {
+    const text = btn.closest('.code-block').querySelector('pre').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '복사됨 ✓'; btn.style.color = 'var(--accent)';
+      setTimeout(() => { btn.textContent = '복사'; btn.style.color = ''; }, 2000);
+    });
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    if (isMobile()) document.body.classList.add('sidebar-closed');
+    else if (localStorage.getItem('sp-sidebar') === 'closed') document.body.classList.add('sidebar-closed');
+  });
+  window.addEventListener('resize', () => { if (!isMobile()) overlay.classList.remove('visible'); });
+</script>
+</body>
+</html>

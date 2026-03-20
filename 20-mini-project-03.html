@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>20. 미니 프로젝트 ③ — 브론즈 | 슈퍼파이썬</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#111111;--bg-nav:#0A0A0A;--bg-side:#0E0E0E;--bg-card:#181818;
+      --bg-code:#1A1A1A;--bg-tip:#131A13;--bg-warn:#1A1410;--bg-info:#101520;
+      --accent:#00CC70;--accent-dim:#007A42;--accent-bg:rgba(0,204,112,0.07);
+      --accent2:#C8A000;--text:#D8D8D8;--text-head:#EFEFEF;
+      --text2:#888888;--text3:#444444;--border:#222222;--border2:#2E2E2E;
+      --sy-kw:#C792EA;--sy-fn:#82AAFF;--sy-str:#C3E88D;
+      --sy-cm:#546E7A;--sy-num:#F78C6C;--sy-pn:#89DDFF;
+      --proj:#BB88FF;--proj-bg:rgba(170,100,255,.08);--proj-border:rgba(170,100,255,.22);
+      --sidebar-w:248px;--content-max:740px;--header-h:48px;
+      font-variant-ligatures: none;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:15px;line-height:1.8;overflow-x:hidden}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}
+    ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+    ::-webkit-scrollbar-thumb:hover{background:var(--accent-dim)}
+
+    /* HEADER */
+    .top-header{position:fixed;top:0;left:0;right:0;z-index:200;height:var(--header-h);background:var(--bg-nav);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px}
+    .header-open-btn{display:none;align-items:center;justify-content:center;width:28px;height:28px;flex-shrink:0;margin-right:12px;background:var(--bg-card);border:1px solid var(--border2);border-radius:4px;cursor:pointer;color:var(--text2);font-size:12px;transition:background .15s,color .15s}
+    .header-open-btn:hover{background:var(--accent-bg);color:var(--accent)}
+    body.sidebar-closed .header-open-btn{display:flex}
+    .header-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0;font-family:'JetBrains Mono',monospace;font-size:12px;overflow:hidden}
+    .header-logo{color:var(--accent);text-decoration:none;font-weight:700;white-space:nowrap}
+    .header-sep{color:var(--text3);flex-shrink:0}
+    .header-grade{color:var(--text2);white-space:nowrap}
+    .header-chap{color:var(--text-head);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .header-center{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);display:flex;align-items:center;gap:8px;flex-shrink:0;padding:0 16px}
+    .progress-mini{width:80px;height:3px;background:var(--border2);border-radius:2px;overflow:hidden}
+    .progress-mini-fill{height:100%;background:var(--accent);border-radius:2px}
+    .header-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+    .nav-btn{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);background:transparent;border:1px solid var(--border2);padding:4px 12px;text-decoration:none;transition:border-color .15s,color .15s;white-space:nowrap}
+    .nav-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .nav-btn.primary{color:var(--bg-nav);background:var(--accent);border-color:var(--accent);font-weight:700}
+    .nav-btn.primary:hover{filter:brightness(1.1)}
+
+    /* LAYOUT */
+    .layout{display:flex;padding-top:var(--header-h);min-height:100vh}
+
+    /* SIDEBAR */
+    .sidebar{width:var(--sidebar-w);flex-shrink:0;position:fixed;top:var(--header-h);bottom:0;left:0;background:var(--bg-side);border-right:1px solid var(--border);overflow-y:auto;overflow-x:hidden;transition:transform .22s ease;z-index:150;padding-top:8px}
+    body.sidebar-closed .sidebar{transform:translateX(calc(-1 * var(--sidebar-w)))}
+    body.sidebar-closed .content{margin-left:0}
+    .sidebar-toggle{position:absolute;top:10px;right:10px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:var(--bg-card);border:1px solid var(--border2);border-radius:4px;cursor:pointer;color:var(--text2);font-size:12px;z-index:10;transition:background .15s,color .15s}
+    .sidebar-toggle:hover{background:var(--accent-bg);color:var(--accent);border-color:var(--accent)}
+    body.sidebar-closed .sidebar-toggle{display:none}
+    .sidebar-progress{margin:44px 12px 12px;padding:12px 14px;background:var(--bg-card);border:1px solid var(--border)}
+    .sp-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);margin-bottom:6px;letter-spacing:.08em}
+    .sp-bar{height:4px;background:var(--border2);border-radius:2px;overflow:hidden;margin-bottom:5px}
+    .sp-fill{height:100%;background:var(--accent);border-radius:2px}
+    .sp-text{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2)}
+    .sp-text span{color:var(--accent)}
+    .sb-group{border-bottom:1px solid var(--border)}
+    .sb-group-header{display:flex;align-items:center;justify-content:space-between;padding:9px 14px 9px 12px;cursor:pointer;user-select:none;transition:background .12s;gap:8px}
+    .sb-group-header:hover{background:rgba(255,255,255,.03)}
+    .sb-group-title{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--text2);text-transform:uppercase;flex:1}
+    .sb-group.current .sb-group-title{color:var(--accent)}
+    .sb-group-arrow{font-size:9px;color:var(--text3);transition:transform .2s;flex-shrink:0}
+    .sb-group.open .sb-group-arrow{transform:rotate(90deg);color:var(--accent)}
+    .sb-items{overflow:hidden;max-height:0;transition:max-height .28s ease}
+    .sb-group.open .sb-items{max-height:1200px}
+    .sb-item{display:flex;align-items:baseline;gap:8px;padding:6px 14px 6px 20px;font-size:13px;color:var(--text2);text-decoration:none;border-left:2px solid transparent;transition:background .1s,color .1s,border-color .1s;line-height:1.45}
+    .sb-item:hover{background:rgba(255,255,255,.03);color:var(--text)}
+    .sb-item.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-bg);font-weight:500}
+    .sb-item.done{color:var(--text3)}
+    .sb-icon{font-size:9px;flex-shrink:0;font-family:'JetBrains Mono',monospace;width:10px;text-align:center;color:var(--text3)}
+    .sb-item.active .sb-icon{color:var(--accent)}
+    .sb-item.done .sb-icon{color:var(--accent-dim)}
+    .sb-num{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);flex-shrink:0;min-width:22px}
+
+    /* CONTENT */
+    .content{margin-left:var(--sidebar-w);flex:1;min-width:0;padding:48px 52px 96px;transition:margin-left .22s ease}
+    .content-inner{max-width:var(--content-max);margin:0 auto}
+
+    /* TYPOGRAPHY */
+    .chap-meta{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .badge{font-size:10px;padding:2px 8px;letter-spacing:.06em;border:1px solid}
+    .badge.project{background:var(--proj-bg);color:var(--proj);border-color:var(--proj-border)}
+    .chap-title{font-family:'JetBrains Mono',monospace;font-size:clamp(20px,3.5vw,28px);font-weight:700;color:var(--text-head);line-height:1.25;margin-bottom:8px}
+    .chap-title .hl{color:var(--accent)}
+    .chap-subtitle{font-size:15px;color:var(--text2);margin-bottom:40px;line-height:1.65}
+    h2{font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:700;color:var(--text-head);margin:48px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+    h2 .n{color:var(--accent);font-size:13px}
+    h3{font-size:15px;font-weight:700;color:var(--text-head);margin:24px 0 10px}
+    p{color:var(--text);margin-bottom:16px;line-height:1.9;font-size:15px}
+    code{font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--bg-code);color:var(--accent);padding:1px 6px;border:1px solid var(--border2);border-radius:2px}
+    strong{color:var(--text-head);font-weight:700}
+    ul,ol{padding-left:20px;margin-bottom:16px}
+    li{color:var(--text);line-height:1.85;margin-bottom:4px;font-size:15px}
+
+    /* PROJECT INTRO BANNER */
+    .project-banner{background:linear-gradient(135deg,rgba(170,100,255,.06) 0%,rgba(0,204,112,.04) 100%);border:1px solid var(--proj-border);padding:24px 28px;margin-bottom:40px;position:relative;overflow:hidden}
+    .project-banner::before{content:'🏨';position:absolute;right:24px;top:50%;transform:translateY(-50%);font-size:48px;opacity:.15}
+    .pb-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--proj);letter-spacing:.1em;margin-bottom:8px}
+    .pb-title{font-size:20px;font-weight:700;color:var(--text-head);margin-bottom:6px;line-height:1.3}
+    .pb-desc{font-size:14px;color:var(--text2);line-height:1.7}
+    .pb-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .pb-tag{font-family:'JetBrains Mono',monospace;font-size:11px;padding:3px 10px;background:var(--bg-card);border:1px solid var(--border2);color:var(--text3)}
+
+    /* LEARN-GUIDE BOX */
+    .learn-guide{background:var(--bg-card);border:1px solid var(--border2);border-left:3px solid var(--proj);padding:16px 20px;margin-bottom:32px}
+    .lg-title{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--proj);letter-spacing:.1em;margin-bottom:8px}
+    .lg-steps{display:flex;gap:8px;flex-wrap:wrap}
+    .lg-step{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);background:var(--bg-code);border:1px solid var(--border2);padding:5px 12px;display:flex;align-items:center;gap:6px}
+    .lg-step .lg-n{color:var(--accent);font-weight:700}
+    .lg-arrow{color:var(--text3);font-size:12px}
+
+    /* OUTPUT DEMO */
+    .output-demo{background:#0A0A0A;border:1px solid var(--border);margin:16px 0 24px;overflow:hidden}
+    .od-header{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);padding:7px 16px;border-bottom:1px solid var(--border);letter-spacing:.08em;display:flex;align-items:center;gap:8px}
+    .od-header .dot{width:8px;height:8px;border-radius:50%}
+    .od-header .dot-r{background:#FF5F57}
+    .od-header .dot-y{background:#FFBD2E}
+    .od-header .dot-g{background:#28C840}
+    .od-body{padding:16px 20px}
+    .od-body pre{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text);line-height:1.85;white-space:pre-wrap}
+    .od-input{color:var(--accent2)}
+    .od-output{color:var(--accent)}
+    .od-prompt{color:var(--text2)}
+    .od-warn{color:#FF7070}
+
+    /* SPEC TABLE */
+    .spec-table{width:100%;border-collapse:collapse;margin:16px 0 24px;font-size:14px}
+    .spec-table th{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--text3);text-align:left;padding:8px 14px;border-bottom:2px solid var(--border2);background:var(--bg-card)}
+    .spec-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text2);line-height:1.6;vertical-align:top}
+    .spec-table td:first-child{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);white-space:nowrap}
+    .spec-table tr:last-child td{border-bottom:none}
+
+    /* STEP CARDS */
+    .step-list{display:flex;flex-direction:column;gap:12px;margin-bottom:32px}
+    .step-card{background:var(--bg-card);border:1px solid var(--border2);overflow:hidden}
+    .step-header{display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:1px solid var(--border)}
+    .step-num{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--bg-nav);background:var(--accent);padding:2px 8px;flex-shrink:0}
+    .step-title{font-size:14px;font-weight:700;color:var(--text-head);flex:1}
+    .step-concept{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);flex-shrink:0}
+    .step-body{padding:14px 18px}
+    .step-body p{font-size:14px;margin-bottom:10px}
+    .step-body p:last-child{margin-bottom:0}
+
+    /* CODE BLOCKS */
+    .code-block{background:var(--bg-code);border:1px solid var(--border2);margin:12px 0;overflow:hidden}
+    .code-block-header{display:flex;align-items:center;justify-content:space-between;padding:7px 16px;background:var(--bg-card);border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.06em}
+    .code-block-label{color:var(--accent2)}
+    .code-block pre{padding:14px 18px;line-height:1.75;overflow-x:auto}
+    .code-block code{background:none;border:none;padding:0;font-size:13px;color:var(--text)}
+    .kw{color:#C792EA}.fn{color:#82AAFF}.str{color:#C3E88D}
+    .cm{color:#546E7A}.num{color:#F78C6C}.pn{color:#89DDFF}
+
+    /* HINT ACCORDION */
+    .hint-list{display:flex;flex-direction:column;gap:8px;margin-bottom:32px}
+    .hint-item{background:var(--bg-card);border:1px solid var(--border2);overflow:hidden}
+    .hint-toggle{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;user-select:none;transition:background .12s}
+    .hint-toggle:hover{background:rgba(255,255,255,.03)}
+    .hint-toggle-label{font-size:14px;color:var(--text2);display:flex;align-items:center;gap:8px}
+    .hint-arrow{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);transition:transform .2s}
+    .hint-item.open .hint-arrow{transform:rotate(180deg);color:var(--accent)}
+    .hint-body{max-height:0;overflow:hidden;transition:max-height .28s ease}
+    .hint-item.open .hint-body{max-height:800px}
+    .hint-content{padding:14px 18px;border-top:1px solid var(--border);font-size:14px;color:var(--text2);line-height:1.8}
+    .hint-content code{font-size:12px}
+
+    /* ANSWER SECTION */
+    .answer-toggle-btn{display:flex;align-items:center;justify-content:space-between;width:100%;padding:14px 20px;background:var(--bg-card);border:1px solid var(--border2);cursor:pointer;transition:border-color .15s}
+    .answer-toggle-btn:hover{border-color:var(--accent)}
+    .answer-toggle-btn span{font-size:14px;color:var(--text2)}
+    .answer-body{display:none;background:var(--bg-code);border:1px solid var(--border2);border-top:none;padding:20px 24px}
+    .answer-body.visible{display:block}
+
+    /* CHALLENGE BOX */
+    .challenge-box{background:linear-gradient(135deg,rgba(200,160,0,.06) 0%,rgba(200,160,0,.02) 100%);border:1px solid rgba(200,160,0,.2);padding:22px 26px;margin:32px 0}
+    .challenge-title{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent2);letter-spacing:.1em;margin-bottom:12px}
+    .challenge-list{list-style:none;padding:0;margin:0}
+    .challenge-list li{font-size:14px;color:var(--text2);padding:6px 0;display:flex;align-items:baseline;gap:10px;border-bottom:1px solid rgba(200,160,0,.08)}
+    .challenge-list li:last-child{border-bottom:none}
+    .challenge-list li::before{content:"★";color:var(--accent2);font-size:10px;flex-shrink:0}
+
+    /* TIP / WARN BOXES */
+    .tip-box{background:var(--bg-tip);border:1px solid rgba(0,204,112,.2);border-left:3px solid var(--accent);padding:14px 18px;margin:20px 0}
+    .tip-box .box-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:.08em;margin-bottom:6px}
+    .warn-box{background:var(--bg-warn);border:1px solid rgba(200,160,0,.2);border-left:3px solid var(--accent2);padding:14px 18px;margin:20px 0}
+    .warn-box .box-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent2);letter-spacing:.08em;margin-bottom:6px}
+    .tip-box p,.warn-box p{margin:0;font-size:14px;line-height:1.75}
+    .tip-box p+p,.warn-box p+p{margin-top:8px}
+
+    /* REVIEW */
+    .review-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:16px 0 32px}
+    .review-card{background:var(--bg-card);border:1px solid var(--border2);padding:12px 16px}
+    .rc-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.07em;margin-bottom:5px}
+    .rc-code{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);line-height:1.6}
+    .rc-desc{font-size:12px;color:var(--text2);margin-top:3px;line-height:1.5}
+
+    /* SECTION DIVIDER + NAV */
+    .section-divider{height:1px;background:var(--border);margin:48px 0}
+    .cheer-box{border:1px solid var(--border);background:var(--bg);padding:18px 22px;margin-bottom:44px;display:flex;gap:14px;align-items:flex-start}
+    .cheer-icon{font-size:18px;flex-shrink:0;line-height:1.5}
+    .cheer-text{font-size:14px;color:var(--text2);line-height:1.85}
+    .cheer-text strong{color:var(--text-head)}
+    .chap-nav{display:flex;justify-content:space-between;padding-top:32px;border-top:1px solid var(--border);gap:12px;flex-wrap:wrap}
+    .chap-nav-btn{display:flex;flex-direction:column;gap:4px;text-decoration:none;padding:14px 18px;border:1px solid var(--border2);background:var(--bg-card);flex:1;max-width:300px;transition:border-color .15s}
+    .chap-nav-btn:hover{border-color:var(--accent)}
+    .chap-nav-btn.next{text-align:right}
+    .cnb-dir{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.07em}
+    .cnb-title{font-size:13px;color:var(--text2);line-height:1.45}
+    .cnb-title span{color:var(--accent);font-family:'JetBrains Mono',monospace}
+
+    /* FLOW TABLE */
+    .flow-table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}
+    .flow-table th{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--text3);text-align:center;padding:8px 14px;border-bottom:2px solid var(--border2);background:var(--bg-card)}
+    .flow-table td{padding:9px 14px;border-bottom:1px solid var(--border);color:var(--text2);text-align:center;font-family:'JetBrains Mono',monospace;font-size:13px}
+    .flow-table tr:last-child td{border-bottom:none}
+    .flow-table .ok{color:var(--accent)}
+    .flow-table .no{color:#FF7070}
+    .flow-table .warn{color:var(--accent2)}
+
+    .sidebar-overlay{display:none;position:fixed;inset:0;top:var(--header-h);z-index:140;background:rgba(0,0,0,.65)}
+    @media(max-width:720px){.sidebar-overlay.visible{display:block}.content{margin-left:0;padding:28px 20px 72px}.header-center{display:none}.review-grid{grid-template-columns:1fr}}
+    @media(max-width:480px){.header-grade{display:none}.chap-nav-btn{max-width:100%}.header-right .nav-btn:not(.primary){display:none}.lg-steps{flex-direction:column}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important}}
+  </style>
+</head>
+<body>
+
+<header class="top-header">
+  <button class="header-open-btn" onclick="toggleSidebar()">▶</button>
+  <div class="header-left">
+    <a href="../index.html" class="header-logo">SUPERPYTHON</a>
+    <span class="header-sep">/</span>
+    <span class="header-grade">🟤 BRONZE</span>
+    <span class="header-sep">/</span>
+    <span class="header-chap">20. 미니 프로젝트 ③</span>
+  </div>
+  <div class="header-center">
+    <span>20 / 48</span>
+    <div class="progress-mini"><div class="progress-mini-fill" style="width:41.67%"></div></div>
+    <span>42%</span>
+  </div>
+  <div class="header-right">
+    <a href="19-quiz-if.html" class="nav-btn">← 이전</a>
+    <a href="21-for-range.html" class="nav-btn primary">다음 →</a>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<div class="layout">
+<aside class="sidebar" id="sidebar">
+  <button class="sidebar-toggle" onclick="toggleSidebar()">◀</button>
+  <div class="sidebar-progress">
+    <div class="sp-label">BRONZE 진행률</div>
+    <div class="sp-bar"><div class="sp-fill" style="width:41.67%"></div></div>
+    <div class="sp-text"><span>20</span> / 48 챕터 완료</div>
+  </div>
+  <div class="sb-group" id="grp-env"><div class="sb-group-header" onclick="toggleGroup('grp-env')"><span class="sb-group-title">환경 설정</span><span class="sb-group-arrow">▶</span></div><div class="sb-items"><a href="01-what-is-python.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">01</span>파이썬이란?</a><a href="02-setup.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">02</span>개발환경 설치</a></div></div>
+  <div class="sb-group" id="grp-basic1"><div class="sb-group-header" onclick="toggleGroup('grp-basic1')"><span class="sb-group-title">기초 문법 1</span><span class="sb-group-arrow">▶</span></div><div class="sb-items"><a href="03-print.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">03</span>print()란?</a><a href="04-quiz-print.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">04</span>연습문제</a><a href="05-variables.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">05</span>변수와 데이터 타입</a><a href="06-operators.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">06</span>연산자</a><a href="07-quiz-variables-operators.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">07</span>연습문제</a><a href="08-string.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">08</span>문자열 String</a><a href="09-quiz-string.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">09</span>연습문제</a><a href="10-fstring.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">10</span>f-string 완전정리</a><a href="11-quiz-fstring.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">11</span>연습문제</a><a href="12-mini-project-01.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">12</span>🎮 미니 프로젝트 ①</a></div></div>
+  <div class="sb-group" id="grp-basic2"><div class="sb-group-header" onclick="toggleGroup('grp-basic2')"><span class="sb-group-title">기초 문법 2</span><span class="sb-group-arrow">▶</span></div><div class="sb-items"><a href="13-list.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">13</span>리스트</a><a href="14-quiz-list.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">14</span>연습문제</a><a href="15-input.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">15</span>input() 함수</a><a href="16-quiz-input.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">16</span>연습문제</a><a href="17-mini-project-02.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">17</span>🎮 미니 프로젝트 ②</a></div></div>
+  <div class="sb-group current open" id="grp-flow"><div class="sb-group-header" onclick="toggleGroup('grp-flow')"><span class="sb-group-title">흐름 제어</span><span class="sb-group-arrow">▶</span></div><div class="sb-items"><a href="18-if.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">18</span>조건문 (if)</a><a href="19-quiz-if.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">19</span>연습문제</a><a href="20-mini-project-03.html" class="sb-item active"><span class="sb-icon">▶</span><span class="sb-num">20</span>🎮 미니 프로젝트 ③</a><a href="21-for-range.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">21</span>for문과 range()</a><a href="22-quiz-for.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">22</span>연습문제</a><a href="23-while.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">23</span>while문</a><a href="24-quiz-while.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">24</span>연습문제</a><a href="25-mini-project-04.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">25</span>🎮 미니 프로젝트 ④</a></div></div>
+  <div class="sb-group" id="grp-error"><div class="sb-group-header" onclick="toggleGroup('grp-error')"><span class="sb-group-title">에러 &amp; 디버깅</span><span class="sb-group-arrow">▶</span></div><div class="sb-items"><a href="26-error-types.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">26</span>에러 읽는 법</a><a href="27-debugging.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">27</span>기초 디버깅 실습</a><a href="28-quiz-debugging.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">28</span>연습문제</a></div></div>
+  <div class="sb-group" id="grp-func"><div class="sb-group-header" onclick="toggleGroup('grp-func')"><span class="sb-group-title">함수</span><span class="sb-group-arrow">▶</span></div><div class="sb-items"><a href="29-function-basic.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">29</span>함수 기초</a><a href="30-quiz-function-basic.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">30</span>연습문제</a><a href="31-mini-project-05.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">31</span>🎮 미니 프로젝트 ⑤</a><a href="32-function-advanced.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">32</span>함수 심화</a><a href="33-quiz-function-advanced.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">33</span>연습문제</a><a href="34-module.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">34</span>모듈</a><a href="35-quiz-module.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">35</span>연습문제</a><a href="36-mini-project-06.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">36</span>🎮 미니 프로젝트 ⑥</a></div></div>
+  <div class="sb-group" id="grp-ds"><div class="sb-group-header" onclick="toggleGroup('grp-ds')"><span class="sb-group-title">자료구조</span><span class="sb-group-arrow">▶</span></div><div class="sb-items"><a href="37-dictionary.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">37</span>딕셔너리</a><a href="38-quiz-dictionary.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">38</span>연습문제</a><a href="39-tuple-set.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">39</span>튜플과 셋</a><a href="40-quiz-tuple-set.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">40</span>연습문제</a><a href="41-mini-project-07.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">41</span>🎮 미니 프로젝트 ⑦</a></div></div>
+  <div class="sb-group" id="grp-file"><div class="sb-group-header" onclick="toggleGroup('grp-file')"><span class="sb-group-title">파일 &amp; 예외처리</span><span class="sb-group-arrow">▶</span></div><div class="sb-items"><a href="42-file-io.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">42</span>파일 입출력</a><a href="43-quiz-file-io.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">43</span>연습문제</a><a href="44-exception-basic.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">44</span>예외처리 기초</a><a href="45-quiz-exception.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">45</span>연습문제</a><a href="46-mini-project-08.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">46</span>🎮 미니 프로젝트 ⑧</a></div></div>
+  <div class="sb-group" id="grp-end"><div class="sb-group-header" onclick="toggleGroup('grp-end')"><span class="sb-group-title">마무리</span><span class="sb-group-arrow">▶</span></div><div class="sb-items"><a href="47-final-project.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">47</span>★ 최종 프로젝트</a><a href="48-next-step.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">48</span>다음 단계 미리보기</a></div></div>
+</aside>
+
+<main class="content" id="mainContent">
+<div class="content-inner">
+
+  <div class="chap-meta">
+    <span class="badge project">PROJECT</span>
+    <span>흐름 제어</span>
+    <span style="color:var(--text3)">·</span>
+    <span>챕터 20 / 48</span>
+  </div>
+  <h1 class="chap-title"><span class="hl">미니 프로젝트 ③</span> — 조건문 활용</h1>
+  <p class="chap-subtitle">if / elif / else, 비교 연산자, 논리 연산자를 실전에서 조합해, 사용자가 입력한 정보를 바탕으로 <strong>맞춤형 여행 추천 프로그램</strong>을 만들어봅니다.</p>
+
+  <!-- 학습 순서 가이드 -->
+  <div class="learn-guide">
+    <div class="lg-title">📌 이렇게 진행하세요</div>
+    <div class="lg-steps">
+      <div class="lg-step"><span class="lg-n">1</span> 기능 명세서 읽기</div>
+      <div class="lg-arrow">→</div>
+      <div class="lg-step"><span class="lg-n">2</span> 실행 결과 확인</div>
+      <div class="lg-arrow">→</div>
+      <div class="lg-step"><span class="lg-n">3</span> 혼자 구현 시도</div>
+      <div class="lg-arrow">→</div>
+      <div class="lg-step"><span class="lg-n">4</span> 막히면 단계 가이드</div>
+      <div class="lg-arrow">→</div>
+      <div class="lg-step"><span class="lg-n">5</span> 최후에 정답 확인</div>
+    </div>
+  </div>
+
+  <div class="warn-box">
+    <div class="box-label">⚠️ 정답을 먼저 보지 마세요</div>
+    <p>기능 명세를 읽고 스스로 먼저 만들어보세요. <strong>막히는 구간이 실제로 가장 많이 배우는 순간</strong>입니다. 30분 이상 고민한 뒤에 힌트를 여세요.</p>
+  </div>
+
+  <!-- ═══ 1. 프로젝트 소개 ═══ -->
+  <h2><span class="n">1.</span>프로젝트 소개</h2>
+
+  <div class="project-banner">
+    <div class="pb-label">MINI PROJECT ③</div>
+    <div class="pb-title">맞춤형 여행 추천 프로그램</div>
+    <div class="pb-desc">예산, 선호 날씨, 동행 유형을 입력받아 여러 조건을 조합한 뒤, 딱 맞는 국내 여행지와 여행 팁을 추천해주는 프로그램입니다. 조건문의 진짜 힘 — 여러 <code>if / elif / else</code>와 <code>and / or</code>를 조합해 복잡한 판단 로직을 만들어봅니다.</div>
+    <div class="pb-tags">
+      <span class="pb-tag">if / elif / else</span>
+      <span class="pb-tag">and / or / not</span>
+      <span class="pb-tag">비교 연산자</span>
+      <span class="pb-tag">input()</span>
+      <span class="pb-tag">int()</span>
+      <span class="pb-tag">f-string</span>
+    </div>
+  </div>
+
+  <!-- ═══ 2. 실행 결과 ═══ -->
+  <h2><span class="n">2.</span>실행 결과 미리보기</h2>
+  <p>완성된 프로그램은 아래처럼 동작합니다. 사용자가 입력한 조건에 따라 <strong>매번 다른 결과</strong>가 출력됩니다. 밑줄 친 부분이 사용자 입력입니다.</p>
+
+  <h3>실행 예시 1 — 따뜻한 날씨, 커플, 중간 예산</h3>
+  <div class="output-demo">
+    <div class="od-header">
+      <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+      <span style="margin-left:4px">터미널</span>
+    </div>
+    <div class="od-body"><pre><span class="od-output">====================================
+   🗺️  맞춤형 여행 추천 프로그램
+====================================</span>
+<span class="od-prompt">여행 예산을 입력하세요 (만원 단위): </span><span class="od-input">25</span>
+<span class="od-prompt">선호하는 날씨를 입력하세요 (따뜻함/시원함/상관없음): </span><span class="od-input">따뜻함</span>
+<span class="od-prompt">동행 유형을 입력하세요 (혼자/커플/가족/친구): </span><span class="od-input">커플</span>
+
+<span class="od-output">====================================
+   ✈️  추천 여행지: 제주도
+====================================
+ 📍 예산       : 25만원 (적합)
+ 🌤️ 날씨       : 따뜻한 날씨 선호
+ 👫 동행       : 커플
+------------------------------------
+ 💡 여행 팁
+    · 협재 해변과 한라산 코스를 묶어서 2박 3일로 계획하세요.
+    · 렌터카를 이용하면 이동이 훨씬 편합니다.
+    · 성산일출봉은 일출 시간에 맞춰 방문하면 특별한 추억이 됩니다.
+====================================</span></pre>
+    </div>
+  </div>
+
+  <h3>실행 예시 2 — 시원한 날씨, 가족, 저예산</h3>
+  <div class="output-demo">
+    <div class="od-header">
+      <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+      <span style="margin-left:4px">터미널</span>
+    </div>
+    <div class="od-body"><pre><span class="od-prompt">여행 예산을 입력하세요 (만원 단위): </span><span class="od-input">12</span>
+<span class="od-prompt">선호하는 날씨를 입력하세요 (따뜻함/시원함/상관없음): </span><span class="od-input">시원함</span>
+<span class="od-prompt">동행 유형을 입력하세요 (혼자/커플/가족/친구): </span><span class="od-input">가족</span>
+
+<span class="od-output">====================================
+   ✈️  추천 여행지: 강원도 평창
+====================================
+ 📍 예산       : 12만원 (타이트)
+ ❄️ 날씨       : 시원한 날씨 선호
+ 👨‍👩‍👧‍👦 동행       : 가족
+------------------------------------
+ 💡 여행 팁
+    · 대관령 양떼 목장은 아이들이 특히 좋아합니다.
+    · 숙박은 펜션보다 캠핑을 활용하면 예산을 크게 줄일 수 있습니다.
+    · 오대산 월정사는 무료 입장이라 가족 나들이에 딱입니다.
+====================================</span></pre>
+    </div>
+  </div>
+
+  <h3>실행 예시 3 — 잘못된 날씨 입력</h3>
+  <div class="output-demo">
+    <div class="od-header">
+      <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+      <span style="margin-left:4px">터미널</span>
+    </div>
+    <div class="od-body"><pre><span class="od-prompt">여행 예산을 입력하세요 (만원 단위): </span><span class="od-input">30</span>
+<span class="od-prompt">선호하는 날씨를 입력하세요 (따뜻함/시원함/상관없음): </span><span class="od-input">맑음</span>
+<span class="od-prompt">동행 유형을 입력하세요 (혼자/커플/가족/친구): </span><span class="od-input">혼자</span>
+
+<span class="od-warn">⚠️  날씨 입력이 올바르지 않습니다. '따뜻함', '시원함', '상관없음' 중에서 입력해주세요.</span></pre>
+    </div>
+  </div>
+
+  <div class="tip-box">
+    <div class="box-label">💡 추천 여행지 결정 기준</div>
+    <p>날씨 선호와 동행 유형의 조합으로 여행지가 결정됩니다. 예산은 여행지를 바꾸지 않고, 예산 코멘트와 팁의 내용을 달리합니다. 아래 표를 참고하되, 창의적으로 구성해도 좋습니다.</p>
+    <table class="flow-table" style="margin-top:12px">
+      <thead><tr><th>날씨</th><th>동행</th><th>추천 여행지</th></tr></thead>
+      <tbody>
+        <tr><td class="ok">따뜻함</td><td>혼자 / 커플</td><td>제주도</td></tr>
+        <tr><td class="ok">따뜻함</td><td>가족 / 친구</td><td>부산</td></tr>
+        <tr><td style="color:#82AAFF">시원함</td><td>혼자 / 친구</td><td>강릉</td></tr>
+        <tr><td style="color:#82AAFF">시원함</td><td>커플 / 가족</td><td>강원도 평창</td></tr>
+        <tr><td class="warn">상관없음</td><td>혼자</td><td>경주</td></tr>
+        <tr><td class="warn">상관없음</td><td>커플 / 가족 / 친구</td><td>전주</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ═══ 3. 기능 명세서 ═══ -->
+  <h2><span class="n">3.</span>기능 명세서</h2>
+  <p>코드를 바로 짜기 전에, 어떤 기능이 필요한지 파악하세요. <strong>"무엇을 만드는가"를 먼저 이해하는 것</strong>이 코딩보다 중요합니다.</p>
+
+  <table class="spec-table">
+    <thead><tr><th>구분</th><th>기능</th><th>사용 개념</th></tr></thead>
+    <tbody>
+      <tr><td>입력</td><td>여행 예산 입력받기 (만원 단위 정수)</td><td><code>int(input())</code></td></tr>
+      <tr><td>입력</td><td>선호 날씨 입력받기 (따뜻함/시원함/상관없음)</td><td><code>input()</code></td></tr>
+      <tr><td>입력</td><td>동행 유형 입력받기 (혼자/커플/가족/친구)</td><td><code>input()</code></td></tr>
+      <tr><td>검증</td><td>날씨/동행 입력 값이 유효한지 확인 후 오류 메시지 출력</td><td><code>if / and / or</code></td></tr>
+      <tr><td>판단</td><td>날씨 + 동행 조건 조합으로 여행지 결정</td><td><code>if / elif / else + and / or</code></td></tr>
+      <tr><td>판단</td><td>예산 크기에 따라 예산 코멘트 결정 (20만원 이상/미만)</td><td><code>if / else</code></td></tr>
+      <tr><td>출력</td><td>여행지, 예산 코멘트, 여행 팁 3가지를 형식에 맞춰 출력</td><td><code>f-string · print()</code></td></tr>
+    </tbody>
+  </table>
+
+  <!-- ═══ 4. 단계별 구현 가이드 ═══ -->
+  <h2><span class="n">4.</span>단계별 구현 가이드</h2>
+  <p>처음부터 완성본을 만들려 하지 말고, <strong>한 단계씩 완성하고 직접 실행</strong>해서 결과를 확인한 뒤 다음으로 넘어가세요.</p>
+
+  <div class="step-list">
+
+    <div class="step-card">
+      <div class="step-header">
+        <span class="step-num">STEP 1</span>
+        <span class="step-title">헤더 출력과 세 가지 입력 받기</span>
+        <span class="step-concept">print · input · int</span>
+      </div>
+      <div class="step-body">
+        <p>프로그램 시작 배너를 출력하고, 예산 / 날씨 / 동행 유형을 차례로 입력받습니다. 예산은 <code>int()</code>로 변환해서 숫자로 저장하세요.</p>
+        <div class="code-block">
+          <div class="code-block-header"><span>STEP 1 구현</span></div>
+          <pre><code><span class="fn">print</span><span class="pn">(</span><span class="str">"===================================="</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"   🗺️  맞춤형 여행 추천 프로그램"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"===================================="</span><span class="pn">)</span>
+<span class="fn">budget</span>  <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"여행 예산을 입력하세요 (만원 단위): "</span><span class="pn">))</span>
+<span class="fn">weather</span> <span class="pn">=</span> <span class="fn">input</span><span class="pn">(</span><span class="str">"선호하는 날씨를 입력하세요 (따뜻함/시원함/상관없음): "</span><span class="pn">)</span>
+<span class="fn">group</span>   <span class="pn">=</span> <span class="fn">input</span><span class="pn">(</span><span class="str">"동행 유형을 입력하세요 (혼자/커플/가족/친구): "</span><span class="pn">)</span></code></pre>
+        </div>
+        <p>▶ 실행하면 배너와 입력 프롬프트 세 개가 차례로 나타나야 합니다.</p>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-header">
+        <span class="step-num">STEP 2</span>
+        <span class="step-title">입력값 유효성 검사하기</span>
+        <span class="step-concept">if · or · not</span>
+      </div>
+      <div class="step-body">
+        <p>날씨와 동행 유형이 허용된 값인지 확인합니다. 잘못된 값이 들어오면 오류 메시지를 출력하고 프로그램을 멈춥니다.</p>
+        <p><strong>핵심 아이디어:</strong> <code>weather</code>가 "따뜻함", "시원함", "상관없음" 중 하나가 <strong>아니라면</strong> 잘못된 입력입니다. <code>and</code>와 <code>!=</code>를 조합하거나, <code>not in</code>을 사용해보세요.</p>
+        <div class="code-block">
+          <div class="code-block-header"><span>STEP 2 구현 — and + != 방식</span></div>
+          <pre><code><span class="kw">if</span> weather <span class="pn">!=</span> <span class="str">"따뜻함"</span> <span class="kw">and</span> weather <span class="pn">!=</span> <span class="str">"시원함"</span> <span class="kw">and</span> weather <span class="pn">!=</span> <span class="str">"상관없음"</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"⚠️  날씨 입력이 올바르지 않습니다. '따뜻함', '시원함', '상관없음' 중에서 입력해주세요."</span><span class="pn">)</span>
+<span class="cm"># 동행 유형도 같은 방식으로 검사해보세요</span></code></pre>
+        </div>
+        <div class="tip-box">
+          <div class="box-label">💡 더 파이썬다운 방법 — not in</div>
+          <p><code>if weather not in ["따뜻함", "시원함", "상관없음"]:</code>처럼 리스트로 묶어서 검사할 수도 있습니다. 지금 단계에서는 어떤 방법을 써도 괜찮습니다.</p>
+        </div>
+        <p>▶ 잘못된 값을 입력했을 때 오류 메시지가 출력되는지 확인하세요.</p>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-header">
+        <span class="step-num">STEP 3</span>
+        <span class="step-title">날씨 + 동행 조합으로 여행지 결정하기</span>
+        <span class="step-concept">if / elif / else + and / or</span>
+      </div>
+      <div class="step-body">
+        <p>이 단계가 이 프로젝트의 핵심입니다. 날씨와 동행 유형을 <strong>동시에</strong> 검사해서 여행지를 결정합니다.</p>
+        <p><code>and</code>로 두 조건을 함께 묶고, <code>or</code>로 여러 선택지를 처리합니다. 조건의 순서가 중요합니다 — 더 구체적인 조건을 앞에 쓰세요.</p>
+        <div class="code-block">
+          <div class="code-block-header"><span>STEP 3 구현 — 조건 조합 구조</span></div>
+          <pre><code><span class="kw">if</span> weather <span class="pn">==</span> <span class="str">"따뜻함"</span> <span class="kw">and</span> <span class="pn">(</span>group <span class="pn">==</span> <span class="str">"혼자"</span> <span class="kw">or</span> group <span class="pn">==</span> <span class="str">"커플"</span><span class="pn">)</span><span class="pn">:</span>
+    <span class="fn">destination</span> <span class="pn">=</span> <span class="str">"제주도"</span>
+    <span class="fn">tips</span> <span class="pn">=</span> <span class="pn">[</span>
+        <span class="str">"협재 해변과 한라산 코스를 묶어서 2박 3일로 계획하세요."</span><span class="pn">,</span>
+        <span class="str">"렌터카를 이용하면 이동이 훨씬 편합니다."</span><span class="pn">,</span>
+        <span class="str">"성산일출봉은 일출 시간에 맞춰 방문하면 특별한 추억이 됩니다."</span>
+    <span class="pn">]</span>
+<span class="kw">elif</span> weather <span class="pn">==</span> <span class="str">"따뜻함"</span> <span class="kw">and</span> <span class="pn">(</span>group <span class="pn">==</span> <span class="str">"가족"</span> <span class="kw">or</span> group <span class="pn">==</span> <span class="str">"친구"</span><span class="pn">)</span><span class="pn">:</span>
+    <span class="fn">destination</span> <span class="pn">=</span> <span class="str">"부산"</span>
+    <span class="fn">tips</span> <span class="pn">=</span> <span class="pn">[</span>
+        <span class="str">"해운대와 광안리를 모두 방문해보세요."</span><span class="pn">,</span>
+        <span class="str">"자갈치 시장 해산물은 꼭 드세요!"</span><span class="pn">,</span>
+        <span class="str">"감천 문화마을은 인생 사진 명소입니다."</span>
+    <span class="pn">]</span>
+<span class="cm"># 나머지 조건들도 같은 패턴으로 채워보세요...</span></code></pre>
+        </div>
+        <p>각 분기마다 <code>destination</code> 변수와 <code>tips</code> 리스트를 설정합니다. 이렇게 해두면 출력 코드를 한 번만 작성해도 됩니다.</p>
+        <p>▶ 여섯 가지 조합이 모두 올바른 여행지를 출력하는지 하나씩 확인해보세요.</p>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-header">
+        <span class="step-num">STEP 4</span>
+        <span class="step-title">예산 코멘트 결정하기</span>
+        <span class="step-concept">if / else · 비교 연산자</span>
+      </div>
+      <div class="step-body">
+        <p>예산에 따라 적합 여부를 코멘트로 달아줍니다. <code>budget</code>의 크기를 비교해서 문자열을 결정합니다.</p>
+        <div class="code-block">
+          <div class="code-block-header"><span>STEP 4 구현</span></div>
+          <pre><code><span class="kw">if</span> budget <span class="pn">&gt;=</span> <span class="num">30</span><span class="pn">:</span>
+    <span class="fn">budget_comment</span> <span class="pn">=</span> <span class="str">"넉넉한 여행 가능"</span>
+<span class="kw">elif</span> budget <span class="pn">&gt;=</span> <span class="num">20</span><span class="pn">:</span>
+    <span class="fn">budget_comment</span> <span class="pn">=</span> <span class="str">"적합"</span>
+<span class="kw">elif</span> budget <span class="pn">&gt;=</span> <span class="num">10</span><span class="pn">:</span>
+    <span class="fn">budget_comment</span> <span class="pn">=</span> <span class="str">"타이트"</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">budget_comment</span> <span class="pn">=</span> <span class="str">"매우 빠듯 — 당일치기 추천"</span></code></pre>
+        </div>
+        <p>이렇게 <code>destination</code>, <code>tips</code>, <code>budget_comment</code> 세 가지 변수를 미리 결정해두면, 출력 코드가 훨씬 깔끔해집니다.</p>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-header">
+        <span class="step-num">STEP 5</span>
+        <span class="step-title">결과 출력하기</span>
+        <span class="step-concept">f-string · print()</span>
+      </div>
+      <div class="step-body">
+        <p>STEP 3, 4에서 결정한 변수들을 사용해서 정리된 결과를 출력합니다. <code>tips</code>는 리스트이므로 인덱싱으로 꺼내세요.</p>
+        <div class="code-block">
+          <div class="code-block-header"><span>STEP 5 구현 — 출력 형식</span></div>
+          <pre><code><span class="fn">print</span><span class="pn">()</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"===================================="</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"   ✈️  추천 여행지: {destination}"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"===================================="</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f" 📍 예산       : {budget}만원 ({budget_comment})"</span><span class="pn">)</span>
+
+<span class="cm"># 날씨 아이콘도 조건으로 결정할 수 있습니다</span>
+<span class="kw">if</span> weather <span class="pn">==</span> <span class="str">"따뜻함"</span><span class="pn">:</span>
+    <span class="fn">weather_icon</span> <span class="pn">=</span> <span class="str">"🌤️"</span>
+<span class="kw">elif</span> weather <span class="pn">==</span> <span class="str">"시원함"</span><span class="pn">:</span>
+    <span class="fn">weather_icon</span> <span class="pn">=</span> <span class="str">"❄️"</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">weather_icon</span> <span class="pn">=</span> <span class="str">"🌈"</span>
+
+<span class="fn">print</span><span class="pn">(</span><span class="str">f" {weather_icon} 날씨       : {weather} 날씨 선호"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f" 👤 동행       : {group}"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"------------------------------------"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">" 💡 여행 팁"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"    · {tips[0]}"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"    · {tips[1]}"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"    · {tips[2]}"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"===================================="</span><span class="pn">)</span></code></pre>
+        </div>
+        <p>▶ 여러 조합으로 실행해서 여행지와 팁이 올바르게 바뀌는지 확인하세요.</p>
+      </div>
+    </div>
+
+  </div><!-- end step-list -->
+
+  <!-- ═══ 5. 힌트 ═══ -->
+  <h2><span class="n">5.</span>막혔을 때 — 단계별 힌트</h2>
+  <p>충분히 혼자 시도해본 뒤에 힌트를 열어보세요.</p>
+
+  <div class="hint-list">
+
+    <div class="hint-item" id="hint1">
+      <div class="hint-toggle" onclick="toggleHint('hint1')">
+        <span class="hint-toggle-label">💡 힌트 1 — and와 or, 언제 괄호가 필요한가요?</span>
+        <span class="hint-arrow">▼</span>
+      </div>
+      <div class="hint-body">
+        <div class="hint-content">
+          <p><code>and</code>는 <code>or</code>보다 우선순위가 높습니다. 그래서 <code>A and B or C</code>는 <code>(A and B) or C</code>로 해석됩니다.</p>
+          <p>원하는 의미가 <code>A and (B or C)</code>라면 반드시 괄호를 써야 합니다.</p>
+          <div class="code-block">
+            <div class="code-block-header"><span>예시</span></div>
+            <pre><code><span class="cm"># 이렇게 쓰면 의도와 다를 수 있습니다</span>
+<span class="kw">if</span> weather <span class="pn">==</span> <span class="str">"따뜻함"</span> <span class="kw">and</span> group <span class="pn">==</span> <span class="str">"혼자"</span> <span class="kw">or</span> group <span class="pn">==</span> <span class="str">"커플"</span><span class="pn">:</span>  <span class="cm"># ❌</span>
+
+<span class="cm"># 괄호로 명확하게 의도를 표현하세요</span>
+<span class="kw">if</span> weather <span class="pn">==</span> <span class="str">"따뜻함"</span> <span class="kw">and</span> <span class="pn">(</span>group <span class="pn">==</span> <span class="str">"혼자"</span> <span class="kw">or</span> group <span class="pn">==</span> <span class="str">"커플"</span><span class="pn">)</span><span class="pn">:</span>  <span class="cm"># ✅</span></code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hint-item" id="hint2">
+      <div class="hint-toggle" onclick="toggleHint('hint2')">
+        <span class="hint-toggle-label">💡 힌트 2 — 유효성 검사를 어디에 넣어야 하나요?</span>
+        <span class="hint-arrow">▼</span>
+      </div>
+      <div class="hint-body">
+        <div class="hint-content">
+          <p>유효성 검사는 여행지 결정 로직보다 <strong>앞에</strong> 두세요. 잘못된 입력이면 뒤의 코드가 실행될 필요가 없습니다.</p>
+          <p>지금 단계에서는 오류 메시지를 출력하고 <strong>프로그램이 그냥 끝나는 방식</strong>으로 구현하면 됩니다. 나중에 <code>while</code>문을 배우면 재입력을 받을 수 있습니다.</p>
+          <div class="code-block">
+            <div class="code-block-header"><span>구조 예시</span></div>
+            <pre><code><span class="cm"># 1. 입력 받기</span>
+budget  <span class="pn">=</span> ...
+weather <span class="pn">=</span> ...
+group   <span class="pn">=</span> ...
+
+<span class="cm"># 2. 유효성 검사 (잘못된 입력이면 여기서 멈춤)</span>
+<span class="kw">if</span> weather <span class="pn">!=</span> <span class="str">"따뜻함"</span> <span class="kw">and</span> ...<span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"⚠️ ..."</span><span class="pn">)</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="cm"># 3. 정상 처리 — 여행지 결정 + 출력</span>
+    <span class="kw">if</span> weather <span class="pn">==</span> <span class="str">"따뜻함"</span> <span class="kw">and</span> ...<span class="pn">:</span>
+        ...</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hint-item" id="hint3">
+      <div class="hint-toggle" onclick="toggleHint('hint3')">
+        <span class="hint-toggle-label">💡 힌트 3 — elif 조건이 6개나 되는데, 더 간결하게 쓸 방법은 없나요?</span>
+        <span class="hint-arrow">▼</span>
+      </div>
+      <div class="hint-body">
+        <div class="hint-content">
+          <p>날씨를 먼저 <code>if/elif</code>로 나누고, 그 안에서 동행을 다시 <code>if/elif</code>로 나누는 <strong>중첩 조건문</strong>을 쓰면 구조가 더 명확해집니다.</p>
+          <div class="code-block">
+            <div class="code-block-header"><span>중첩 조건문 구조</span></div>
+            <pre><code><span class="kw">if</span> weather <span class="pn">==</span> <span class="str">"따뜻함"</span><span class="pn">:</span>
+    <span class="kw">if</span> group <span class="pn">==</span> <span class="str">"혼자"</span> <span class="kw">or</span> group <span class="pn">==</span> <span class="str">"커플"</span><span class="pn">:</span>
+        destination <span class="pn">=</span> <span class="str">"제주도"</span>
+        tips <span class="pn">=</span> <span class="pn">[</span>...<span class="pn">]</span>
+    <span class="kw">else</span><span class="pn">:</span>     <span class="cm"># 가족 또는 친구</span>
+        destination <span class="pn">=</span> <span class="str">"부산"</span>
+        tips <span class="pn">=</span> <span class="pn">[</span>...<span class="pn">]</span>
+<span class="kw">elif</span> weather <span class="pn">==</span> <span class="str">"시원함"</span><span class="pn">:</span>
+    ...</code></pre>
+          </div>
+          <p>두 방식 모두 맞습니다. 직접 해보고 더 읽기 편한 쪽을 선택하세요.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="hint-item" id="hint4">
+      <div class="hint-toggle" onclick="toggleHint('hint4')">
+        <span class="hint-toggle-label">💡 힌트 4 — 동행 아이콘도 조건으로 바꾸고 싶어요</span>
+        <span class="hint-arrow">▼</span>
+      </div>
+      <div class="hint-body">
+        <div class="hint-content">
+          <p>동행 유형에 맞는 이모지를 <code>if/elif/else</code>로 결정할 수 있습니다. 출력 코드보다 앞에서 미리 결정해두세요.</p>
+          <div class="code-block">
+            <div class="code-block-header"><span>동행 아이콘 예시</span></div>
+            <pre><code><span class="kw">if</span> group <span class="pn">==</span> <span class="str">"혼자"</span><span class="pn">:</span>
+    group_icon <span class="pn">=</span> <span class="str">"🧳"</span>
+<span class="kw">elif</span> group <span class="pn">==</span> <span class="str">"커플"</span><span class="pn">:</span>
+    group_icon <span class="pn">=</span> <span class="str">"👫"</span>
+<span class="kw">elif</span> group <span class="pn">==</span> <span class="str">"가족"</span><span class="pn">:</span>
+    group_icon <span class="pn">=</span> <span class="str">"👨‍👩‍👧‍👦"</span>
+<span class="kw">else</span><span class="pn">:</span>
+    group_icon <span class="pn">=</span> <span class="str">"👯"</span>
+
+<span class="fn">print</span><span class="pn">(</span><span class="str">f" {group_icon} 동행       : {group}"</span><span class="pn">)</span></code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end hint-list -->
+
+  <!-- ═══ 6. 전체 정답 코드 ═══ -->
+  <h2><span class="n">6.</span>전체 정답 코드</h2>
+  <p>스스로 완성하지 못했다면 정답 코드를 열어보세요. 단순히 복사하지 말고, <strong>한 줄씩 읽으며 왜 이렇게 짰는지</strong> 이해하는 것이 중요합니다.</p>
+
+  <button class="answer-toggle-btn" onclick="toggleAnswer()">
+    <span>✅ 정답 코드 보기 (먼저 스스로 완성해보세요)</span>
+    <span id="answer-arrow">▼</span>
+  </button>
+  <div class="answer-body" id="answer-body">
+    <div class="code-block" style="margin:0">
+      <div class="code-block-header"><span>20-travel-recommender.py</span></div>
+      <pre><code><span class="cm"># ══════════════════════════════════════
+# 맞춤형 여행 추천 프로그램
+# ══════════════════════════════════════</span>
+
+<span class="cm"># 1. 헤더 출력</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"===================================="</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"   🗺️  맞춤형 여행 추천 프로그램"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"===================================="</span><span class="pn">)</span>
+
+<span class="cm"># 2. 입력 받기</span>
+<span class="fn">budget</span>  <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"여행 예산을 입력하세요 (만원 단위): "</span><span class="pn">))</span>
+<span class="fn">weather</span> <span class="pn">=</span> <span class="fn">input</span><span class="pn">(</span><span class="str">"선호하는 날씨를 입력하세요 (따뜻함/시원함/상관없음): "</span><span class="pn">)</span>
+<span class="fn">group</span>   <span class="pn">=</span> <span class="fn">input</span><span class="pn">(</span><span class="str">"동행 유형을 입력하세요 (혼자/커플/가족/친구): "</span><span class="pn">)</span>
+
+<span class="cm"># 3. 유효성 검사
+#    날씨와 동행 입력이 잘못되면 오류 메시지를 출력하고 else 블록 전체를 건너뜀</span>
+<span class="fn">valid_weather</span> <span class="pn">=</span> <span class="pn">[</span><span class="str">"따뜻함"</span><span class="pn">,</span> <span class="str">"시원함"</span><span class="pn">,</span> <span class="str">"상관없음"</span><span class="pn">]</span>
+<span class="fn">valid_group</span>   <span class="pn">=</span> <span class="pn">[</span><span class="str">"혼자"</span><span class="pn">,</span> <span class="str">"커플"</span><span class="pn">,</span> <span class="str">"가족"</span><span class="pn">,</span> <span class="str">"친구"</span><span class="pn">]</span>
+
+<span class="kw">if</span> weather <span class="kw">not</span> <span class="kw">in</span> valid_weather<span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"⚠️  날씨 입력이 올바르지 않습니다. '따뜻함', '시원함', '상관없음' 중에서 입력해주세요."</span><span class="pn">)</span>
+<span class="kw">elif</span> group <span class="kw">not</span> <span class="kw">in</span> valid_group<span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"⚠️  동행 유형이 올바르지 않습니다. '혼자', '커플', '가족', '친구' 중에서 입력해주세요."</span><span class="pn">)</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="cm"># 4. 날씨 + 동행 조합으로 여행지와 팁 결정</span>
+    <span class="kw">if</span> weather <span class="pn">==</span> <span class="str">"따뜻함"</span><span class="pn">:</span>
+        <span class="kw">if</span> group <span class="pn">==</span> <span class="str">"혼자"</span> <span class="kw">or</span> group <span class="pn">==</span> <span class="str">"커플"</span><span class="pn">:</span>
+            destination <span class="pn">=</span> <span class="str">"제주도"</span>
+            tips <span class="pn">=</span> <span class="pn">[</span>
+                <span class="str">"협재 해변과 한라산 코스를 묶어서 2박 3일로 계획하세요."</span><span class="pn">,</span>
+                <span class="str">"렌터카를 이용하면 이동이 훨씬 편합니다."</span><span class="pn">,</span>
+                <span class="str">"성산일출봉은 일출 시간에 맞춰 방문하면 특별한 추억이 됩니다."</span>
+            <span class="pn">]</span>
+        <span class="kw">else</span><span class="pn">:</span>   <span class="cm"># 가족 또는 친구</span>
+            destination <span class="pn">=</span> <span class="str">"부산"</span>
+            tips <span class="pn">=</span> <span class="pn">[</span>
+                <span class="str">"해운대와 광안리를 모두 방문해보세요."</span><span class="pn">,</span>
+                <span class="str">"자갈치 시장 해산물은 꼭 드세요!"</span><span class="pn">,</span>
+                <span class="str">"감천 문화마을은 인생 사진 명소입니다."</span>
+            <span class="pn">]</span>
+    <span class="kw">elif</span> weather <span class="pn">==</span> <span class="str">"시원함"</span><span class="pn">:</span>
+        <span class="kw">if</span> group <span class="pn">==</span> <span class="str">"혼자"</span> <span class="kw">or</span> group <span class="pn">==</span> <span class="str">"친구"</span><span class="pn">:</span>
+            destination <span class="pn">=</span> <span class="str">"강릉"</span>
+            tips <span class="pn">=</span> <span class="pn">[</span>
+                <span class="str">"경포대 해변에서 새벽 일출을 꼭 보세요."</span><span class="pn">,</span>
+                <span class="str">"안목 해변 커피거리는 현지인 추천 명소입니다."</span><span class="pn">,</span>
+                <span class="str">"버스와 자전거를 조합하면 시내 이동이 편합니다."</span>
+            <span class="pn">]</span>
+        <span class="kw">else</span><span class="pn">:</span>   <span class="cm"># 커플 또는 가족</span>
+            destination <span class="pn">=</span> <span class="str">"강원도 평창"</span>
+            tips <span class="pn">=</span> <span class="pn">[</span>
+                <span class="str">"대관령 양떼 목장은 아이들이 특히 좋아합니다."</span><span class="pn">,</span>
+                <span class="str">"숙박은 펜션보다 캠핑을 활용하면 예산을 크게 줄일 수 있습니다."</span><span class="pn">,</span>
+                <span class="str">"오대산 월정사는 무료 입장이라 가족 나들이에 딱입니다."</span>
+            <span class="pn">]</span>
+    <span class="kw">else</span><span class="pn">:</span>   <span class="cm"># 상관없음</span>
+        <span class="kw">if</span> group <span class="pn">==</span> <span class="str">"혼자"</span><span class="pn">:</span>
+            destination <span class="pn">=</span> <span class="str">"경주"</span>
+            tips <span class="pn">=</span> <span class="pn">[</span>
+                <span class="str">"첨성대, 불국사, 석굴암을 하루 동선으로 묶어보세요."</span><span class="pn">,</span>
+                <span class="str">"자전거 대여로 시내 고분군을 천천히 돌아보는 것을 추천합니다."</span><span class="pn">,</span>
+                <span class="str">"황남빵은 경주 여행의 필수 기념품입니다."</span>
+            <span class="pn">]</span>
+        <span class="kw">else</span><span class="pn">:</span>   <span class="cm"># 커플, 가족, 친구</span>
+            destination <span class="pn">=</span> <span class="str">"전주"</span>
+            tips <span class="pn">=</span> <span class="pn">[</span>
+                <span class="str">"한옥마을에서 한복 체험을 해보세요. 다양한 대여점이 있습니다."</span><span class="pn">,</span>
+                <span class="str">"전주 비빔밥은 골목 식당이 유명 맛집보다 맛있을 때가 많습니다."</span><span class="pn">,</span>
+                <span class="str">"오목대에서 내려다보는 한옥마을 전경이 일품입니다."</span>
+            <span class="pn">]</span>
+
+    <span class="cm"># 5. 예산 코멘트 결정</span>
+    <span class="kw">if</span> budget <span class="pn">&gt;=</span> <span class="num">30</span><span class="pn">:</span>
+        budget_comment <span class="pn">=</span> <span class="str">"넉넉한 여행 가능"</span>
+    <span class="kw">elif</span> budget <span class="pn">&gt;=</span> <span class="num">20</span><span class="pn">:</span>
+        budget_comment <span class="pn">=</span> <span class="str">"적합"</span>
+    <span class="kw">elif</span> budget <span class="pn">&gt;=</span> <span class="num">10</span><span class="pn">:</span>
+        budget_comment <span class="pn">=</span> <span class="str">"타이트"</span>
+    <span class="kw">else</span><span class="pn">:</span>
+        budget_comment <span class="pn">=</span> <span class="str">"매우 빠듯 — 당일치기 추천"</span>
+
+    <span class="cm"># 6. 날씨/동행 아이콘 결정</span>
+    <span class="kw">if</span> weather <span class="pn">==</span> <span class="str">"따뜻함"</span><span class="pn">:</span>
+        weather_icon <span class="pn">=</span> <span class="str">"🌤️"</span>
+    <span class="kw">elif</span> weather <span class="pn">==</span> <span class="str">"시원함"</span><span class="pn">:</span>
+        weather_icon <span class="pn">=</span> <span class="str">"❄️"</span>
+    <span class="kw">else</span><span class="pn">:</span>
+        weather_icon <span class="pn">=</span> <span class="str">"🌈"</span>
+
+    <span class="kw">if</span> group <span class="pn">==</span> <span class="str">"혼자"</span><span class="pn">:</span>
+        group_icon <span class="pn">=</span> <span class="str">"🧳"</span>
+    <span class="kw">elif</span> group <span class="pn">==</span> <span class="str">"커플"</span><span class="pn">:</span>
+        group_icon <span class="pn">=</span> <span class="str">"👫"</span>
+    <span class="kw">elif</span> group <span class="pn">==</span> <span class="str">"가족"</span><span class="pn">:</span>
+        group_icon <span class="pn">=</span> <span class="str">"👨‍👩‍👧‍👦"</span>
+    <span class="kw">else</span><span class="pn">:</span>
+        group_icon <span class="pn">=</span> <span class="str">"👯"</span>
+
+    <span class="cm"># 7. 결과 출력</span>
+    <span class="fn">print</span><span class="pn">()</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"===================================="</span><span class="pn">)</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">f"   ✈️  추천 여행지: {destination}"</span><span class="pn">)</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"===================================="</span><span class="pn">)</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">f" 📍 예산       : {budget}만원 ({budget_comment})"</span><span class="pn">)</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">f" {weather_icon} 날씨       : {weather} 날씨 선호"</span><span class="pn">)</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">f" {group_icon} 동행       : {group}"</span><span class="pn">)</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"------------------------------------"</span><span class="pn">)</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">" 💡 여행 팁"</span><span class="pn">)</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">f"    · {tips[0]}"</span><span class="pn">)</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">f"    · {tips[1]}"</span><span class="pn">)</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">f"    · {tips[2]}"</span><span class="pn">)</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"===================================="</span><span class="pn">)</span></code></pre>
+    </div>
+
+    <div style="margin-top:20px;padding:14px 0;border-top:1px solid var(--border)">
+      <p style="font-size:13px;color:var(--text3);margin:0">📌 <strong style="color:var(--text2)">핵심 패턴 — "먼저 결정, 나중에 출력":</strong> 여행지(<code>destination</code>), 팁(<code>tips</code>), 예산 코멘트(<code>budget_comment</code>), 아이콘들을 각각 변수에 저장해두고, 출력 코드는 맨 마지막에 한 번만 작성합니다. 이 패턴을 쓰면 조건 로직과 출력 로직이 분리되어 코드가 훨씬 읽기 쉬워집니다.</p>
+    </div>
+  </div>
+
+  <!-- ═══ 7. 도전 과제 ═══ -->
+  <h2><span class="n">7.</span>도전 과제 — 더 발전시켜보기</h2>
+  <p>기본 추천 프로그램을 완성했다면, 힌트 없이 아래 기능을 스스로 추가해보세요.</p>
+
+  <div class="challenge-box">
+    <div class="challenge-title">★ CHALLENGE</div>
+    <ul class="challenge-list">
+      <li>예산이 <strong>0 이하</strong>이면 <code>"예산을 1만원 이상 입력해주세요."</code>를 출력하고 추천을 중단하기</li>
+      <li>여행지마다 <strong>예상 소요 예산 범위</strong>를 추가로 출력하기<br><small style="color:var(--text3)">예: <code>📊 예상 비용: 20~35만원 (숙박 2박 기준)</code></small></li>
+      <li>여행지 이름 옆에 <strong>예산 대비 코멘트</strong> 추가하기<br><small style="color:var(--text3)">예: 제주도인데 예산이 10만원 미만이면 <code>"⚠️ 제주도는 예산이 다소 부족할 수 있습니다."</code></small></li>
+      <li>마지막에 <strong>"다시 추천받으시겠습니까? (예/아니오)"</strong>를 묻고, "예"면 처음부터 다시 실행되도록 하기 (while문 선행 학습)</li>
+    </ul>
+  </div>
+
+  <!-- ═══ 8. 이번 프로젝트에서 쓴 개념 ═══ -->
+  <h2><span class="n">8.</span>이번 프로젝트에서 쓴 개념 정리</h2>
+
+  <div class="review-grid">
+    <div class="review-card">
+      <div class="rc-label">조건 분기</div>
+      <div class="rc-code">if / elif / else</div>
+      <div class="rc-desc">여행지·코멘트 결정</div>
+    </div>
+    <div class="review-card">
+      <div class="rc-label">조건 조합</div>
+      <div class="rc-code">and / or / not in</div>
+      <div class="rc-desc">복합 조건 처리</div>
+    </div>
+    <div class="review-card">
+      <div class="rc-label">비교 연산자</div>
+      <div class="rc-code">== · != · >= · &lt;</div>
+      <div class="rc-desc">값 비교 및 범위 검사</div>
+    </div>
+    <div class="review-card">
+      <div class="rc-label">유효성 검사</div>
+      <div class="rc-code">not in [리스트]</div>
+      <div class="rc-desc">잘못된 입력 처리</div>
+    </div>
+    <div class="review-card">
+      <div class="rc-label">리스트 인덱싱</div>
+      <div class="rc-code">tips[0], tips[1]</div>
+      <div class="rc-desc">팁 항목 꺼내기</div>
+    </div>
+    <div class="review-card">
+      <div class="rc-label">분리 원칙</div>
+      <div class="rc-code">결정 → 출력</div>
+      <div class="rc-desc">로직과 출력 분리</div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <div class="cheer-box">
+    <span class="cheer-icon">🗺️</span>
+    <div class="cheer-text">
+      <strong>조건문 섹션의 미니 프로젝트를 완성했습니다!</strong><br>
+      이제 <code>if / elif / else</code>와 <code>and / or</code>를 자유롭게 조합해서 복잡한 판단 로직을 직접 만들 수 있게 됐습니다. 다음 챕터에서는 <strong>for문</strong>을 배웁니다. 반복문을 알면 지금보다 훨씬 강력한 프로그램을 만들 수 있습니다.
+    </div>
+  </div>
+
+  <div class="chap-nav">
+    <a href="19-quiz-if.html" class="chap-nav-btn">
+      <span class="cnb-dir">← 이전 챕터</span>
+      <span class="cnb-title"><span>19.</span> 연습문제 — 조건문</span>
+    </a>
+    <a href="21-for-range.html" class="chap-nav-btn next">
+      <span class="cnb-dir">다음 챕터 →</span>
+      <span class="cnb-title"><span>21.</span> for문과 range()</span>
+    </a>
+  </div>
+
+</div>
+</main>
+</div>
+
+<script>
+  const isMobile = () => window.innerWidth <= 720;
+  const overlay  = document.getElementById('sidebarOverlay');
+  function toggleSidebar() { document.body.classList.toggle('sidebar-closed'); if (isMobile()) overlay.classList.toggle('visible', !document.body.classList.contains('sidebar-closed')); localStorage.setItem('sp-sidebar', document.body.classList.contains('sidebar-closed') ? 'closed' : 'open'); }
+  function closeSidebar()  { document.body.classList.add('sidebar-closed'); overlay.classList.remove('visible'); localStorage.setItem('sp-sidebar','closed'); }
+  function toggleGroup(id) { document.getElementById(id).classList.toggle('open'); }
+  window.addEventListener('DOMContentLoaded', () => {
+    if (isMobile()) document.body.classList.add('sidebar-closed');
+    else if (localStorage.getItem('sp-sidebar') === 'closed') document.body.classList.add('sidebar-closed');
+  });
+  window.addEventListener('resize', () => { if (!isMobile()) overlay.classList.remove('visible'); });
+
+  function toggleHint(id) {
+    const item = document.getElementById(id);
+    item.classList.toggle('open');
+  }
+  function toggleAnswer() {
+    const body  = document.getElementById('answer-body');
+    const arrow = document.getElementById('answer-arrow');
+    const isVisible = body.classList.toggle('visible');
+    arrow.textContent = isVisible ? '▲' : '▼';
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>27. 기초 디버깅 실습 — 브론즈 | 슈퍼파이썬</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#111111; --bg-nav:#0A0A0A; --bg-side:#0E0E0E; --bg-card:#181818;
+      --bg-code:#1A1A1A; --bg-tip:#131A13; --bg-warn:#1A1410; --bg-info:#101520;
+      --accent:#00CC70; --accent-dim:#007A42; --accent-bg:rgba(0,204,112,0.07);
+      --accent2:#C8A000;
+      --text:#D8D8D8; --text-head:#EFEFEF; --text2:#888888; --text3:#444444;
+      --border:#222222; --border2:#2E2E2E;
+      --sy-kw:#C792EA; --sy-fn:#82AAFF; --sy-str:#C3E88D;
+      --sy-cm:#546E7A; --sy-num:#F78C6C; --sy-pn:#89DDFF; --sy-ln-t:#555555;
+      --err:#FF6B6B; --err-bg:rgba(255,107,107,.07); --err-border:rgba(255,107,107,.2);
+      --fix:#00CC70; --fix-bg:rgba(0,204,112,.07);
+      --sidebar-w:248px; --content-max:720px; --header-h:48px;
+      font-variant-ligatures: none;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:15px;line-height:1.8;overflow-x:hidden}
+    ::-webkit-scrollbar{width:5px;height:5px}
+    ::-webkit-scrollbar-track{background:var(--bg)}
+    ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+    ::-webkit-scrollbar-thumb:hover{background:var(--accent-dim)}
+
+    /* HEADER */
+    .top-header{position:fixed;top:0;left:0;right:0;z-index:200;height:var(--header-h);background:var(--bg-nav);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px}
+    .header-open-btn{display:none;align-items:center;justify-content:center;width:28px;height:28px;flex-shrink:0;margin-right:12px;background:var(--bg-card);border:1px solid var(--border2);border-radius:4px;cursor:pointer;color:var(--text2);font-size:12px;transition:background .15s,color .15s,border-color .15s}
+    .header-open-btn:hover{background:var(--accent-bg);color:var(--accent);border-color:var(--accent)}
+    body.sidebar-closed .header-open-btn{display:flex}
+    .header-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0;font-family:'JetBrains Mono',monospace;font-size:12px;overflow:hidden}
+    .header-logo{color:var(--accent);text-decoration:none;font-weight:700;white-space:nowrap}
+    .header-sep{color:var(--text3);flex-shrink:0}
+    .header-grade{color:var(--text2);white-space:nowrap}
+    .header-chap{color:var(--text-head);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .header-center{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);display:flex;align-items:center;gap:8px;flex-shrink:0;padding:0 16px}
+    .progress-mini{width:80px;height:3px;background:var(--border2);border-radius:2px;overflow:hidden}
+    .progress-mini-fill{height:100%;background:var(--accent);border-radius:2px}
+    .header-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+    .nav-btn{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);background:transparent;border:1px solid var(--border2);padding:4px 12px;text-decoration:none;transition:border-color .15s,color .15s;white-space:nowrap}
+    .nav-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .nav-btn.primary{color:var(--bg-nav);background:var(--accent);border-color:var(--accent);font-weight:700}
+    .nav-btn.primary:hover{filter:brightness(1.1)}
+
+    /* LAYOUT */
+    .layout{display:flex;padding-top:var(--header-h);min-height:100vh}
+
+    /* SIDEBAR */
+    .sidebar{width:var(--sidebar-w);flex-shrink:0;position:fixed;top:var(--header-h);bottom:0;left:0;background:var(--bg-side);border-right:1px solid var(--border);overflow-y:auto;overflow-x:hidden;transition:transform .22s ease;z-index:150;padding-top:8px}
+    body.sidebar-closed .sidebar{transform:translateX(calc(-1 * var(--sidebar-w)))}
+    body.sidebar-closed .content{margin-left:0}
+    .sidebar-toggle{position:absolute;top:10px;right:10px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:var(--bg-card);border:1px solid var(--border2);border-radius:4px;cursor:pointer;color:var(--text2);font-size:12px;z-index:10;transition:background .15s,color .15s,border-color .15s}
+    .sidebar-toggle:hover{background:var(--accent-bg);color:var(--accent);border-color:var(--accent)}
+    body.sidebar-closed .sidebar-toggle{display:none}
+    .sidebar-progress{margin:44px 12px 12px;padding:12px 14px;background:var(--bg-card);border:1px solid var(--border)}
+    .sp-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);margin-bottom:6px;letter-spacing:.08em}
+    .sp-bar{height:4px;background:var(--border2);border-radius:2px;overflow:hidden;margin-bottom:5px}
+    .sp-fill{height:100%;background:var(--accent);border-radius:2px}
+    .sp-text{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2)}
+    .sp-text span{color:var(--accent)}
+    .sb-group{border-bottom:1px solid var(--border)}
+    .sb-group-header{display:flex;align-items:center;justify-content:space-between;padding:9px 14px 9px 12px;cursor:pointer;user-select:none;transition:background .12s;gap:8px}
+    .sb-group-header:hover{background:rgba(255,255,255,.03)}
+    .sb-group-title{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--text2);text-transform:uppercase;flex:1}
+    .sb-group.current .sb-group-title{color:var(--accent)}
+    .sb-group-arrow{font-size:9px;color:var(--text3);transition:transform .2s;flex-shrink:0}
+    .sb-group.open .sb-group-arrow{transform:rotate(90deg);color:var(--accent)}
+    .sb-items{overflow:hidden;max-height:0;transition:max-height .28s ease}
+    .sb-group.open .sb-items{max-height:1200px}
+    .sb-item{display:flex;align-items:baseline;gap:8px;padding:6px 14px 6px 20px;font-size:13px;color:var(--text2);text-decoration:none;border-left:2px solid transparent;transition:background .1s,color .1s,border-color .1s;line-height:1.45}
+    .sb-item:hover{background:rgba(255,255,255,.03);color:var(--text)}
+    .sb-item.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-bg);font-weight:500}
+    .sb-item.done{color:var(--text3)}
+    .sb-icon{font-size:9px;flex-shrink:0;font-family:'JetBrains Mono',monospace;width:10px;text-align:center;color:var(--text3)}
+    .sb-item.active .sb-icon{color:var(--accent)}
+    .sb-item.done .sb-icon{color:var(--accent-dim)}
+    .sb-num{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);flex-shrink:0;min-width:22px}
+
+    /* CONTENT */
+    .content{margin-left:var(--sidebar-w);flex:1;min-width:0;padding:48px 52px 96px;transition:margin-left .22s ease}
+    .content-inner{max-width:var(--content-max);margin:0 auto}
+
+    /* TYPOGRAPHY */
+    .chap-meta{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .badge{font-size:10px;padding:2px 8px;background:var(--accent-bg);color:var(--accent);border:1px solid rgba(0,204,112,.25);letter-spacing:.06em}
+    .chap-title{font-family:'JetBrains Mono',monospace;font-size:clamp(22px,3.5vw,30px);font-weight:700;color:var(--text-head);line-height:1.25;margin-bottom:8px}
+    .chap-title .hl{color:var(--accent)}
+    .chap-subtitle{font-size:15px;color:var(--text2);margin-bottom:32px;line-height:1.65}
+    .goal-box{border:1px solid var(--border2);border-left:3px solid var(--accent);background:var(--bg-card);padding:16px 20px;margin-bottom:44px}
+    .goal-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:.1em;margin-bottom:12px}
+    .goal-list{list-style:none;display:flex;flex-direction:column;gap:7px}
+    .goal-list li{font-size:14px;color:var(--text2);display:flex;align-items:baseline;gap:10px;line-height:1.65}
+    .goal-list li::before{content:'▸';color:var(--accent);font-size:10px;flex-shrink:0;font-family:'JetBrains Mono',monospace}
+    .section-divider{height:1px;background:var(--border);margin:44px 0}
+    h2{font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:700;color:var(--text-head);margin:44px 0 16px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+    h2 .n{color:var(--text3);font-weight:400;margin-right:6px}
+    h3{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--accent);margin:28px 0 10px}
+    p{color:var(--text);margin-bottom:16px;line-height:1.9;font-size:15px}
+    p:last-child{margin-bottom:0}
+    code{font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--bg-code);color:var(--accent);padding:1px 6px;border:1px solid var(--border2);border-radius:2px}
+    strong{color:var(--text-head);font-weight:700}
+    ul,ol{padding-left:20px;margin-bottom:16px}
+    li{color:var(--text);line-height:1.85;margin-bottom:4px;font-size:15px}
+
+    /* CODE BLOCK */
+    .code-block{background:var(--bg-code);border:1px solid var(--border2);margin:16px 0;overflow:hidden}
+    .code-block-header{display:flex;align-items:center;justify-content:space-between;padding:7px 14px;background:#141414;border-bottom:1px solid var(--border)}
+    .cb-lang{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3)}
+    .cb-copy{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);background:transparent;border:none;cursor:pointer;transition:color .15s;padding:0}
+    .cb-copy:hover{color:var(--accent)}
+    .code-block-body{display:flex;overflow-x:auto}
+    .ln-col{display:flex;flex-direction:column;padding:14px 12px 14px 14px;background:#141414;border-right:1px solid var(--border);user-select:none;flex-shrink:0}
+    .ln-col span{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--sy-ln-t);line-height:1.75;text-align:right;min-width:16px}
+    .code-pre-col{padding:14px 18px;flex:1;min-width:0}
+    .code-pre-col pre{font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.75;color:var(--text);white-space:pre;margin:0}
+    .kw{color:var(--sy-kw)} .fn{color:var(--sy-fn)} .str{color:var(--sy-str)}
+    .cm{color:var(--sy-cm)} .num{color:var(--sy-num)} .pn{color:var(--sy-pn)}
+    .err-line{background:rgba(255,107,107,.08);display:block;margin:0 -18px;padding:0 18px}
+
+    /* CALLOUTS */
+    .tip-box{background:var(--bg-tip);border:1px solid rgba(0,204,112,.2);border-left:3px solid var(--accent);padding:14px 18px;margin:20px 0}
+    .tip-box-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:.1em;margin-bottom:8px}
+    .tip-box p{font-size:14px;color:var(--text2);margin-bottom:0}
+    .tip-box p+p{margin-top:8px}
+    .warn-box{background:var(--bg-warn);border:1px solid rgba(200,160,0,.2);border-left:3px solid var(--accent2);padding:14px 18px;margin:20px 0}
+    .warn-box-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent2);letter-spacing:.1em;margin-bottom:8px}
+    .warn-box p{font-size:14px;color:var(--text2);margin-bottom:0}
+    .warn-box p+p{margin-top:8px}
+
+    /* ERROR TRACEBACK BLOCK */
+    .traceback{background:#0D0808;border:1px solid var(--err-border);margin:16px 0;overflow:hidden}
+    .traceback-header{display:flex;align-items:center;gap:8px;padding:7px 14px;background:#120505;border-bottom:1px solid var(--err-border)}
+    .tb-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--err);letter-spacing:.08em}
+    .traceback-body{padding:14px 18px;overflow-x:auto}
+    .traceback-body pre{font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.75;color:#CCAAAA;white-space:pre;margin:0}
+    .tb-loc{color:#888888}
+    .tb-arrow{color:var(--err)}
+    .tb-errtype{color:var(--err);font-weight:700}
+    .tb-msg{color:#FFBBBB}
+
+    /* DEBUG CARD — before/after comparison */
+    .debug-card{background:var(--bg-card);border:1px solid var(--border2);margin:24px 0;overflow:hidden}
+    .dc-header{display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--border);background:#141414}
+    .dc-num{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--bg-nav);background:var(--err);padding:2px 9px;flex-shrink:0}
+    .dc-title{font-size:14px;font-weight:700;color:var(--text-head);flex:1}
+    .dc-type{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--err);flex-shrink:0;padding:2px 8px;border:1px solid var(--err-border);background:var(--err-bg)}
+    .dc-body{padding:16px 18px}
+    .dc-body p{font-size:14px;color:var(--text2);margin-bottom:12px;line-height:1.85}
+    .dc-body p:last-child{margin-bottom:0}
+    .dc-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;margin-bottom:6px;margin-top:14px}
+    .dc-label.bad{color:var(--err)}
+    .dc-label.good{color:var(--accent)}
+    .dc-explain{background:var(--bg-code);border:1px solid var(--border2);border-left:3px solid var(--accent);padding:12px 16px;margin-top:12px;font-size:14px;color:var(--text2);line-height:1.8}
+    .dc-explain strong{color:var(--text-head)}
+
+    /* BEFORE / AFTER CODE PAIR */
+    .before-after{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0 0}
+    .ba-block{overflow:hidden;border:1px solid var(--border2)}
+    .ba-block.bad{border-color:var(--err-border)}
+    .ba-block.good{border-color:rgba(0,204,112,.25)}
+    .ba-head{font-family:'JetBrains Mono',monospace;font-size:10px;padding:6px 14px;display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--border)}
+    .ba-block.bad .ba-head{background:#120505;color:var(--err)}
+    .ba-block.good .ba-head{background:#051209;color:var(--accent)}
+    .ba-body pre{font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.75;color:var(--text);padding:12px 16px;white-space:pre;overflow-x:auto;background:var(--bg-code)}
+
+    /* DEBUG PROCESS STEPS */
+    .debug-steps{display:flex;flex-direction:column;gap:0;margin:20px 0;border:1px solid var(--border2)}
+    .ds-step{display:flex;align-items:flex-start;gap:16px;padding:14px 18px;border-bottom:1px solid var(--border)}
+    .ds-step:last-child{border-bottom:none}
+    .ds-num{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--accent);background:var(--accent-bg);border:1px solid rgba(0,204,112,.2);width:28px;height:28px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+    .ds-content{flex:1}
+    .ds-title{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--text-head);margin-bottom:5px}
+    .ds-desc{font-size:14px;color:var(--text2);line-height:1.75}
+    .ds-desc code{font-size:12px}
+
+    /* SUMMARY BOX */
+    .summary-box{background:var(--bg-card);border:1px solid var(--border2);padding:22px 24px;margin:44px 0 32px}
+    .summary-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:.1em;margin-bottom:16px}
+    .summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .summary-item{background:var(--bg-code);border:1px solid var(--border2);padding:12px 14px}
+    .summary-item-key{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--err);margin-bottom:5px}
+    .summary-item-key.ok{color:var(--accent)}
+    .summary-item-val{font-size:13px;color:var(--text2);line-height:1.6}
+
+    /* CHEER */
+    .cheer-box{border:1px solid var(--border);background:var(--bg);padding:18px 22px;margin-bottom:44px;display:flex;gap:14px;align-items:flex-start}
+    .cheer-icon{font-size:18px;flex-shrink:0;line-height:1.5}
+    .cheer-text{font-size:14px;color:var(--text2);line-height:1.85}
+    .cheer-text strong{color:var(--text-head)}
+
+    /* NAV */
+    .chap-nav{display:flex;justify-content:space-between;padding-top:32px;border-top:1px solid var(--border);gap:12px;flex-wrap:wrap}
+    .chap-nav-btn{display:flex;flex-direction:column;gap:4px;text-decoration:none;padding:14px 18px;border:1px solid var(--border2);background:var(--bg-card);flex:1;max-width:300px;transition:border-color .15s}
+    .chap-nav-btn:hover{border-color:var(--accent)}
+    .chap-nav-btn.next{text-align:right}
+    .cnb-dir{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.07em}
+    .cnb-title{font-size:13px;color:var(--text2);line-height:1.45}
+    .cnb-title span{color:var(--accent);font-family:'JetBrains Mono',monospace}
+
+    /* RESPONSIVE */
+    .sidebar-overlay{display:none;position:fixed;inset:0;top:var(--header-h);z-index:140;background:rgba(0,0,0,.65)}
+    @media(max-width:720px){
+      .sidebar-overlay.visible{display:block}
+      .content{margin-left:0;padding:28px 20px 72px}
+      .before-after{grid-template-columns:1fr}
+      .summary-grid{grid-template-columns:1fr}
+    }
+    @media(max-width:480px){.header-grade{display:none}.chap-nav-btn{max-width:100%}.header-right .nav-btn:not(.primary){display:none}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important}}
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="top-header">
+  <button class="header-open-btn" onclick="toggleSidebar()">▶</button>
+  <div class="header-left">
+    <a href="../index.html" class="header-logo">SUPERPYTHON</a>
+    <span class="header-sep">/</span>
+    <span class="header-grade">🟤 BRONZE</span>
+    <span class="header-sep">/</span>
+    <span class="header-chap">27. 기초 디버깅 실습</span>
+  </div>
+  <div class="header-center">
+    <span>27 / 48</span>
+    <div class="progress-mini"><div class="progress-mini-fill" style="width:56.25%"></div></div>
+    <span>56%</span>
+  </div>
+  <div class="header-right">
+    <a href="26-error-types.html" class="nav-btn">← 이전</a>
+    <a href="28-quiz-debugging.html" class="nav-btn primary">다음 →</a>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<div class="layout">
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <button class="sidebar-toggle" onclick="toggleSidebar()">◀</button>
+  <div class="sidebar-progress">
+    <div class="sp-label">BRONZE 진행률</div>
+    <div class="sp-bar"><div class="sp-fill" style="width:56.25%"></div></div>
+    <div class="sp-text"><span>27</span> / 48 챕터 완료</div>
+  </div>
+
+  <div class="sb-group" id="grp-env">
+    <div class="sb-group-header" onclick="toggleGroup('grp-env')"><span class="sb-group-title">환경 설정</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="01-what-is-python.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">01</span>파이썬이란?</a>
+      <a href="02-setup.html"          class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">02</span>개발환경 설치</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-basic1">
+    <div class="sb-group-header" onclick="toggleGroup('grp-basic1')"><span class="sb-group-title">기초 문법 1</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="03-print.html"                    class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">03</span>print()란?</a>
+      <a href="04-quiz-print.html"               class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">04</span>연습문제</a>
+      <a href="05-variables.html"                class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">05</span>변수와 데이터 타입</a>
+      <a href="06-operators.html"                class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">06</span>연산자</a>
+      <a href="07-quiz-variables-operators.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">07</span>연습문제</a>
+      <a href="08-string.html"                   class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">08</span>문자열 String</a>
+      <a href="09-quiz-string.html"              class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">09</span>연습문제</a>
+      <a href="10-fstring.html"                  class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">10</span>f-string 완전정리</a>
+      <a href="11-quiz-fstring.html"             class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">11</span>연습문제</a>
+      <a href="12-mini-project-01.html"          class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">12</span>🎮 미니 프로젝트 ①</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-basic2">
+    <div class="sb-group-header" onclick="toggleGroup('grp-basic2')"><span class="sb-group-title">기초 문법 2</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="13-list.html"            class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">13</span>리스트</a>
+      <a href="14-quiz-list.html"       class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">14</span>연습문제</a>
+      <a href="15-input.html"           class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">15</span>input() 함수</a>
+      <a href="16-quiz-input.html"      class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">16</span>연습문제</a>
+      <a href="17-mini-project-02.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">17</span>🎮 미니 프로젝트 ②</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-flow">
+    <div class="sb-group-header" onclick="toggleGroup('grp-flow')"><span class="sb-group-title">흐름 제어</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="18-if.html"              class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">18</span>조건문 (if)</a>
+      <a href="19-quiz-if.html"         class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">19</span>연습문제</a>
+      <a href="20-mini-project-03.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">20</span>🎮 미니 프로젝트 ③</a>
+      <a href="21-for-range.html"       class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">21</span>for문과 range()</a>
+      <a href="22-quiz-for.html"        class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">22</span>연습문제</a>
+      <a href="23-while.html"           class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">23</span>while문, break, continue</a>
+      <a href="24-quiz-while.html"      class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">24</span>연습문제</a>
+      <a href="25-mini-project-04.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">25</span>🎮 미니 프로젝트 ④</a>
+    </div>
+  </div>
+  <div class="sb-group current open" id="grp-error">
+    <div class="sb-group-header" onclick="toggleGroup('grp-error')"><span class="sb-group-title">에러 &amp; 디버깅</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="26-error-types.html"    class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">26</span>에러 읽는 법</a>
+      <a href="27-debugging.html"      class="sb-item active"><span class="sb-icon">▶</span><span class="sb-num">27</span>기초 디버깅 실습</a>
+      <a href="28-quiz-debugging.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">28</span>연습문제</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-func">
+    <div class="sb-group-header" onclick="toggleGroup('grp-func')"><span class="sb-group-title">함수</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="29-function-basic.html"         class="sb-item"><span class="sb-icon"> </span><span class="sb-num">29</span>함수 기초</a>
+      <a href="30-quiz-function-basic.html"    class="sb-item"><span class="sb-icon"> </span><span class="sb-num">30</span>연습문제</a>
+      <a href="31-mini-project-05.html"        class="sb-item"><span class="sb-icon"> </span><span class="sb-num">31</span>🎮 미니 프로젝트 ⑤</a>
+      <a href="32-function-advanced.html"      class="sb-item"><span class="sb-icon"> </span><span class="sb-num">32</span>함수 심화</a>
+      <a href="33-quiz-function-advanced.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">33</span>연습문제</a>
+      <a href="34-module.html"                 class="sb-item"><span class="sb-icon"> </span><span class="sb-num">34</span>모듈</a>
+      <a href="35-quiz-module.html"            class="sb-item"><span class="sb-icon"> </span><span class="sb-num">35</span>연습문제</a>
+      <a href="36-mini-project-06.html"        class="sb-item"><span class="sb-icon"> </span><span class="sb-num">36</span>🎮 미니 프로젝트 ⑥</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-ds">
+    <div class="sb-group-header" onclick="toggleGroup('grp-ds')"><span class="sb-group-title">자료구조</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="37-dictionary.html"      class="sb-item"><span class="sb-icon"> </span><span class="sb-num">37</span>딕셔너리</a>
+      <a href="38-quiz-dictionary.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">38</span>연습문제</a>
+      <a href="39-tuple-set.html"       class="sb-item"><span class="sb-icon"> </span><span class="sb-num">39</span>튜플과 셋</a>
+      <a href="40-quiz-tuple-set.html"  class="sb-item"><span class="sb-icon"> </span><span class="sb-num">40</span>연습문제</a>
+      <a href="41-mini-project-07.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">41</span>🎮 미니 프로젝트 ⑦</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-file">
+    <div class="sb-group-header" onclick="toggleGroup('grp-file')"><span class="sb-group-title">파일 &amp; 예외처리</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="42-file-io.html"         class="sb-item"><span class="sb-icon"> </span><span class="sb-num">42</span>파일 입출력</a>
+      <a href="43-quiz-file-io.html"    class="sb-item"><span class="sb-icon"> </span><span class="sb-num">43</span>연습문제</a>
+      <a href="44-exception-basic.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">44</span>예외처리 기초</a>
+      <a href="45-quiz-exception.html"  class="sb-item"><span class="sb-icon"> </span><span class="sb-num">45</span>연습문제</a>
+      <a href="46-mini-project-08.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">46</span>🎮 미니 프로젝트 ⑧</a>
+    </div>
+  </div>
+  <div class="sb-group" id="grp-end">
+    <div class="sb-group-header" onclick="toggleGroup('grp-end')"><span class="sb-group-title">마무리</span><span class="sb-group-arrow">▶</span></div>
+    <div class="sb-items">
+      <a href="47-final-project.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">47</span>★ 최종 프로젝트</a>
+      <a href="48-next-step.html"     class="sb-item"><span class="sb-icon"> </span><span class="sb-num">48</span>다음 단계 미리보기</a>
+    </div>
+  </div>
+</aside>
+
+<!-- CONTENT -->
+<main class="content" id="mainContent">
+<div class="content-inner">
+
+  <div class="chap-meta">
+    <span class="badge">LESSON</span>
+    <span>에러 &amp; 디버깅</span>
+    <span style="color:var(--text3)">·</span>
+    <span>챕터 27 / 48</span>
+  </div>
+  <h1 class="chap-title">기초 <span class="hl">디버깅</span> 실습</h1>
+  <p class="chap-subtitle">오류 메시지를 읽고 원인을 파악한 뒤 코드를 고치는 과정을 실전처럼 훈련합니다. 에러를 두려워하지 않는 개발자가 되는 첫걸음입니다.</p>
+
+  <div class="goal-box">
+    <div class="goal-label">이 챕터를 마치면</div>
+    <ul class="goal-list">
+      <li>오류 메시지에서 에러 타입과 위치를 빠르게 찾을 수 있다</li>
+      <li>SyntaxError, NameError, TypeError, IndexError를 직접 수정할 수 있다</li>
+      <li>논리 오류(버그)를 <code>print()</code>로 추적하는 방법을 안다</li>
+      <li>에러 없이도 잘못 동작하는 코드를 고칠 수 있다</li>
+      <li>디버깅의 체계적인 5단계 과정을 설명할 수 있다</li>
+    </ul>
+  </div>
+
+
+  <!-- ─────────────────────────────── -->
+  <h2><span class="n">01</span>디버깅이란?</h2>
+
+  <p><strong>디버깅(debugging)</strong>은 코드에서 오류(버그)를 찾아 고치는 과정입니다. "버그(bug)"라는 단어는 1947년 하버드 대학교에서 실제 나방(moth)이 컴퓨터 회로에 끼어 오작동을 일으킨 사건에서 유래했습니다. 이후 소프트웨어 오류를 버그라 부르게 됐고, 고치는 행위를 디버깅이라 합니다.</p>
+
+  <p>처음 코딩을 배울 때 오류 메시지가 뜨면 당황스럽습니다. 하지만 프로 개발자들도 매일 오류를 만납니다. 차이는 단 하나 — <strong>오류 메시지를 읽을 줄 아느냐</strong>입니다. 오류 메시지는 파이썬이 여러분에게 보내는 친절한 편지입니다. "이 줄에서 이런 문제가 생겼어요"라고 정확히 알려줍니다.</p>
+
+  <h3>버그의 두 가지 종류</h3>
+  <p>파이썬의 오류는 크게 두 종류로 나뉩니다.</p>
+  <ul>
+    <li><strong>실행 오류 (Error)</strong> — 파이썬이 오류 메시지를 출력하고 프로그램을 멈춥니다. <em>고맙게도 어디가 잘못됐는지 알려줍니다.</em></li>
+    <li><strong>논리 오류 (Logic Bug)</strong> — 프로그램이 멈추지 않고 실행은 되지만, 결과가 의도와 다릅니다. <em>더 찾기 어렵습니다.</em></li>
+  </ul>
+
+  <div class="tip-box">
+    <div class="tip-box-label">💡 오류 메시지는 적이 아닙니다</div>
+    <p>빨간 오류 메시지를 보면 실패한 것 같은 기분이 듭니다. 하지만 오류 메시지가 없는 논리 오류보다 훨씬 고치기 쉽습니다. 오류 메시지는 파이썬이 여러분의 편에서 정확한 힌트를 주는 것입니다.</p>
+  </div>
+
+
+  <!-- ─────────────────────────────── -->
+  <h2><span class="n">02</span>트레이스백(Traceback) 읽는 법 — 복습</h2>
+
+  <p>26챕터에서 에러 타입을 배웠습니다. 이번엔 오류 메시지 전체(트레이스백)를 위에서 아래로 읽는 순서를 한 번 더 확인합니다.</p>
+
+  <div class="code-block">
+    <div class="code-block-header"><span class="cb-lang">python</span><button class="cb-copy" onclick="copyCode(this)">copy</button></div>
+    <div class="code-block-body">
+      <div class="ln-col"><span>1</span><span>2</span><span>3</span></div>
+      <div class="code-pre-col"><pre><span class="fn">scores</span> <span class="pn">=</span> <span class="pn">[</span><span class="num">90</span><span class="pn">,</span> <span class="num">85</span><span class="pn">,</span> <span class="num">78</span><span class="pn">]</span>
+<span class="fn">name</span>   <span class="pn">=</span> <span class="str">"Alice"</span>
+<span class="fn">print</span><span class="pn">(</span><span class="fn">name</span> <span class="pn">+</span> <span class="fn">scores</span><span class="pn">[</span><span class="num">0</span><span class="pn">])</span>   <span class="cm"># ← 오류 발생</span></pre></div>
+    </div>
+  </div>
+
+  <div class="traceback">
+    <div class="traceback-header"><span class="tb-label">TRACEBACK</span></div>
+    <div class="traceback-body"><pre><span class="tb-loc">Traceback (most recent call last):</span>
+<span class="tb-loc">  File "main.py", line 3, in &lt;module&gt;</span>
+<span class="tb-arrow">    print(name + scores[0])</span>
+<span class="tb-arrow">          ~~~~~~~~~~~~~~~~</span>
+<span class="tb-errtype">TypeError</span><span class="tb-msg">: can only concatenate str (not "int") to str</span></pre></div>
+  </div>
+
+  <div class="debug-steps">
+    <div class="ds-step">
+      <div class="ds-num">1</div>
+      <div class="ds-content">
+        <div class="ds-title">파일명과 줄 번호 확인</div>
+        <div class="ds-desc"><code>File "main.py", line 3</code> → 3번째 줄에서 문제 발생</div>
+      </div>
+    </div>
+    <div class="ds-step">
+      <div class="ds-num">2</div>
+      <div class="ds-content">
+        <div class="ds-title">문제 줄 확인</div>
+        <div class="ds-desc"><code>print(name + scores[0])</code> → 화살표(~)가 가리키는 부분 집중</div>
+      </div>
+    </div>
+    <div class="ds-step">
+      <div class="ds-num">3</div>
+      <div class="ds-content">
+        <div class="ds-title">에러 타입 읽기</div>
+        <div class="ds-desc"><code>TypeError</code> → 타입(종류)이 맞지 않음</div>
+      </div>
+    </div>
+    <div class="ds-step">
+      <div class="ds-num">4</div>
+      <div class="ds-content">
+        <div class="ds-title">메시지 해석</div>
+        <div class="ds-desc"><code>can only concatenate str (not "int") to str</code> → 문자열에 정수를 더할 수 없다. <code>str(scores[0])</code>로 변환 필요</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tip-box">
+    <div class="tip-box-label">💡 트레이스백은 항상 마지막 줄부터</div>
+    <p>트레이스백이 길게 나오면 당황하지 말고 <strong>맨 마지막 두 줄</strong>만 먼저 보세요. 에러 타입과 메시지가 가장 중요한 정보입니다. 그다음 <code>line N</code>으로 줄 번호를 확인하세요.</p>
+  </div>
+
+
+  <!-- ─────────────────────────────── -->
+  <h2><span class="n">03</span>실전 디버깅 — 케이스 1 : SyntaxError</h2>
+
+  <div class="debug-card">
+    <div class="dc-header">
+      <span class="dc-num">CASE 1</span>
+      <span class="dc-title">괄호를 빠뜨린 경우</span>
+      <span class="dc-type">SyntaxError</span>
+    </div>
+    <div class="dc-body">
+      <p>아래 코드를 실행하면 SyntaxError가 발생합니다. 오류 메시지를 보고 무엇이 문제인지 생각해보세요.</p>
+      <div class="dc-label bad">✗ 오류 코드</div>
+      <div class="code-block">
+        <div class="code-block-header"><span class="cb-lang">python</span></div>
+        <div class="code-block-body">
+          <div class="ln-col"><span>1</span><span>2</span><span>3</span></div>
+          <div class="code-pre-col"><pre><span class="fn">name</span> <span class="pn">=</span> <span class="str">"파이썬"</span>
+<span class="fn">age</span>  <span class="pn">=</span> <span class="num">30</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"이름: {name}, 나이: {age}"</span>   <span class="cm"># ← 문제가 있습니다</span></pre></div>
+        </div>
+      </div>
+      <div class="traceback" style="margin:8px 0 16px">
+        <div class="traceback-header"><span class="tb-label">TRACEBACK</span></div>
+        <div class="traceback-body"><pre><span class="tb-loc">  File "main.py", line 3</span>
+<span class="tb-arrow">    print(f"이름: {name}, 나이: {age}"</span>
+<span class="tb-arrow">                                      ^</span>
+<span class="tb-errtype">SyntaxError</span><span class="tb-msg">: '(' was never closed</span></pre></div>
+      </div>
+      <p><strong>오류 분석:</strong> <code>'(' was never closed</code> — 열린 괄호 <code>(</code>가 닫히지 않았다는 메시지입니다. <code>print(</code> 뒤에 여는 괄호는 있지만 닫는 괄호 <code>)</code>가 없습니다.</p>
+      <div class="dc-label good">✓ 수정된 코드</div>
+      <div class="code-block">
+        <div class="code-block-header"><span class="cb-lang">python</span></div>
+        <div class="code-block-body">
+          <div class="ln-col"><span>1</span><span>2</span><span>3</span></div>
+          <div class="code-pre-col"><pre><span class="fn">name</span> <span class="pn">=</span> <span class="str">"파이썬"</span>
+<span class="fn">age</span>  <span class="pn">=</span> <span class="num">30</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"이름: {name}, 나이: {age}"</span><span class="pn">)</span>   <span class="cm"># 닫는 괄호 ) 추가</span></pre></div>
+        </div>
+      </div>
+      <div class="dc-explain">
+        <strong>핵심 패턴:</strong> SyntaxError는 항상 <strong>코드를 실행하기 전에</strong> 발생합니다. 파이썬이 코드를 읽는 단계에서 문법이 맞지 않으면 바로 멈춥니다. 괄호 <code>() [] {}</code>, 따옴표 <code>"" ''</code>, 콜론 <code>:</code>이 빠지는 경우가 가장 흔합니다.
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ─────────────────────────────── -->
+  <h2><span class="n">04</span>실전 디버깅 — 케이스 2 : NameError</h2>
+
+  <div class="debug-card">
+    <div class="dc-header">
+      <span class="dc-num">CASE 2</span>
+      <span class="dc-title">정의되지 않은 변수를 사용</span>
+      <span class="dc-type">NameError</span>
+    </div>
+    <div class="dc-body">
+      <p>점수 합계를 구하는 코드입니다. 실행하면 NameError가 발생합니다.</p>
+      <div class="dc-label bad">✗ 오류 코드</div>
+      <div class="code-block">
+        <div class="code-block-header"><span class="cb-lang">python</span></div>
+        <div class="code-block-body">
+          <div class="ln-col"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span></div>
+          <div class="code-pre-col"><pre><span class="fn">math_score</span>    <span class="pn">=</span> <span class="num">85</span>
+<span class="fn">english_score</span> <span class="pn">=</span> <span class="num">90</span>
+<span class="fn">science_score</span> <span class="pn">=</span> <span class="num">78</span>
+
+<span class="fn">total</span> <span class="pn">=</span> <span class="fn">math_score</span> <span class="pn">+</span> <span class="fn">english_scroe</span> <span class="pn">+</span> <span class="fn">science_score</span>  <span class="cm"># ← 오타</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"총점: {total}"</span><span class="pn">)</span></pre></div>
+        </div>
+      </div>
+      <div class="traceback" style="margin:8px 0 16px">
+        <div class="traceback-header"><span class="tb-label">TRACEBACK</span></div>
+        <div class="traceback-body"><pre><span class="tb-loc">  File "main.py", line 5, in &lt;module&gt;</span>
+<span class="tb-arrow">    total = math_score + english_scroe + science_score</span>
+<span class="tb-arrow">                         ^^^^^^^^^^^^^</span>
+<span class="tb-errtype">NameError</span><span class="tb-msg">: name 'english_scroe' is not defined. Did you mean: 'english_score'?</span></pre></div>
+      </div>
+      <p><strong>오류 분석:</strong> <code>'english_scroe' is not defined</code> — <code>english_scroe</code>라는 변수가 없다고 합니다. 자세히 보면 <code>english_score</code>를 <code>english_scroe</code>로 오타 냈습니다. 심지어 파이썬이 <code>Did you mean: 'english_score'?</code>라고 올바른 이름까지 제안해줍니다!</p>
+      <div class="dc-label good">✓ 수정된 코드</div>
+      <div class="code-block">
+        <div class="code-block-header"><span class="cb-lang">python</span></div>
+        <div class="code-block-body">
+          <div class="ln-col"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span></div>
+          <div class="code-pre-col"><pre><span class="fn">math_score</span>    <span class="pn">=</span> <span class="num">85</span>
+<span class="fn">english_score</span> <span class="pn">=</span> <span class="num">90</span>
+<span class="fn">science_score</span> <span class="pn">=</span> <span class="num">78</span>
+
+<span class="fn">total</span> <span class="pn">=</span> <span class="fn">math_score</span> <span class="pn">+</span> <span class="fn">english_score</span> <span class="pn">+</span> <span class="fn">science_score</span>  <span class="cm"># scroe → score 수정</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"총점: {total}"</span><span class="pn">)</span>   <span class="cm"># 출력: 총점: 253</span></pre></div>
+        </div>
+      </div>
+      <div class="dc-explain">
+        <strong>핵심 패턴:</strong> NameError의 원인은 거의 항상 <strong>오타</strong>입니다. 에러 메시지가 가리키는 이름을 정확히 확인하고, 선언한 변수 이름과 글자 하나씩 비교하세요. 파이썬 3.10+ 버전부터는 "Did you mean...?" 제안을 많이 제공합니다.
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ─────────────────────────────── -->
+  <h2><span class="n">05</span>실전 디버깅 — 케이스 3 : TypeError</h2>
+
+  <div class="debug-card">
+    <div class="dc-header">
+      <span class="dc-num">CASE 3</span>
+      <span class="dc-title">문자열과 숫자를 더하려는 경우</span>
+      <span class="dc-type">TypeError</span>
+    </div>
+    <div class="dc-body">
+      <p>사용자 나이를 입력받아 10년 후 나이를 출력하는 코드입니다.</p>
+      <div class="dc-label bad">✗ 오류 코드</div>
+      <div class="code-block">
+        <div class="code-block-header"><span class="cb-lang">python</span></div>
+        <div class="code-block-body">
+          <div class="ln-col"><span>1</span><span>2</span><span>3</span></div>
+          <div class="code-pre-col"><pre><span class="fn">age</span> <span class="pn">=</span> <span class="fn">input</span><span class="pn">(</span><span class="str">"나이를 입력하세요: "</span><span class="pn">)</span>   <span class="cm"># input()은 항상 문자열 반환</span>
+<span class="fn">future</span> <span class="pn">=</span> <span class="fn">age</span> <span class="pn">+</span> <span class="num">10</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"10년 후 나이: {future}"</span><span class="pn">)</span></pre></div>
+        </div>
+      </div>
+      <div class="traceback" style="margin:8px 0 16px">
+        <div class="traceback-header"><span class="tb-label">TRACEBACK</span></div>
+        <div class="traceback-body"><pre><span class="tb-loc">  File "main.py", line 2, in &lt;module&gt;</span>
+<span class="tb-arrow">    future = age + 10</span>
+<span class="tb-arrow">             ~~~^~~</span>
+<span class="tb-errtype">TypeError</span><span class="tb-msg">: can only concatenate str (not "int") to str</span></pre></div>
+      </div>
+      <p><strong>오류 분석:</strong> <code>input()</code>은 언제나 <strong>문자열(str)</strong>을 반환합니다. 사용자가 <code>25</code>를 입력해도 파이썬은 이를 숫자가 아닌 문자열 <code>"25"</code>로 받습니다. 문자열에 숫자 10을 더하면 TypeError가 발생합니다.</p>
+      <div class="dc-label good">✓ 수정된 코드</div>
+      <div class="code-block">
+        <div class="code-block-header"><span class="cb-lang">python</span></div>
+        <div class="code-block-body">
+          <div class="ln-col"><span>1</span><span>2</span><span>3</span></div>
+          <div class="code-pre-col"><pre><span class="fn">age</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"나이를 입력하세요: "</span><span class="pn">))</span>   <span class="cm"># int()로 감싸서 정수로 변환</span>
+<span class="fn">future</span> <span class="pn">=</span> <span class="fn">age</span> <span class="pn">+</span> <span class="num">10</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"10년 후 나이: {future}"</span><span class="pn">)</span>   <span class="cm"># 출력: 10년 후 나이: 35</span></pre></div>
+        </div>
+      </div>
+      <div class="dc-explain">
+        <strong>핵심 패턴:</strong> <code>input()</code> 결과를 숫자 연산에 쓰려면 <strong>반드시 <code>int()</code> 또는 <code>float()</code>로 변환</strong>하세요. 이것은 파이썬에서 가장 자주 만나는 TypeError 중 하나입니다.
+      </div>
+    </div>
+  </div>
+
+  <div class="debug-card">
+    <div class="dc-header">
+      <span class="dc-num">CASE 3-B</span>
+      <span class="dc-title">반복 횟수에 문자열을 사용</span>
+      <span class="dc-type">TypeError</span>
+    </div>
+    <div class="dc-body">
+      <p>같은 TypeError지만 조금 다른 상황입니다. <code>range()</code>에 문자열을 넣으면 어떻게 될까요?</p>
+      <div class="dc-label bad">✗ 오류 코드</div>
+      <div class="code-block">
+        <div class="code-block-header"><span class="cb-lang">python</span></div>
+        <div class="code-block-body">
+          <div class="ln-col"><span>1</span><span>2</span><span>3</span></div>
+          <div class="code-pre-col"><pre><span class="fn">n</span> <span class="pn">=</span> <span class="fn">input</span><span class="pn">(</span><span class="str">"반복 횟수를 입력하세요: "</span><span class="pn">)</span>
+<span class="kw">for</span> <span class="fn">i</span> <span class="kw">in</span> <span class="fn">range</span><span class="pn">(</span><span class="fn">n</span><span class="pn">)</span><span class="pn">:</span>   <span class="cm"># n은 문자열 → range()는 정수만 받음</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">f"반복 {i+1}회"</span><span class="pn">)</span></pre></div>
+        </div>
+      </div>
+      <div class="traceback" style="margin:8px 0 16px">
+        <div class="traceback-header"><span class="tb-label">TRACEBACK</span></div>
+        <div class="traceback-body"><pre><span class="tb-errtype">TypeError</span><span class="tb-msg">: 'str' object cannot be interpreted as an integer</span></pre></div>
+      </div>
+      <div class="dc-label good">✓ 수정된 코드</div>
+      <div class="code-block">
+        <div class="code-block-header"><span class="cb-lang">python</span></div>
+        <div class="code-block-body">
+          <div class="ln-col"><span>1</span><span>2</span><span>3</span></div>
+          <div class="code-pre-col"><pre><span class="fn">n</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"반복 횟수를 입력하세요: "</span><span class="pn">))</span>   <span class="cm"># int()로 변환</span>
+<span class="kw">for</span> <span class="fn">i</span> <span class="kw">in</span> <span class="fn">range</span><span class="pn">(</span><span class="fn">n</span><span class="pn">)</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">f"반복 {i+1}회"</span><span class="pn">)</span></pre></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ─────────────────────────────── -->
+  <h2><span class="n">06</span>실전 디버깅 — 케이스 4 : IndexError</h2>
+
+  <div class="debug-card">
+    <div class="dc-header">
+      <span class="dc-num">CASE 4</span>
+      <span class="dc-title">리스트 범위를 벗어난 인덱스</span>
+      <span class="dc-type">IndexError</span>
+    </div>
+    <div class="dc-body">
+      <p>학생 3명의 성적을 출력하는 코드입니다.</p>
+      <div class="dc-label bad">✗ 오류 코드</div>
+      <div class="code-block">
+        <div class="code-block-header"><span class="cb-lang">python</span></div>
+        <div class="code-block-body">
+          <div class="ln-col"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+          <div class="code-pre-col"><pre><span class="fn">scores</span> <span class="pn">=</span> <span class="pn">[</span><span class="num">88</span><span class="pn">,</span> <span class="num">95</span><span class="pn">,</span> <span class="num">72</span><span class="pn">]</span>   <span class="cm"># 인덱스 0, 1, 2까지만 있음</span>
+
+<span class="kw">for</span> <span class="fn">i</span> <span class="kw">in</span> <span class="fn">range</span><span class="pn">(</span><span class="num">4</span><span class="pn">)</span><span class="pn">:</span>        <span class="cm"># ← 0, 1, 2, 3 — 범위가 너무 넓음</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">f"점수 {i+1}: {scores[i]}"</span><span class="pn">)</span></pre></div>
+        </div>
+      </div>
+      <div class="traceback" style="margin:8px 0 16px">
+        <div class="traceback-header"><span class="tb-label">TRACEBACK</span></div>
+        <div class="traceback-body"><pre><span class="tb-loc">  File "main.py", line 4, in &lt;module&gt;</span>
+<span class="tb-arrow">    print(f"점수 {i+1}: {scores[i]}")</span>
+<span class="tb-arrow">                          ~~~~~~~~</span>
+<span class="tb-errtype">IndexError</span><span class="tb-msg">: list index out of range</span></pre></div>
+      </div>
+      <p><strong>오류 분석:</strong> <code>scores</code>에는 요소가 3개(인덱스 0·1·2)입니다. <code>range(4)</code>는 0·1·2·3 네 번 반복하므로 <code>i = 3</code>일 때 <code>scores[3]</code>에 접근하려 하지만 그 인덱스는 존재하지 않아 IndexError가 발생합니다.</p>
+      <div class="before-after">
+        <div class="ba-block bad">
+          <div class="ba-head">✗ 수정 전</div>
+          <div class="ba-body"><pre><span class="kw">for</span> <span class="fn">i</span> <span class="kw">in</span> <span class="fn">range</span><span class="pn">(</span><span class="num">4</span><span class="pn">)</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="fn">scores</span><span class="pn">[</span><span class="fn">i</span><span class="pn">])</span></pre></div>
+        </div>
+        <div class="ba-block good">
+          <div class="ba-head">✓ 수정 후</div>
+          <div class="ba-body"><pre><span class="kw">for</span> <span class="fn">i</span> <span class="kw">in</span> <span class="fn">range</span><span class="pn">(</span><span class="num">3</span><span class="pn">)</span><span class="pn">:</span>    <span class="cm"># 3으로 수정</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="fn">scores</span><span class="pn">[</span><span class="fn">i</span><span class="pn">])</span></pre></div>
+        </div>
+      </div>
+      <div class="dc-explain">
+        <strong>더 좋은 방법:</strong> 리스트 길이에 맞춰 range를 직접 쓰는 것보다, <code>range(len(scores))</code>를 쓰거나 <code>for score in scores:</code>처럼 인덱스 없이 순회하면 IndexError를 아예 방지할 수 있습니다.
+      </div>
+      <div class="code-block" style="margin-top:12px">
+        <div class="code-block-header"><span class="cb-lang">python — 더 안전한 방법</span></div>
+        <div class="code-block-body">
+          <div class="ln-col"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span></div>
+          <div class="code-pre-col"><pre><span class="cm"># 방법 1: range(len()) 사용</span>
+<span class="kw">for</span> <span class="fn">i</span> <span class="kw">in</span> <span class="fn">range</span><span class="pn">(</span><span class="fn">len</span><span class="pn">(</span><span class="fn">scores</span><span class="pn">))</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">f"점수 {i+1}: {scores[i]}"</span><span class="pn">)</span>
+
+<span class="cm"># 방법 2: 직접 순회 (더 파이썬다운 방식)</span>
+<span class="kw">for</span> <span class="fn">score</span> <span class="kw">in</span> <span class="fn">scores</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">f"점수: {score}"</span><span class="pn">)</span></pre></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ─────────────────────────────── -->
+  <h2><span class="n">07</span>논리 오류 디버깅 — print()로 추적하기</h2>
+
+  <p>논리 오류는 프로그램이 실행은 되지만 <strong>결과가 의도와 다른</strong> 경우입니다. 에러 메시지가 없기 때문에 더 까다롭습니다. 가장 기본적인 방법은 <code>print()</code>를 전략적으로 넣어 변수 값을 추적하는 것입니다.</p>
+
+  <div class="debug-card">
+    <div class="dc-header">
+      <span class="dc-num">CASE 5</span>
+      <span class="dc-title">평균을 잘못 계산하는 경우</span>
+      <span class="dc-type">논리 오류</span>
+    </div>
+    <div class="dc-body">
+      <p>1부터 10까지의 합의 평균을 구하는 코드입니다. 실행은 되지만 결과가 이상합니다.</p>
+      <div class="dc-label bad">✗ 오류 코드 (에러 없음, 결과만 틀림)</div>
+      <div class="code-block">
+        <div class="code-block-header"><span class="cb-lang">python</span></div>
+        <div class="code-block-body">
+          <div class="ln-col"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span></div>
+          <div class="code-pre-col"><pre><span class="fn">total</span> <span class="pn">=</span> <span class="num">0</span>
+<span class="kw">for</span> <span class="fn">i</span> <span class="kw">in</span> <span class="fn">range</span><span class="pn">(</span><span class="num">1</span><span class="pn">,</span> <span class="num">10</span><span class="pn">)</span><span class="pn">:</span>    <span class="cm"># ← 실수: 10이 포함되지 않음</span>
+    <span class="fn">total</span> <span class="pn">+=</span> <span class="fn">i</span>
+
+<span class="fn">average</span> <span class="pn">=</span> <span class="fn">total</span> <span class="pn">/</span> <span class="num">10</span>       <span class="cm"># ← 실수: 나누는 수도 9여야 함</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"평균: {average}"</span><span class="pn">)</span>   <span class="cm"># 출력: 평균: 4.5 (틀린 답)</span></pre></div>
+        </div>
+      </div>
+      <p><strong>문제 추적:</strong> 정답은 5.5여야 합니다. <code>print()</code>로 중간 값을 확인해봅니다.</p>
+      <div class="code-block">
+        <div class="code-block-header"><span class="cb-lang">python — print() 디버깅 추가</span></div>
+        <div class="code-block-body">
+          <div class="ln-col"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span></div>
+          <div class="code-pre-col"><pre><span class="fn">total</span> <span class="pn">=</span> <span class="num">0</span>
+<span class="kw">for</span> <span class="fn">i</span> <span class="kw">in</span> <span class="fn">range</span><span class="pn">(</span><span class="num">1</span><span class="pn">,</span> <span class="num">10</span><span class="pn">)</span><span class="pn">:</span>
+    <span class="fn">total</span> <span class="pn">+=</span> <span class="fn">i</span>
+
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"[디버그] total = {total}"</span><span class="pn">)</span>   <span class="cm"># ← 임시 디버그 출력</span>
+<span class="cm"># 출력: [디버그] total = 45  ← 예상은 55인데 45가 나옴!</span>
+<span class="cm"># → range(1, 10)이 1~9만 포함. 10을 빠뜨렸다!</span></pre></div>
+        </div>
+      </div>
+      <div class="dc-label good">✓ 수정된 코드</div>
+      <div class="code-block">
+        <div class="code-block-header"><span class="cb-lang">python</span></div>
+        <div class="code-block-body">
+          <div class="ln-col"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span></div>
+          <div class="code-pre-col"><pre><span class="fn">total</span> <span class="pn">=</span> <span class="num">0</span>
+<span class="kw">for</span> <span class="fn">i</span> <span class="kw">in</span> <span class="fn">range</span><span class="pn">(</span><span class="num">1</span><span class="pn">,</span> <span class="num">11</span><span class="pn">)</span><span class="pn">:</span>   <span class="cm"># 10 → 11로 수정 (range는 끝값 미포함)</span>
+    <span class="fn">total</span> <span class="pn">+=</span> <span class="fn">i</span>
+
+<span class="fn">average</span> <span class="pn">=</span> <span class="fn">total</span> <span class="pn">/</span> <span class="num">10</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"평균: {average}"</span><span class="pn">)</span>   <span class="cm"># 출력: 평균: 5.5 ✅</span></pre></div>
+        </div>
+      </div>
+      <div class="dc-explain">
+        <strong>핵심 패턴:</strong> 논리 오류가 의심되면 <strong>중간중간 <code>print()</code>를 삽입</strong>해서 변수 값이 예상대로 변하는지 확인하세요. <code>[디버그]</code> 같은 접두어를 붙이면 나중에 지우기 편합니다. 디버깅이 끝나면 반드시 이 줄들을 제거하세요.
+      </div>
+    </div>
+  </div>
+
+  <div class="debug-card">
+    <div class="dc-header">
+      <span class="dc-num">CASE 6</span>
+      <span class="dc-title">조건문이 의도대로 동작하지 않음</span>
+      <span class="dc-type">논리 오류</span>
+    </div>
+    <div class="dc-body">
+      <p>점수가 60점 미만이면 "불합격", 아니면 "합격"을 출력하는 코드입니다. 실행은 되지만 결과가 뒤집혀 있습니다.</p>
+      <div class="dc-label bad">✗ 오류 코드</div>
+      <div class="code-block">
+        <div class="code-block-header"><span class="cb-lang">python</span></div>
+        <div class="code-block-body">
+          <div class="ln-col"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+          <div class="code-pre-col"><pre><span class="fn">score</span> <span class="pn">=</span> <span class="num">45</span>
+
+<span class="kw">if</span> <span class="fn">score</span> <span class="pn">&gt;</span> <span class="num">60</span><span class="pn">:</span>          <span class="cm"># ← >= 이어야 하는데 > 만 씀, 또는 방향이 반대</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"불합격"</span><span class="pn">)</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"합격"</span><span class="pn">)</span>         <span class="cm"># 45점인데 "합격"이 출력됨 (의도와 반대)</span></pre></div>
+        </div>
+      </div>
+      <p><strong>문제 분석:</strong> 조건의 방향이 뒤집혀 있습니다. "60점 미만이면 불합격"이라면 조건은 <code>score &lt; 60</code>이어야 합니다. <code>score &gt; 60</code>이면 45는 60보다 작으므로 else(합격)로 가버립니다.</p>
+      <div class="dc-label good">✓ 수정된 코드</div>
+      <div class="code-block">
+        <div class="code-block-header"><span class="cb-lang">python</span></div>
+        <div class="code-block-body">
+          <div class="ln-col"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+          <div class="code-pre-col"><pre><span class="fn">score</span> <span class="pn">=</span> <span class="num">45</span>
+
+<span class="kw">if</span> <span class="fn">score</span> <span class="pn">&lt;</span> <span class="num">60</span><span class="pn">:</span>          <span class="cm"># > 를 < 로 수정</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"불합격"</span><span class="pn">)</span>       <span class="cm"># 출력: 불합격 ✅</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"합격"</span><span class="pn">)</span></pre></div>
+        </div>
+      </div>
+      <div class="dc-explain">
+        <strong>핵심 패턴:</strong> 조건문 논리 오류는 <code>&gt;</code>와 <code>&lt;</code>, <code>&gt;=</code>와 <code>&gt;</code>를 혼동할 때 자주 발생합니다. 조건을 한국어로 먼저 써보고(<em>"60 미만이면"</em>) 그에 맞는 연산자로 옮기면 실수가 줄어듭니다.
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ─────────────────────────────── -->
+  <h2><span class="n">08</span>디버깅 5단계 프로세스</h2>
+
+  <p>오류를 만났을 때 무작정 코드를 수정하면 오히려 더 꼬이기 쉽습니다. 아래 5단계를 순서대로 따르면 대부분의 오류를 체계적으로 해결할 수 있습니다.</p>
+
+  <div class="debug-steps">
+    <div class="ds-step">
+      <div class="ds-num">1</div>
+      <div class="ds-content">
+        <div class="ds-title">침착하게 오류 메시지 읽기</div>
+        <div class="ds-desc">빨간 글씨를 보면 당황하지 말고 <strong>맨 마지막 줄</strong>부터 읽습니다. 에러 타입과 메시지 → 줄 번호 순서로 확인합니다.</div>
+      </div>
+    </div>
+    <div class="ds-step">
+      <div class="ds-num">2</div>
+      <div class="ds-content">
+        <div class="ds-title">해당 줄 집중 분석</div>
+        <div class="ds-desc"><code>line N</code>이 가리키는 줄로 가서 코드를 한 글자씩 살펴봅니다. 괄호·따옴표 쌍이 맞는지, 변수명 오타는 없는지 확인합니다.</div>
+      </div>
+    </div>
+    <div class="ds-step">
+      <div class="ds-num">3</div>
+      <div class="ds-content">
+        <div class="ds-title">에러 타입으로 원인 범주 좁히기</div>
+        <div class="ds-desc"><code>SyntaxError</code> → 문법 문제 / <code>NameError</code> → 오타나 미선언 / <code>TypeError</code> → 타입 불일치 / <code>IndexError</code> → 범위 초과. 타입만 알아도 탐색 범위가 크게 줄어듭니다.</div>
+      </div>
+    </div>
+    <div class="ds-step">
+      <div class="ds-num">4</div>
+      <div class="ds-content">
+        <div class="ds-title">print()로 중간 값 확인</div>
+        <div class="ds-desc">에러 없이 결과가 이상하다면 의심되는 변수 앞뒤에 <code>print(f"[디버그] 변수명 = {변수명}")</code>을 삽입합니다. 값이 기대와 다른 지점이 버그의 위치입니다.</div>
+      </div>
+    </div>
+    <div class="ds-step">
+      <div class="ds-num">5</div>
+      <div class="ds-content">
+        <div class="ds-title">한 번에 하나씩 수정하고 재실행</div>
+        <div class="ds-desc">여러 곳을 한꺼번에 수정하면 어떤 변경이 효과가 있었는지 알 수 없습니다. <strong>한 가지 수정 → 실행 → 확인</strong>을 반복하세요. 디버그용 <code>print()</code>는 해결 후 제거합니다.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="warn-box">
+    <div class="warn-box-label">⚠ 흔한 실수 — 줄 번호를 맹신하지 마세요</div>
+    <p>오류 메시지가 가리키는 줄에 실제 문제가 없을 때도 있습니다. 특히 SyntaxError는 <strong>오류 발생 위치보다 윗줄</strong>에 원인이 있는 경우가 많습니다. 예를 들어 3번 줄에 SyntaxError가 나도 실제 원인은 2번 줄의 닫히지 않은 따옴표일 수 있습니다.</p>
+  </div>
+
+  <div class="tip-box">
+    <div class="tip-box-label">💡 에러 메시지를 검색 엔진에 복사하세요</div>
+    <p>해결이 안 될 때는 에러 메시지 마지막 줄을 그대로 복사해서 구글이나 네이버에 검색하세요. 전 세계 수백만 명의 개발자가 같은 오류를 겪고 해결책을 공유해두었습니다. Stack Overflow가 가장 유용한 자료 사이트입니다.</p>
+  </div>
+
+
+  <!-- ─────────────────────────────── -->
+  <h2><span class="n">09</span>직접 고쳐보기 — 3문제</h2>
+
+  <p>아래 세 코드에는 각각 버그가 숨어 있습니다. 오류 메시지와 코드를 보고 스스로 원인을 찾아보세요. 정답은 드롭다운으로 숨겨두었습니다.</p>
+
+  <!-- 연습 1 -->
+  <h3>연습 1</h3>
+  <div class="code-block">
+    <div class="code-block-header"><span class="cb-lang">python — 이 코드의 버그는 무엇일까요?</span></div>
+    <div class="code-block-body">
+      <div class="ln-col"><span>1</span><span>2</span><span>3</span><span>4</span></div>
+      <div class="code-pre-col"><pre><span class="fn">items</span> <span class="pn">=</span> <span class="pn">[</span><span class="str">"사과"</span><span class="pn">,</span> <span class="str">"바나나"</span><span class="pn">,</span> <span class="str">"체리"</span><span class="pn">]</span>
+<span class="fn">count</span> <span class="pn">=</span> <span class="fn">len</span><span class="pn">(</span><span class="fn">items</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"마지막 항목: {items[count]}"</span><span class="pn">)</span>   <span class="cm"># 어떤 오류가 날까요?</span></pre></div>
+    </div>
+  </div>
+  <details style="margin:8px 0 24px">
+    <summary style="cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text2);padding:10px 14px;background:var(--bg-card);border:1px solid var(--border2);list-style:none;display:flex;align-items:center;gap:8px"><span style="color:var(--accent)">▶</span> 정답 보기</summary>
+    <div style="background:var(--bg-code);border:1px solid var(--border2);border-top:none;padding:14px 18px;font-size:14px;color:var(--text2);line-height:1.8">
+      <p><strong style="color:var(--err)">오류:</strong> <code>IndexError: list index out of range</code></p>
+      <p><strong>원인:</strong> <code>count = len(items) = 3</code>이지만 리스트 인덱스는 0·1·2까지입니다. <code>items[3]</code>은 존재하지 않습니다.</p>
+      <p><strong style="color:var(--accent)">수정:</strong> <code>items[count - 1]</code> 또는 <code>items[-1]</code>로 변경합니다. <code>items[-1]</code>이 파이썬에서 마지막 요소를 가리키는 관용적 표현입니다.</p>
+      <div class="code-block" style="margin-top:10px">
+        <div class="code-block-header"><span class="cb-lang">수정된 코드</span></div>
+        <div class="code-block-body">
+          <div class="code-pre-col"><pre><span class="fn">print</span><span class="pn">(</span><span class="str">f"마지막 항목: {items[-1]}"</span><span class="pn">)</span>  <span class="cm"># 출력: 마지막 항목: 체리</span></pre></div>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- 연습 2 -->
+  <h3>연습 2</h3>
+  <div class="code-block">
+    <div class="code-block-header"><span class="cb-lang">python — 이 코드의 버그는 무엇일까요?</span></div>
+    <div class="code-block-body">
+      <div class="ln-col"><span>1</span><span>2</span><span>3</span><span>4</span></div>
+      <div class="code-pre-col"><pre><span class="fn">width</span>  <span class="pn">=</span> <span class="fn">input</span><span class="pn">(</span><span class="str">"가로 길이: "</span><span class="pn">)</span>
+<span class="fn">height</span> <span class="pn">=</span> <span class="fn">input</span><span class="pn">(</span><span class="str">"세로 길이: "</span><span class="pn">)</span>
+<span class="fn">area</span>   <span class="pn">=</span> <span class="fn">width</span> <span class="pn">*</span> <span class="fn">height</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"넓이: {area}"</span><span class="pn">)</span></pre></div>
+    </div>
+  </div>
+  <details style="margin:8px 0 24px">
+    <summary style="cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text2);padding:10px 14px;background:var(--bg-card);border:1px solid var(--border2);list-style:none;display:flex;align-items:center;gap:8px"><span style="color:var(--accent)">▶</span> 정답 보기</summary>
+    <div style="background:var(--bg-code);border:1px solid var(--border2);border-top:none;padding:14px 18px;font-size:14px;color:var(--text2);line-height:1.8">
+      <p><strong style="color:var(--err)">오류:</strong> <code>TypeError: can't multiply sequence by non-int of type 'str'</code></p>
+      <p><strong>원인:</strong> <code>input()</code>은 항상 문자열을 반환합니다. <code>"5" * "3"</code>처럼 문자열끼리 곱하면 TypeError가 발생합니다. (문자열에 숫자를 곱하면 반복이 되지만, 문자열끼리는 불가)</p>
+      <p><strong style="color:var(--accent)">수정:</strong> <code>int()</code>로 변환합니다.</p>
+      <div class="code-block" style="margin-top:10px">
+        <div class="code-block-header"><span class="cb-lang">수정된 코드</span></div>
+        <div class="code-block-body">
+          <div class="code-pre-col"><pre><span class="fn">width</span>  <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"가로 길이: "</span><span class="pn">))</span>
+<span class="fn">height</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"세로 길이: "</span><span class="pn">))</span>
+<span class="fn">area</span>   <span class="pn">=</span> <span class="fn">width</span> <span class="pn">*</span> <span class="fn">height</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"넓이: {area}"</span><span class="pn">)</span>   <span class="cm"># 출력: 넓이: 15 (5×3)</span></pre></div>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- 연습 3 -->
+  <h3>연습 3</h3>
+  <div class="code-block">
+    <div class="code-block-header"><span class="cb-lang">python — 이 코드의 버그는 무엇일까요? (논리 오류)</span></div>
+    <div class="code-block-body">
+      <div class="ln-col"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span></div>
+      <div class="code-pre-col"><pre><span class="cm"># 홀수만 출력하려는 코드</span>
+<span class="fn">result</span> <span class="pn">=</span> <span class="pn">[]</span>
+<span class="kw">for</span> <span class="fn">i</span> <span class="kw">in</span> <span class="fn">range</span><span class="pn">(</span><span class="num">1</span><span class="pn">,</span> <span class="num">11</span><span class="pn">)</span><span class="pn">:</span>
+    <span class="kw">if</span> <span class="fn">i</span> <span class="pn">%</span> <span class="num">2</span> <span class="pn">==</span> <span class="num">0</span><span class="pn">:</span>       <span class="cm"># ← 이 조건이 홀수인가요, 짝수인가요?</span>
+        <span class="fn">result</span><span class="pn">.</span><span class="fn">append</span><span class="pn">(</span><span class="fn">i</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="fn">result</span><span class="pn">)</span>   <span class="cm"># 출력: [2, 4, 6, 8, 10]  ← 원하던 결과가 아님</span></pre></div>
+    </div>
+  </div>
+  <details style="margin:8px 0 24px">
+    <summary style="cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text2);padding:10px 14px;background:var(--bg-card);border:1px solid var(--border2);list-style:none;display:flex;align-items:center;gap:8px"><span style="color:var(--accent)">▶</span> 정답 보기</summary>
+    <div style="background:var(--bg-code);border:1px solid var(--border2);border-top:none;padding:14px 18px;font-size:14px;color:var(--text2);line-height:1.8">
+      <p><strong style="color:var(--err)">오류:</strong> 에러 없음 — 논리 오류</p>
+      <p><strong>원인:</strong> <code>i % 2 == 0</code>은 짝수 조건입니다. 홀수는 2로 나눈 나머지가 1이므로 <code>i % 2 == 1</code> 또는 <code>i % 2 != 0</code>이어야 합니다.</p>
+      <p><strong style="color:var(--accent)">수정:</strong> 조건을 <code>i % 2 != 0</code>으로 변경합니다.</p>
+      <div class="code-block" style="margin-top:10px">
+        <div class="code-block-header"><span class="cb-lang">수정된 코드</span></div>
+        <div class="code-block-body">
+          <div class="code-pre-col"><pre><span class="kw">if</span> <span class="fn">i</span> <span class="pn">%</span> <span class="num">2</span> <span class="pn">!=</span> <span class="num">0</span><span class="pn">:</span>   <span class="cm"># == 0 → != 0 으로 수정</span>
+    <span class="fn">result</span><span class="pn">.</span><span class="fn">append</span><span class="pn">(</span><span class="fn">i</span><span class="pn">)</span>
+<span class="cm"># 출력: [1, 3, 5, 7, 9] ✅</span></pre></div>
+        </div>
+      </div>
+    </div>
+  </details>
+
+
+  <!-- SUMMARY -->
+  <div class="section-divider"></div>
+  <div class="summary-box">
+    <div class="summary-label">CHAPTER SUMMARY</div>
+    <div class="summary-grid">
+      <div class="summary-item">
+        <div class="summary-item-key">SyntaxError</div>
+        <div class="summary-item-val">문법 오류. 괄호·따옴표·콜론 누락. 실행 전 발생.</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-item-key">NameError</div>
+        <div class="summary-item-val">정의되지 않은 변수 사용. 오타가 원인인 경우가 대부분.</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-item-key">TypeError</div>
+        <div class="summary-item-val">타입 불일치. input()은 항상 str. 숫자 연산 전 int() 변환.</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-item-key">IndexError</div>
+        <div class="summary-item-val">인덱스 범위 초과. len()-1이 마지막 인덱스. -1로 마지막 접근.</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-item-key ok">논리 오류</div>
+        <div class="summary-item-val">에러 없이 결과만 틀림. print()로 중간 값 추적.</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-item-key ok">디버깅 원칙</div>
+        <div class="summary-item-val">에러 마지막 줄 읽기 → 줄 번호 확인 → 한 번에 하나씩 수정.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cheer-box">
+    <span class="cheer-icon">🔍</span>
+    <div class="cheer-text">
+      <strong>버그를 두려워하지 않는 개발자!</strong><br>
+      오류를 만나는 것은 실패가 아닙니다. 모든 개발자는 하루에도 수십 번 오류를 만나고 고칩니다. 오늘 배운 것은 오류 메시지를 <strong>해독하는 언어</strong>입니다. 이제 빨간 메시지가 뜨면 당황하는 대신 "어디가 문제지?"라고 침착하게 읽을 수 있습니다. 디버깅 능력은 경험이 쌓일수록 훨씬 빠르고 날카로워집니다. 다음 챕터 연습문제로 실력을 굳혀보세요! 💪
+    </div>
+  </div>
+
+  <div class="chap-nav">
+    <a href="26-error-types.html" class="chap-nav-btn">
+      <span class="cnb-dir">← 이전 챕터</span>
+      <span class="cnb-title"><span>26.</span> 에러 읽는 법</span>
+    </a>
+    <a href="28-quiz-debugging.html" class="chap-nav-btn next">
+      <span class="cnb-dir">다음 챕터 →</span>
+      <span class="cnb-title"><span>28.</span> 연습문제 — 디버깅</span>
+    </a>
+  </div>
+
+</div>
+</main>
+</div>
+
+<script>
+  const isMobile = () => window.innerWidth <= 720;
+  const overlay  = document.getElementById('sidebarOverlay');
+  function toggleSidebar() {
+    document.body.classList.toggle('sidebar-closed');
+    if (isMobile()) overlay.classList.toggle('visible', !document.body.classList.contains('sidebar-closed'));
+    localStorage.setItem('sp-sidebar', document.body.classList.contains('sidebar-closed') ? 'closed' : 'open');
+  }
+  function closeSidebar() {
+    document.body.classList.add('sidebar-closed');
+    overlay.classList.remove('visible');
+    localStorage.setItem('sp-sidebar', 'closed');
+  }
+  function toggleGroup(id) { document.getElementById(id).classList.toggle('open'); }
+  window.addEventListener('DOMContentLoaded', () => {
+    if (isMobile()) document.body.classList.add('sidebar-closed');
+    else if (localStorage.getItem('sp-sidebar') === 'closed') document.body.classList.add('sidebar-closed');
+  });
+  window.addEventListener('resize', () => { if (!isMobile()) overlay.classList.remove('visible'); });
+
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = 'copied!';
+      setTimeout(() => btn.textContent = 'copy', 1500);
+    });
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>17. 미니 프로젝트 ② — 브론즈 | 슈퍼파이썬</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#111111;--bg-nav:#0A0A0A;--bg-side:#0E0E0E;--bg-card:#181818;
+      --bg-code:#1A1A1A;--bg-tip:#131A13;--bg-warn:#1A1410;--bg-info:#101520;
+      --accent:#00CC70;--accent-dim:#007A42;--accent-bg:rgba(0,204,112,0.07);
+      --accent2:#C8A000;--text:#D8D8D8;--text-head:#EFEFEF;
+      --text2:#888888;--text3:#444444;--border:#222222;--border2:#2E2E2E;
+      --sy-kw:#C792EA;--sy-fn:#82AAFF;--sy-str:#C3E88D;
+      --sy-cm:#546E7A;--sy-num:#F78C6C;--sy-pn:#89DDFF;
+      --proj:#BB88FF;--proj-bg:rgba(170,100,255,.08);--proj-border:rgba(170,100,255,.22);
+      --sidebar-w:248px;--content-max:740px;--header-h:48px;
+      font-variant-ligatures: none;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:15px;line-height:1.8;overflow-x:hidden}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}
+    ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+    ::-webkit-scrollbar-thumb:hover{background:var(--accent-dim)}
+
+    /* HEADER */
+    .top-header{position:fixed;top:0;left:0;right:0;z-index:200;height:var(--header-h);background:var(--bg-nav);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px}
+    .header-open-btn{display:none;align-items:center;justify-content:center;width:28px;height:28px;flex-shrink:0;margin-right:12px;background:var(--bg-card);border:1px solid var(--border2);border-radius:4px;cursor:pointer;color:var(--text2);font-size:12px;transition:background .15s,color .15s}
+    .header-open-btn:hover{background:var(--accent-bg);color:var(--accent)}
+    body.sidebar-closed .header-open-btn{display:flex}
+    .header-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0;font-family:'JetBrains Mono',monospace;font-size:12px;overflow:hidden}
+    .header-logo{color:var(--accent);text-decoration:none;font-weight:700;white-space:nowrap}
+    .header-sep{color:var(--text3);flex-shrink:0}
+    .header-grade{color:var(--text2);white-space:nowrap}
+    .header-chap{color:var(--text-head);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .header-center{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);display:flex;align-items:center;gap:8px;flex-shrink:0;padding:0 16px}
+    .progress-mini{width:80px;height:3px;background:var(--border2);border-radius:2px;overflow:hidden}
+    .progress-mini-fill{height:100%;background:var(--accent);border-radius:2px}
+    .header-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+    .nav-btn{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);background:transparent;border:1px solid var(--border2);padding:4px 12px;text-decoration:none;transition:border-color .15s,color .15s;white-space:nowrap}
+    .nav-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .nav-btn.primary{color:var(--bg-nav);background:var(--accent);border-color:var(--accent);font-weight:700}
+    .nav-btn.primary:hover{filter:brightness(1.1)}
+
+    /* LAYOUT */
+    .layout{display:flex;padding-top:var(--header-h);min-height:100vh}
+
+    /* SIDEBAR */
+    .sidebar{width:var(--sidebar-w);flex-shrink:0;position:fixed;top:var(--header-h);bottom:0;left:0;background:var(--bg-side);border-right:1px solid var(--border);overflow-y:auto;overflow-x:hidden;transition:transform .22s ease;z-index:150;padding-top:8px}
+    body.sidebar-closed .sidebar{transform:translateX(calc(-1 * var(--sidebar-w)))}
+    body.sidebar-closed .content{margin-left:0}
+    .sidebar-toggle{position:absolute;top:10px;right:10px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:var(--bg-card);border:1px solid var(--border2);border-radius:4px;cursor:pointer;color:var(--text2);font-size:12px;z-index:10;transition:background .15s,color .15s}
+    .sidebar-toggle:hover{background:var(--accent-bg);color:var(--accent);border-color:var(--accent)}
+    body.sidebar-closed .sidebar-toggle{display:none}
+    .sidebar-progress{margin:44px 12px 12px;padding:12px 14px;background:var(--bg-card);border:1px solid var(--border)}
+    .sp-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);margin-bottom:6px;letter-spacing:.08em}
+    .sp-bar{height:4px;background:var(--border2);border-radius:2px;overflow:hidden;margin-bottom:5px}
+    .sp-fill{height:100%;background:var(--accent);border-radius:2px}
+    .sp-text{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2)}
+    .sp-text span{color:var(--accent)}
+    .sb-group{border-bottom:1px solid var(--border)}
+    .sb-group-header{display:flex;align-items:center;justify-content:space-between;padding:9px 14px 9px 12px;cursor:pointer;user-select:none;transition:background .12s;gap:8px}
+    .sb-group-header:hover{background:rgba(255,255,255,.03)}
+    .sb-group-title{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--text2);text-transform:uppercase;flex:1}
+    .sb-group.current .sb-group-title{color:var(--accent)}
+    .sb-group-arrow{font-size:9px;color:var(--text3);transition:transform .2s;flex-shrink:0}
+    .sb-group.open .sb-group-arrow{transform:rotate(90deg);color:var(--accent)}
+    .sb-items{overflow:hidden;max-height:0;transition:max-height .28s ease}
+    .sb-group.open .sb-items{max-height:1200px}
+    .sb-item{display:flex;align-items:baseline;gap:8px;padding:6px 14px 6px 20px;font-size:13px;color:var(--text2);text-decoration:none;border-left:2px solid transparent;transition:background .1s,color .1s,border-color .1s;line-height:1.45}
+    .sb-item:hover{background:rgba(255,255,255,.03);color:var(--text)}
+    .sb-item.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-bg);font-weight:500}
+    .sb-item.done{color:var(--text3)}
+    .sb-icon{font-size:9px;flex-shrink:0;font-family:'JetBrains Mono',monospace;width:10px;text-align:center;color:var(--text3)}
+    .sb-item.active .sb-icon{color:var(--accent)}
+    .sb-item.done .sb-icon{color:var(--accent-dim)}
+    .sb-num{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);flex-shrink:0;min-width:22px}
+
+    /* CONTENT */
+    .content{margin-left:var(--sidebar-w);flex:1;min-width:0;padding:48px 52px 96px;transition:margin-left .22s ease}
+    .content-inner{max-width:var(--content-max);margin:0 auto}
+
+    /* TYPOGRAPHY */
+    .chap-meta{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .badge{font-size:10px;padding:2px 8px;letter-spacing:.06em;border:1px solid}
+    .badge.project{background:var(--proj-bg);color:var(--proj);border-color:var(--proj-border)}
+    .chap-title{font-family:'JetBrains Mono',monospace;font-size:clamp(20px,3.5vw,28px);font-weight:700;color:var(--text-head);line-height:1.25;margin-bottom:8px}
+    .chap-title .hl{color:var(--accent)}
+    .chap-subtitle{font-size:15px;color:var(--text2);margin-bottom:40px;line-height:1.65}
+    h2{font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:700;color:var(--text-head);margin:48px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+    h2 .n{color:var(--accent);font-size:13px}
+    h3{font-size:15px;font-weight:700;color:var(--text-head);margin:24px 0 10px}
+    p{color:var(--text);margin-bottom:16px;line-height:1.9;font-size:15px}
+    code{font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--bg-code);color:var(--accent);padding:1px 6px;border:1px solid var(--border2);border-radius:2px}
+    strong{color:var(--text-head);font-weight:700}
+    ul,ol{padding-left:20px;margin-bottom:16px}
+    li{color:var(--text);line-height:1.85;margin-bottom:4px;font-size:15px}
+
+    /* PROJECT INTRO BANNER */
+    .project-banner{background:linear-gradient(135deg,rgba(170,100,255,.06) 0%,rgba(0,204,112,.04) 100%);border:1px solid var(--proj-border);padding:24px 28px;margin-bottom:40px;position:relative;overflow:hidden}
+    .project-banner::before{content:'🎮';position:absolute;right:24px;top:50%;transform:translateY(-50%);font-size:48px;opacity:.15}
+    .pb-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--proj);letter-spacing:.1em;margin-bottom:8px}
+    .pb-title{font-size:20px;font-weight:700;color:var(--text-head);margin-bottom:6px;line-height:1.3}
+    .pb-desc{font-size:14px;color:var(--text2);line-height:1.7}
+    .pb-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .pb-tag{font-family:'JetBrains Mono',monospace;font-size:11px;padding:3px 10px;background:var(--bg-card);border:1px solid var(--border2);color:var(--text3)}
+
+    /* LEARN-GUIDE BOX */
+    .learn-guide{background:var(--bg-card);border:1px solid var(--border2);border-left:3px solid var(--proj);padding:16px 20px;margin-bottom:32px}
+    .lg-title{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--proj);letter-spacing:.1em;margin-bottom:8px}
+    .lg-steps{display:flex;gap:8px;flex-wrap:wrap}
+    .lg-step{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);background:var(--bg-code);border:1px solid var(--border2);padding:5px 12px;display:flex;align-items:center;gap:6px}
+    .lg-step .lg-n{color:var(--accent);font-weight:700}
+    .lg-arrow{color:var(--text3);font-size:12px}
+
+    /* OUTPUT DEMO */
+    .output-demo{background:#0A0A0A;border:1px solid var(--border);margin:16px 0 24px;overflow:hidden}
+    .od-header{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);padding:7px 16px;border-bottom:1px solid var(--border);letter-spacing:.08em;display:flex;align-items:center;gap:8px}
+    .od-header .dot{width:8px;height:8px;border-radius:50%}
+    .od-header .dot-r{background:#FF5F57}
+    .od-header .dot-y{background:#FFBD2E}
+    .od-header .dot-g{background:#28C840}
+    .od-body{padding:16px 20px}
+    .od-body pre{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text);line-height:1.85;white-space:pre-wrap}
+    .od-input{color:var(--accent2)}
+    .od-output{color:var(--accent)}
+    .od-prompt{color:var(--text2)}
+
+    /* SPEC TABLE */
+    .spec-table{width:100%;border-collapse:collapse;margin:16px 0 24px;font-size:14px}
+    .spec-table th{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--text3);text-align:left;padding:8px 14px;border-bottom:2px solid var(--border2);background:var(--bg-card)}
+    .spec-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text2);line-height:1.6;vertical-align:top}
+    .spec-table td:first-child{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);white-space:nowrap}
+    .spec-table tr:last-child td{border-bottom:none}
+
+    /* STEP CARDS */
+    .step-list{display:flex;flex-direction:column;gap:12px;margin-bottom:32px}
+    .step-card{background:var(--bg-card);border:1px solid var(--border2);overflow:hidden}
+    .step-header{display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:1px solid var(--border)}
+    .step-num{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--bg-nav);background:var(--accent);padding:2px 8px;flex-shrink:0}
+    .step-title{font-size:14px;font-weight:700;color:var(--text-head);flex:1}
+    .step-concept{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);flex-shrink:0}
+    .step-body{padding:14px 18px}
+    .step-body p{font-size:14px;margin-bottom:10px}
+    .step-body p:last-child{margin-bottom:0}
+
+    /* CODE BLOCKS */
+    .code-block{background:var(--bg-code);border:1px solid var(--border2);margin:12px 0;overflow:hidden}
+    .code-block-header{display:flex;align-items:center;justify-content:space-between;padding:7px 16px;background:var(--bg-card);border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.06em}
+    .code-block-label{color:var(--accent2)}
+    .code-block pre{padding:14px 18px;line-height:1.75;overflow-x:auto}
+    .code-block code{background:none;border:none;padding:0;font-size:13px;color:var(--text)}
+    .kw{color:#C792EA}.fn{color:#82AAFF}.str{color:#C3E88D}
+    .cm{color:#546E7A}.num{color:#F78C6C}.pn{color:#89DDFF}
+
+    /* HINT ACCORDION */
+    .hint-list{display:flex;flex-direction:column;gap:8px;margin-bottom:32px}
+    .hint-item{background:var(--bg-card);border:1px solid var(--border2);overflow:hidden}
+    .hint-toggle{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;user-select:none;transition:background .12s}
+    .hint-toggle:hover{background:rgba(255,255,255,.03)}
+    .hint-toggle-label{font-size:14px;color:var(--text2);display:flex;align-items:center;gap:8px}
+    .hint-arrow{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);transition:transform .2s}
+    .hint-item.open .hint-arrow{transform:rotate(180deg);color:var(--accent)}
+    .hint-body{max-height:0;overflow:hidden;transition:max-height .28s ease}
+    .hint-item.open .hint-body{max-height:800px}
+    .hint-content{padding:14px 18px;border-top:1px solid var(--border);font-size:14px;color:var(--text2);line-height:1.8}
+    .hint-content code{font-size:12px}
+
+    /* ANSWER SECTION */
+    .answer-toggle-btn{display:flex;align-items:center;justify-content:space-between;width:100%;padding:14px 20px;background:var(--bg-card);border:1px solid var(--border2);cursor:pointer;transition:border-color .15s}
+    .answer-toggle-btn:hover{border-color:var(--accent)}
+    .answer-toggle-btn span{font-size:14px;color:var(--text2)}
+    .answer-body{display:none;background:var(--bg-code);border:1px solid var(--border2);border-top:none;padding:20px 24px}
+    .answer-body.visible{display:block}
+
+    /* CHALLENGE BOX */
+    .challenge-box{background:linear-gradient(135deg,rgba(200,160,0,.06) 0%,rgba(200,160,0,.02) 100%);border:1px solid rgba(200,160,0,.2);padding:22px 26px;margin:32px 0}
+    .challenge-title{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent2);letter-spacing:.1em;margin-bottom:12px}
+    .challenge-list{list-style:none;padding:0;margin:0}
+    .challenge-list li{font-size:14px;color:var(--text2);padding:6px 0;display:flex;align-items:baseline;gap:10px;border-bottom:1px solid rgba(200,160,0,.08)}
+    .challenge-list li:last-child{border-bottom:none}
+    .challenge-list li::before{content:"★";color:var(--accent2);font-size:10px;flex-shrink:0}
+
+    /* TIP / WARN BOXES */
+    .tip-box{background:var(--bg-tip);border:1px solid rgba(0,204,112,.2);border-left:3px solid var(--accent);padding:14px 18px;margin:20px 0}
+    .tip-box .box-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:.08em;margin-bottom:6px}
+    .warn-box{background:var(--bg-warn);border:1px solid rgba(200,160,0,.2);border-left:3px solid var(--accent2);padding:14px 18px;margin:20px 0}
+    .warn-box .box-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent2);letter-spacing:.08em;margin-bottom:6px}
+    .tip-box p,.warn-box p{margin:0;font-size:14px;line-height:1.75}
+    .tip-box p+p,.warn-box p+p{margin-top:8px}
+
+    /* REVIEW */
+    .review-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:16px 0 32px}
+    .review-card{background:var(--bg-card);border:1px solid var(--border2);padding:12px 16px}
+    .rc-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.07em;margin-bottom:5px}
+    .rc-code{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);line-height:1.6}
+    .rc-desc{font-size:12px;color:var(--text2);margin-top:3px;line-height:1.5}
+
+    /* SECTION DIVIDER + NAV */
+    .section-divider{height:1px;background:var(--border);margin:48px 0}
+    .cheer-box{border:1px solid var(--border);background:var(--bg);padding:18px 22px;margin-bottom:44px;display:flex;gap:14px;align-items:flex-start}
+    .cheer-icon{font-size:18px;flex-shrink:0;line-height:1.5}
+    .cheer-text{font-size:14px;color:var(--text2);line-height:1.85}
+    .cheer-text strong{color:var(--text-head)}
+    .chap-nav{display:flex;justify-content:space-between;padding-top:32px;border-top:1px solid var(--border);gap:12px;flex-wrap:wrap}
+    .chap-nav-btn{display:flex;flex-direction:column;gap:4px;text-decoration:none;padding:14px 18px;border:1px solid var(--border2);background:var(--bg-card);flex:1;max-width:300px;transition:border-color .15s}
+    .chap-nav-btn:hover{border-color:var(--accent)}
+    .chap-nav-btn.next{text-align:right}
+    .cnb-dir{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.07em}
+    .cnb-title{font-size:13px;color:var(--text2);line-height:1.45}
+    .cnb-title span{color:var(--accent);font-family:'JetBrains Mono',monospace}
+
+    .sidebar-overlay{display:none;position:fixed;inset:0;top:var(--header-h);z-index:140;background:rgba(0,0,0,.65)}
+    @media(max-width:720px){.sidebar-overlay.visible{display:block}.content{margin-left:0;padding:28px 20px 72px}.header-center{display:none}}
+    @media(max-width:480px){.header-grade{display:none}.chap-nav-btn{max-width:100%}.header-right .nav-btn:not(.primary){display:none}.lg-steps{flex-direction:column}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important}}
+  </style>
+</head>
+<body>
+
+<header class="top-header">
+  <button class="header-open-btn" onclick="toggleSidebar()">▶</button>
+  <div class="header-left">
+    <a href="../index.html" class="header-logo">SUPERPYTHON</a>
+    <span class="header-sep">/</span>
+    <span class="header-grade">🟤 BRONZE</span>
+    <span class="header-sep">/</span>
+    <span class="header-chap">17. 🎮 미니 프로젝트 ②</span>
+  </div>
+  <div class="header-center">
+    <span>17 / 48</span>
+    <div class="progress-mini"><div class="progress-mini-fill" style="width:35.42%"></div></div>
+    <span>35%</span>
+  </div>
+  <div class="header-right">
+    <a href="16-quiz-input.html" class="nav-btn">← 이전</a>
+    <a href="18-if.html" class="nav-btn primary">다음 →</a>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<div class="layout">
+<aside class="sidebar" id="sidebar">
+  <button class="sidebar-toggle" onclick="toggleSidebar()">◀</button>
+  <div class="sidebar-progress">
+    <div class="sp-label">BRONZE 진행률</div>
+    <div class="sp-bar"><div class="sp-fill" style="width:35.42%"></div></div>
+    <div class="sp-text"><span>17</span> / 48 챕터 완료</div>
+  </div>
+  <div class="sb-group" id="grp-env"><div class="sb-group-header" onclick="toggleGroup('grp-env')"><span class="sb-group-title">환경 설정</span><span class="sb-group-arrow">▶</span></div><div class="sb-items"><a href="01-what-is-python.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">01</span>파이썬이란?</a><a href="02-setup.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">02</span>개발환경 설치</a></div></div>
+  <div class="sb-group" id="grp-basic1"><div class="sb-group-header" onclick="toggleGroup('grp-basic1')"><span class="sb-group-title">기초 문법 1</span><span class="sb-group-arrow">▶</span></div><div class="sb-items"><a href="03-print.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">03</span>print()란?</a><a href="04-quiz-print.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">04</span>연습문제</a><a href="05-variables.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">05</span>변수와 데이터 타입</a><a href="06-operators.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">06</span>연산자</a><a href="07-quiz-variables-operators.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">07</span>연습문제</a><a href="08-string.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">08</span>문자열 String</a><a href="09-quiz-string.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">09</span>연습문제</a><a href="10-fstring.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">10</span>f-string 완전정리</a><a href="11-quiz-fstring.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">11</span>연습문제</a><a href="12-mini-project-01.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">12</span>🎮 미니 프로젝트 ①</a></div></div>
+  <div class="sb-group current open" id="grp-basic2"><div class="sb-group-header" onclick="toggleGroup('grp-basic2')"><span class="sb-group-title">기초 문법 2</span><span class="sb-group-arrow">▶</span></div><div class="sb-items"><a href="13-list.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">13</span>리스트</a><a href="14-quiz-list.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">14</span>연습문제</a><a href="15-input.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">15</span>input() 함수</a><a href="16-quiz-input.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">16</span>연습문제</a><a href="17-mini-project-02.html" class="sb-item active"><span class="sb-icon">▶</span><span class="sb-num">17</span>🎮 미니 프로젝트 ②</a></div></div>
+  <div class="sb-group" id="grp-flow"><div class="sb-group-header" onclick="toggleGroup('grp-flow')"><span class="sb-group-title">흐름 제어</span><span class="sb-group-arrow">▶</span></div><div class="sb-items"><a href="18-if.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">18</span>조건문 (if)</a><a href="19-quiz-if.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">19</span>연습문제</a><a href="20-mini-project-03.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">20</span>🎮 미니 프로젝트 ③</a><a href="21-for-range.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">21</span>for문과 range()</a><a href="22-quiz-for.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">22</span>연습문제</a><a href="23-while.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">23</span>while문</a><a href="24-quiz-while.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">24</span>연습문제</a><a href="25-mini-project-04.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">25</span>🎮 미니 프로젝트 ④</a></div></div>
+  <div class="sb-group" id="grp-error"><div class="sb-group-header" onclick="toggleGroup('grp-error')"><span class="sb-group-title">에러 &amp; 디버깅</span><span class="sb-group-arrow">▶</span></div><div class="sb-items"><a href="26-error-types.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">26</span>에러 읽는 법</a><a href="27-debugging.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">27</span>기초 디버깅 실습</a><a href="28-quiz-debugging.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">28</span>연습문제</a></div></div>
+  <div class="sb-group" id="grp-func"><div class="sb-group-header" onclick="toggleGroup('grp-func')"><span class="sb-group-title">함수</span><span class="sb-group-arrow">▶</span></div><div class="sb-items"><a href="29-function-basic.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">29</span>함수 기초</a><a href="30-quiz-function-basic.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">30</span>연습문제</a><a href="31-mini-project-05.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">31</span>🎮 미니 프로젝트 ⑤</a><a href="32-function-advanced.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">32</span>함수 심화</a><a href="33-quiz-function-advanced.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">33</span>연습문제</a><a href="34-module.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">34</span>모듈</a><a href="35-quiz-module.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">35</span>연습문제</a><a href="36-mini-project-06.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">36</span>🎮 미니 프로젝트 ⑥</a></div></div>
+  <div class="sb-group" id="grp-ds"><div class="sb-group-header" onclick="toggleGroup('grp-ds')"><span class="sb-group-title">자료구조</span><span class="sb-group-arrow">▶</span></div><div class="sb-items"><a href="37-dictionary.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">37</span>딕셔너리</a><a href="38-quiz-dictionary.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">38</span>연습문제</a><a href="39-tuple-set.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">39</span>튜플과 셋</a><a href="40-quiz-tuple-set.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">40</span>연습문제</a><a href="41-mini-project-07.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">41</span>🎮 미니 프로젝트 ⑦</a></div></div>
+  <div class="sb-group" id="grp-file"><div class="sb-group-header" onclick="toggleGroup('grp-file')"><span class="sb-group-title">파일 &amp; 예외처리</span><span class="sb-group-arrow">▶</span></div><div class="sb-items"><a href="42-file-io.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">42</span>파일 입출력</a><a href="43-quiz-file-io.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">43</span>연습문제</a><a href="44-exception-basic.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">44</span>예외처리 기초</a><a href="45-quiz-exception.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">45</span>연습문제</a><a href="46-mini-project-08.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">46</span>🎮 미니 프로젝트 ⑧</a></div></div>
+  <div class="sb-group" id="grp-end"><div class="sb-group-header" onclick="toggleGroup('grp-end')"><span class="sb-group-title">마무리</span><span class="sb-group-arrow">▶</span></div><div class="sb-items"><a href="47-final-project.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">47</span>★ 최종 프로젝트</a><a href="48-next-step.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">48</span>다음 단계 미리보기</a></div></div>
+</aside>
+
+<main class="content" id="mainContent">
+<div class="content-inner">
+
+  <div class="chap-meta">
+    <span class="badge project">PROJECT</span>
+    <span>기초 문법 2</span>
+    <span style="color:var(--text3)">·</span>
+    <span>챕터 17 / 48</span>
+  </div>
+  <h1 class="chap-title">🎮 미니 프로젝트 ② — <span class="hl">나만의 성적표 생성기</span></h1>
+  <p class="chap-subtitle">리스트와 input()을 결합해 사용자로부터 직접 점수를 입력받고, 통계와 함께 예쁜 성적표를 출력하는 프로그램을 만듭니다.</p>
+
+  <!-- 학습 순서 가이드 -->
+  <div class="learn-guide">
+    <div class="lg-title">📌 이렇게 진행하세요</div>
+    <div class="lg-steps">
+      <div class="lg-step"><span class="lg-n">1</span> 기능 명세서 읽기</div>
+      <div class="lg-arrow">→</div>
+      <div class="lg-step"><span class="lg-n">2</span> 실행 결과 확인</div>
+      <div class="lg-arrow">→</div>
+      <div class="lg-step"><span class="lg-n">3</span> 혼자 구현 시도</div>
+      <div class="lg-arrow">→</div>
+      <div class="lg-step"><span class="lg-n">4</span> 막히면 단계 가이드</div>
+      <div class="lg-arrow">→</div>
+      <div class="lg-step"><span class="lg-n">5</span> 최후에 정답 확인</div>
+    </div>
+  </div>
+
+  <div class="warn-box">
+    <div class="box-label">⚠️ 정답을 먼저 보지 마세요</div>
+    <p>기능 명세를 읽고 스스로 먼저 만들어보세요. <strong>막히는 구간이 실제로 가장 많이 배우는 순간</strong>입니다. 30분 이상 고민한 뒤에 힌트를 여세요.</p>
+  </div>
+
+  <!-- ═══ 1. 프로젝트 소개 ═══ -->
+  <h2><span class="n">1.</span>프로젝트 소개</h2>
+
+  <div class="project-banner">
+    <div class="pb-label">MINI PROJECT ②</div>
+    <div class="pb-title">나만의 성적표 생성기</div>
+    <div class="pb-desc">이름과 과목별 점수를 직접 입력받아 합계·평균·최고점·최저점을 계산하고, 등급까지 판별하는 성적표를 출력합니다. input()과 리스트가 처음으로 만나 진짜로 "동작하는" 프로그램이 됩니다.</div>
+    <div class="pb-tags">
+      <span class="pb-tag">input()</span>
+      <span class="pb-tag">int()</span>
+      <span class="pb-tag">리스트</span>
+      <span class="pb-tag">append()</span>
+      <span class="pb-tag">sum / max / min</span>
+      <span class="pb-tag">f-string</span>
+      <span class="pb-tag">문자열 서식</span>
+    </div>
+  </div>
+
+  <!-- ═══ 2. 실행 결과 ═══ -->
+  <h2><span class="n">2.</span>실행 결과 미리보기</h2>
+  <p>여러분이 완성할 프로그램을 실행하면 아래와 같이 동작합니다. 밑줄 친 부분이 사용자가 직접 입력한 값입니다.</p>
+
+  <div class="output-demo">
+    <div class="od-header">
+      <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+      <span style="margin-left:4px">터미널</span>
+    </div>
+    <div class="od-body"><pre><span class="od-prompt">=============================
+     📋  성적표 생성기 v1.0
+=============================</span>
+<span class="od-prompt">학생 이름을 입력하세요: </span><span class="od-input">김민준</span>
+<span class="od-prompt">과목 수를 입력하세요 (3~5): </span><span class="od-input">4</span>
+
+<span class="od-prompt">과목 1 이름: </span><span class="od-input">국어</span>
+<span class="od-prompt">국어 점수 (0~100): </span><span class="od-input">88</span>
+<span class="od-prompt">과목 2 이름: </span><span class="od-input">영어</span>
+<span class="od-prompt">영어 점수 (0~100): </span><span class="od-input">92</span>
+<span class="od-prompt">과목 3 이름: </span><span class="od-input">수학</span>
+<span class="od-prompt">수학 점수 (0~100): </span><span class="od-input">78</span>
+<span class="od-prompt">과목 4 이름: </span><span class="od-input">과학</span>
+<span class="od-prompt">과학 점수 (0~100): </span><span class="od-input">85</span>
+
+<span class="od-output">=============================
+   📊  김민준 님의 성적표
+=============================
+ 국어     :  88점
+ 영어     :  92점
+ 수학     :  78점
+ 과학     :  85점
+-----------------------------
+ 합계     : 343점
+ 평균     :  85.8점
+ 최고점   :  92점  (영어)
+ 최저점   :  78점  (수학)
+ 등급     :  B
+=============================</span></pre></div>
+  </div>
+
+  <div class="tip-box">
+    <div class="box-label">💡 등급 기준</div>
+    <p>평균 90 이상 → <strong>A</strong> &nbsp;|&nbsp; 80 이상 → <strong>B</strong> &nbsp;|&nbsp; 70 이상 → <strong>C</strong> &nbsp;|&nbsp; 60 이상 → <strong>D</strong> &nbsp;|&nbsp; 60 미만 → <strong>F</strong></p>
+  </div>
+
+  <!-- ═══ 3. 기능 명세서 ═══ -->
+  <h2><span class="n">3.</span>기능 명세서</h2>
+  <p>아래 표를 참고해 어떤 기능이 필요한지 파악하세요. 코드를 바로 짜는 것보다 <strong>"뭘 만들어야 하는지"를 먼저 이해하는 것</strong>이 중요합니다.</p>
+
+  <table class="spec-table">
+    <thead><tr><th>구분</th><th>기능</th><th>사용 개념</th></tr></thead>
+    <tbody>
+      <tr><td>입력</td><td>학생 이름 입력받기</td><td><code>input()</code></td></tr>
+      <tr><td>입력</td><td>과목 수 입력받기 (3~5사이 정수)</td><td><code>int(input())</code></td></tr>
+      <tr><td>입력</td><td>과목 이름과 점수를 각각 입력받기</td><td><code>input()</code>, <code>int()</code></td></tr>
+      <tr><td>저장</td><td>과목 이름 리스트, 점수 리스트에 각각 저장</td><td><code>[]</code>, <code>.append()</code></td></tr>
+      <tr><td>계산</td><td>합계, 평균(소수점 첫째 자리), 최고점, 최저점 계산</td><td><code>sum()</code>, <code>max()</code>, <code>min()</code>, <code>len()</code></td></tr>
+      <tr><td>계산</td><td>최고점/최저점 과목명 찾기</td><td>리스트 인덱싱</td></tr>
+      <tr><td>계산</td><td>평균으로 등급 판별 (A/B/C/D/F)</td><td>조건 비교 (이번 프로젝트 용도로만 사용)</td></tr>
+      <tr><td>출력</td><td>성적표 형식으로 출력</td><td><code>f-string</code>, 문자열 서식 <code>{:&lt;N}</code></td></tr>
+    </tbody>
+  </table>
+
+  <!-- ═══ 4. 단계별 구현 가이드 ═══ -->
+  <h2><span class="n">4.</span>단계별 구현 가이드</h2>
+  <p>한 번에 전체를 만들려 하지 말고, <strong>한 단계씩 완성하고 실행</strong>해보면서 나아가세요. 각 단계가 제대로 출력되는 것을 확인한 뒤 다음 단계로 진행합니다.</p>
+
+  <div class="step-list">
+
+    <div class="step-card">
+      <div class="step-header">
+        <span class="step-num">STEP 1</span>
+        <span class="step-title">헤더 출력과 이름·과목 수 입력받기</span>
+        <span class="step-concept">print · input · int</span>
+      </div>
+      <div class="step-body">
+        <p>프로그램이 시작될 때 제목 배너를 출력하고, 학생 이름과 과목 수를 입력받습니다.</p>
+        <p>과목 수는 <code>int(input(...))</code>로 변환하고 <code>n</code> 변수에 저장하세요.</p>
+        <div class="code-block">
+          <div class="code-block-header"><span>STEP 1 구현</span></div>
+          <pre><code><span class="fn">print</span><span class="pn">(</span><span class="str">"============================="</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"     📋  성적표 생성기 v1.0"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"============================="</span><span class="pn">)</span>
+<span class="fn">name</span> <span class="pn">=</span> <span class="fn">input</span><span class="pn">(</span><span class="str">"학생 이름을 입력하세요: "</span><span class="pn">)</span>
+<span class="fn">n</span>    <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"과목 수를 입력하세요 (3~5): "</span><span class="pn">))</span>
+<span class="fn">print</span><span class="pn">()</span>  <span class="cm"># 빈 줄</span></code></pre>
+        </div>
+        <p>▶ 실행하면 배너와 입력 프롬프트가 나타나야 합니다.</p>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-header">
+        <span class="step-num">STEP 2</span>
+        <span class="step-title">과목 이름과 점수를 리스트에 수집하기</span>
+        <span class="step-concept">리스트 · append · 반복 입력</span>
+      </div>
+      <div class="step-body">
+        <p>빈 리스트 <code>subjects</code>와 <code>scores</code>를 만들고, 과목 수(<code>n</code>)만큼 입력을 반복해서 받습니다.</p>
+        <p>지금은 <code>for</code>문을 배우지 않았으니, <code>n</code>을 직접 사용해 필요한 횟수만큼 입력 코드를 작성하세요. (최소 3개)</p>
+
+        <div class="code-block">
+          <div class="code-block-header"><span>STEP 2 구현 — 과목 수를 3으로 고정해서 먼저 시도해보세요</span></div>
+          <pre><code><span class="fn">subjects</span> <span class="pn">=</span> <span class="pn">[]</span>   <span class="cm"># 과목 이름 리스트</span>
+<span class="fn">scores</span>   <span class="pn">=</span> <span class="pn">[]</span>   <span class="cm"># 점수 리스트</span>
+
+<span class="cm"># 과목 1</span>
+<span class="fn">subj</span> <span class="pn">=</span> <span class="fn">input</span><span class="pn">(</span><span class="str">"과목 1 이름: "</span><span class="pn">)</span>
+<span class="fn">score</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">f"{subj} 점수 (0~100): "</span><span class="pn">))</span>
+subjects<span class="pn">.</span><span class="fn">append</span><span class="pn">(</span>subj<span class="pn">)</span>
+scores<span class="pn">.</span><span class="fn">append</span><span class="pn">(</span>score<span class="pn">)</span>
+
+<span class="cm"># 과목 2, 3도 같은 패턴으로 반복</span>
+<span class="cm"># ...</span></code></pre>
+        </div>
+
+        <p>각 과목을 입력받은 뒤 <code>print(subjects, scores)</code>로 리스트가 올바르게 채워지는지 확인하세요.</p>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-header">
+        <span class="step-num">STEP 3</span>
+        <span class="step-title">합계·평균·최고·최저 계산하기</span>
+        <span class="step-concept">sum · max · min · 인덱싱</span>
+      </div>
+      <div class="step-body">
+        <p>리스트가 완성되면 통계를 계산합니다. 최고점과 최저점의 <strong>과목 이름</strong>을 찾으려면 인덱스가 필요합니다.</p>
+
+        <div class="code-block">
+          <div class="code-block-header"><span>STEP 3 구현</span></div>
+          <pre><code><span class="fn">total</span>     <span class="pn">=</span> <span class="fn">sum</span><span class="pn">(</span>scores<span class="pn">)</span>
+<span class="fn">avg</span>       <span class="pn">=</span> total <span class="pn">/</span> <span class="fn">len</span><span class="pn">(</span>scores<span class="pn">)</span>
+<span class="fn">best</span>      <span class="pn">=</span> <span class="fn">max</span><span class="pn">(</span>scores<span class="pn">)</span>
+<span class="fn">worst</span>     <span class="pn">=</span> <span class="fn">min</span><span class="pn">(</span>scores<span class="pn">)</span>
+
+<span class="cm"># 최고점 과목명: 점수 리스트에서 최고점의 위치를 찾아 subjects에서 꺼내기</span>
+<span class="fn">best_subj</span>  <span class="pn">=</span> subjects<span class="pn">[</span>scores<span class="pn">.</span><span class="fn">index</span><span class="pn">(</span>best<span class="pn">)]</span>
+<span class="fn">worst_subj</span> <span class="pn">=</span> subjects<span class="pn">[</span>scores<span class="pn">.</span><span class="fn">index</span><span class="pn">(</span>worst<span class="pn">)]</span></code></pre>
+        </div>
+
+        <p><code>.index(값)</code>는 리스트에서 해당 값의 위치(인덱스)를 반환합니다. <code>scores.index(max(scores))</code>는 "점수 리스트에서 최고점이 몇 번째 위치?"를 알려줍니다.</p>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-header">
+        <span class="step-num">STEP 4</span>
+        <span class="step-title">등급 판별하기</span>
+        <span class="step-concept">평균 기반 조건 분기</span>
+      </div>
+      <div class="step-body">
+        <p>평균 점수를 기준으로 등급 문자(A/B/C/D/F)를 결정합니다. 조건문(<code>if/elif/else</code>)은 다음 챕터에서 배우지만, 이번 프로젝트를 위해 간단히 사용법만 미리 씁니다.</p>
+
+        <div class="code-block">
+          <div class="code-block-header"><span>STEP 4 구현 — 조건문 미리 사용해보기</span></div>
+          <pre><code><span class="kw">if</span> avg <span class="pn">>=</span> <span class="num">90</span><span class="pn">:</span>
+    <span class="fn">grade</span> <span class="pn">=</span> <span class="str">"A"</span>
+<span class="kw">elif</span> avg <span class="pn">>=</span> <span class="num">80</span><span class="pn">:</span>
+    <span class="fn">grade</span> <span class="pn">=</span> <span class="str">"B"</span>
+<span class="kw">elif</span> avg <span class="pn">>=</span> <span class="num">70</span><span class="pn">:</span>
+    <span class="fn">grade</span> <span class="pn">=</span> <span class="str">"C"</span>
+<span class="kw">elif</span> avg <span class="pn">>=</span> <span class="num">60</span><span class="pn">:</span>
+    <span class="fn">grade</span> <span class="pn">=</span> <span class="str">"D"</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">grade</span> <span class="pn">=</span> <span class="str">"F"</span></code></pre>
+        </div>
+
+        <p>지금은 이 패턴을 그대로 사용하면 됩니다. 어떻게 동작하는지는 <strong>18번 챕터에서 자세히 배웁니다.</strong></p>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-header">
+        <span class="step-num">STEP 5</span>
+        <span class="step-title">성적표 출력하기</span>
+        <span class="step-concept">f-string · 문자열 서식 정렬</span>
+      </div>
+      <div class="step-body">
+        <p>계산된 모든 값을 정리해서 예쁜 성적표로 출력합니다. 과목 이름과 점수를 <code>f-string</code>의 정렬 서식으로 가지런히 맞춰보세요.</p>
+
+        <div class="code-block">
+          <div class="code-block-header"><span>STEP 5 구현 — 출력 형식</span></div>
+          <pre><code><span class="fn">print</span><span class="pn">()</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"============================="</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"   📊  {name} 님의 성적표"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"============================="</span><span class="pn">)</span>
+
+<span class="cm"># 각 과목 출력 — 과목명을 8칸 너비로 왼쪽 정렬</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f" {subjects[0]:<span class="pn">{</span><span class="num">8</span><span class="pn">}</span>}: {scores[0]:>4}점"</span><span class="pn">)</span>
+<span class="cm"># 나머지 과목도 같은 방식으로 ...
+
+# 구분선 + 통계</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"-----------------------------"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f" {'합계':<span class="pn">{</span><span class="num">8</span><span class="pn">}</span>}: {total:>4}점"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f" {'평균':<span class="pn">{</span><span class="num">8</span><span class="pn">}</span>}: {avg:>6.1f}점"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f" {'최고점':<span class="pn">{</span><span class="num">8</span><span class="pn">}</span>}: {best:>4}점  ({best_subj})"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f" {'최저점':<span class="pn">{</span><span class="num">8</span><span class="pn">}</span>}: {worst:>4}점  ({worst_subj})"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f" {'등급':<span class="pn">{</span><span class="num">8</span><span class="pn">}</span>}: {grade}"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"============================="</span><span class="pn">)</span></code></pre>
+        </div>
+
+        <p><code>{과목명:&lt;8}</code>은 과목명을 8칸 너비에 왼쪽 정렬, <code>{점수:&gt;4}</code>는 4칸 너비에 오른쪽 정렬입니다. 이렇게 하면 어떤 이름이 들어와도 세로가 일렬로 맞춰집니다.</p>
+      </div>
+    </div>
+
+  </div><!-- end step-list -->
+
+  <!-- ═══ 5. 힌트 ═══ -->
+  <h2><span class="n">5.</span>막혔을 때 — 단계별 힌트</h2>
+  <p>충분히 혼자 시도해본 뒤에 힌트를 열어보세요.</p>
+
+  <div class="hint-list">
+
+    <div class="hint-item" id="hint1">
+      <div class="hint-toggle" onclick="toggleHint('hint1')">
+        <span class="hint-toggle-label">💡 힌트 1 — 빈 리스트에 값을 추가하는 방법</span>
+        <span class="hint-arrow">▼</span>
+      </div>
+      <div class="hint-body">
+        <div class="hint-content">
+          <p><code>.append(값)</code>를 쓰면 리스트 끝에 값이 추가됩니다.</p>
+          <div class="code-block"><div class="code-block-header"><span></span></div><pre><code><span class="fn">names</span> <span class="pn">=</span> <span class="pn">[]</span>
+names<span class="pn">.</span><span class="fn">append</span><span class="pn">(</span><span class="str">"국어"</span><span class="pn">)</span>
+names<span class="pn">.</span><span class="fn">append</span><span class="pn">(</span><span class="str">"영어"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span>names<span class="pn">)</span>  <span class="cm"># ['국어', '영어']</span></code></pre></div>
+          <p>과목 이름과 점수를 각각 별도 리스트에 <code>append()</code>로 추가하세요.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="hint-item" id="hint2">
+      <div class="hint-toggle" onclick="toggleHint('hint2')">
+        <span class="hint-toggle-label">💡 힌트 2 — f-string 안에서 input() 사용하기</span>
+        <span class="hint-arrow">▼</span>
+      </div>
+      <div class="hint-body">
+        <div class="hint-content">
+          <p>과목명을 먼저 입력받은 뒤, 그 이름을 prompt 메시지에 포함시키면 더 친절한 UX가 됩니다.</p>
+          <div class="code-block"><div class="code-block-header"><span></span></div><pre><code><span class="fn">subj</span> <span class="pn">=</span> <span class="fn">input</span><span class="pn">(</span><span class="str">"과목 이름: "</span><span class="pn">)</span>
+<span class="fn">score</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">f"{subj} 점수: "</span><span class="pn">))</span>
+<span class="cm"># → "국어 점수: " 처럼 과목명이 들어간 프롬프트가 나옵니다</span></code></pre></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hint-item" id="hint3">
+      <div class="hint-toggle" onclick="toggleHint('hint3')">
+        <span class="hint-toggle-label">💡 힌트 3 — 최고점·최저점의 과목명 찾기</span>
+        <span class="hint-arrow">▼</span>
+      </div>
+      <div class="hint-body">
+        <div class="hint-content">
+          <p>두 리스트(<code>subjects</code>, <code>scores</code>)는 <strong>같은 인덱스끼리 짝을 이룹니다</strong>. 점수 리스트에서 최고점의 위치를 찾으면 같은 위치의 과목 이름을 꺼낼 수 있습니다.</p>
+          <div class="code-block"><div class="code-block-header"><span></span></div><pre><code><span class="fn">best</span>       <span class="pn">=</span> <span class="fn">max</span><span class="pn">(</span>scores<span class="pn">)</span>
+<span class="fn">best_idx</span>   <span class="pn">=</span> scores<span class="pn">.</span><span class="fn">index</span><span class="pn">(</span>best<span class="pn">)</span>  <span class="cm"># 최고점의 위치</span>
+<span class="fn">best_subj</span>  <span class="pn">=</span> subjects<span class="pn">[</span>best_idx<span class="pn">]</span>   <span class="cm"># 같은 위치의 과목명</span></code></pre></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hint-item" id="hint4">
+      <div class="hint-toggle" onclick="toggleHint('hint4')">
+        <span class="hint-toggle-label">💡 힌트 4 — 과목명과 점수를 가지런히 정렬 출력하기</span>
+        <span class="hint-arrow">▼</span>
+      </div>
+      <div class="hint-body">
+        <div class="hint-content">
+          <p>f-string의 <code>{변수:&lt;너비}</code>로 왼쪽 정렬, <code>{변수:&gt;너비}</code>로 오른쪽 정렬이 가능합니다.</p>
+          <div class="code-block"><div class="code-block-header"><span></span></div><pre><code><span class="fn">subj</span>  <span class="pn">=</span> <span class="str">"국어"</span>
+<span class="fn">score</span> <span class="pn">=</span> <span class="num">88</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f" {subj:<8}: {score:>4}점"</span><span class="pn">)</span>
+<span class="cm"># " 국어      :   88점"  (과목명 8칸, 점수 4칸)</span></code></pre></div>
+          <p>한글 과목명은 2바이트라 완벽한 정렬이 어렵습니다. 지금은 근사치로 맞추면 충분합니다.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="hint-item" id="hint5">
+      <div class="hint-toggle" onclick="toggleHint('hint5')">
+        <span class="hint-toggle-label">💡 힌트 5 — 과목 수에 따라 출력 개수를 유동적으로 만들기</span>
+        <span class="hint-arrow">▼</span>
+      </div>
+      <div class="hint-body">
+        <div class="hint-content">
+          <p>과목 수가 3~5개로 바뀌면 출력 줄 수도 달라야 합니다. 인덱스를 직접 쓰는 대신, 리스트를 순회하는 방식을 사용할 수 있습니다. 아직 <code>for</code>를 배우지 않았으니 다음과 같은 패턴으로 모든 경우를 출력해보세요.</p>
+          <div class="code-block"><div class="code-block-header"><span></span></div><pre><code><span class="cm"># 방법 1: 인덱싱으로 각각 출력 (과목 수 고정 시)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f" {subjects[0]:<8}: {scores[0]:>4}점"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f" {subjects[1]:<8}: {scores[1]:>4}점"</span><span class="pn">)</span>
+<span class="cm"># ... n개만큼 반복</span>
+
+<span class="cm"># 참고: for 루프를 배운 뒤에는 이렇게 할 수 있습니다 (선택 도전)</span>
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="pn">(</span>n<span class="pn">):</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">f" {subjects[i]:<8}: {scores[i]:>4}점"</span><span class="pn">)</span></code></pre></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end hint-list -->
+
+  <!-- ═══ 6. 전체 정답 ═══ -->
+  <h2><span class="n">6.</span>전체 정답 코드</h2>
+
+  <button class="answer-toggle-btn" onclick="toggleAnswer()">
+    <span>✅ 전체 정답 코드 보기 &nbsp;<span style="color:var(--text3);font-size:11px">— 스스로 먼저 만들어본 뒤 열어주세요</span></span>
+    <span id="answer-arrow" style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text3)">▼</span>
+  </button>
+  <div class="answer-body" id="answer-body">
+    <div class="code-block" style="margin:0">
+      <div class="code-block-header"><span>17-grade-report.py</span><span class="code-block-label">정답</span></div>
+      <pre><code><span class="cm"># ──────────────────────────────────────
+# 🎮 미니 프로젝트 ② — 나만의 성적표 생성기
+# 사용 개념: input, int, 리스트, append,
+#           sum/max/min, f-string, 조건문
+# ──────────────────────────────────────</span>
+
+<span class="cm"># 1. 시작 배너</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"============================="</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"     📋  성적표 생성기 v1.0"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"============================="</span><span class="pn">)</span>
+
+<span class="cm"># 2. 기본 정보 입력</span>
+<span class="fn">name</span> <span class="pn">=</span> <span class="fn">input</span><span class="pn">(</span><span class="str">"학생 이름을 입력하세요: "</span><span class="pn">)</span>
+<span class="fn">n</span>    <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"과목 수를 입력하세요 (3~5): "</span><span class="pn">))</span>
+<span class="fn">print</span><span class="pn">()</span>
+
+<span class="cm"># 3. 과목 이름·점수 수집 (n개)</span>
+<span class="fn">subjects</span> <span class="pn">=</span> <span class="pn">[]</span>
+<span class="fn">scores</span>   <span class="pn">=</span> <span class="pn">[]</span>
+
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="pn">(</span><span class="num">1</span><span class="pn">,</span> n <span class="pn">+</span> <span class="num">1</span><span class="pn">):</span>
+    <span class="fn">subj</span>  <span class="pn">=</span> <span class="fn">input</span><span class="pn">(</span><span class="str">f"과목 {i} 이름: "</span><span class="pn">)</span>
+    <span class="fn">score</span> <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">f"{subj} 점수 (0~100): "</span><span class="pn">))</span>
+    subjects<span class="pn">.</span><span class="fn">append</span><span class="pn">(</span>subj<span class="pn">)</span>
+    scores<span class="pn">.</span><span class="fn">append</span><span class="pn">(</span>score<span class="pn">)</span>
+
+<span class="cm"># 4. 통계 계산</span>
+<span class="fn">total</span>     <span class="pn">=</span> <span class="fn">sum</span><span class="pn">(</span>scores<span class="pn">)</span>
+<span class="fn">avg</span>       <span class="pn">=</span> total <span class="pn">/</span> <span class="fn">len</span><span class="pn">(</span>scores<span class="pn">)</span>
+<span class="fn">best</span>      <span class="pn">=</span> <span class="fn">max</span><span class="pn">(</span>scores<span class="pn">)</span>
+<span class="fn">worst</span>     <span class="pn">=</span> <span class="fn">min</span><span class="pn">(</span>scores<span class="pn">)</span>
+<span class="fn">best_subj</span>  <span class="pn">=</span> subjects<span class="pn">[</span>scores<span class="pn">.</span><span class="fn">index</span><span class="pn">(</span>best<span class="pn">)]</span>
+<span class="fn">worst_subj</span> <span class="pn">=</span> subjects<span class="pn">[</span>scores<span class="pn">.</span><span class="fn">index</span><span class="pn">(</span>worst<span class="pn">)]</span>
+
+<span class="cm"># 5. 등급 판별</span>
+<span class="kw">if</span> avg <span class="pn">>=</span> <span class="num">90</span><span class="pn">:</span>
+    <span class="fn">grade</span> <span class="pn">=</span> <span class="str">"A"</span>
+<span class="kw">elif</span> avg <span class="pn">>=</span> <span class="num">80</span><span class="pn">:</span>
+    <span class="fn">grade</span> <span class="pn">=</span> <span class="str">"B"</span>
+<span class="kw">elif</span> avg <span class="pn">>=</span> <span class="num">70</span><span class="pn">:</span>
+    <span class="fn">grade</span> <span class="pn">=</span> <span class="str">"C"</span>
+<span class="kw">elif</span> avg <span class="pn">>=</span> <span class="num">60</span><span class="pn">:</span>
+    <span class="fn">grade</span> <span class="pn">=</span> <span class="str">"D"</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">grade</span> <span class="pn">=</span> <span class="str">"F"</span>
+
+<span class="cm"># 6. 성적표 출력</span>
+<span class="fn">print</span><span class="pn">()</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"============================="</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"   📊  {name} 님의 성적표"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"============================="</span><span class="pn">)</span>
+
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span><span class="pn">(</span>n<span class="pn">):</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">f" {subjects[i]:<8}: {scores[i]:>4}점"</span><span class="pn">)</span>
+
+<span class="fn">print</span><span class="pn">(</span><span class="str">"-----------------------------"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f" {'합계':<8}: {total:>4}점"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f" {'평균':<8}: {avg:>6.1f}점"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f" {'최고점':<8}: {best:>4}점  ({best_subj})"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f" {'최저점':<8}: {worst:>4}점  ({worst_subj})"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f" {'등급':<8}: {grade}"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"============================="</span><span class="pn">)</span></code></pre>
+    </div>
+
+    <div style="margin-top:20px;padding:14px 0;border-top:1px solid var(--border)">
+      <p style="font-size:13px;color:var(--text3);margin:0">📌 <strong style="color:var(--text2)">정답 코드에서 for 루프를 사용한 이유:</strong> 과목 수 n이 3~5개로 가변적이기 때문입니다. 아직 for 루프를 배우지 않았다면 <code>subjects[0]</code>, <code>subjects[1]</code>... 방식으로 출력해도 충분합니다. for 루프는 21번 챕터에서 배웁니다.</p>
+    </div>
+  </div>
+
+  <!-- ═══ 7. 도전 과제 ═══ -->
+  <h2><span class="n">7.</span>도전 과제 — 더 발전시켜보기</h2>
+  <p>기본 성적표를 완성했다면, 힌트 없이 아래 기능을 직접 추가해보세요.</p>
+
+  <div class="challenge-box">
+    <div class="challenge-title">★ CHALLENGE</div>
+    <ul class="challenge-list">
+      <li>점수가 <strong>0보다 작거나 100보다 크면</strong> <code>"잘못된 점수입니다. 다시 입력하세요."</code>를 출력하고 재입력 받기 (while 루프 응용 — 23번 챕터 선행 학습)</li>
+      <li>성적표 아래에 <strong>점수 분포 막대 그래프</strong>를 텍스트로 추가하기<br><small style="color:var(--text3)">예: <code>국어 ▓▓▓▓▓▓▓▓▓  88</code> → 점수/10만큼 ▓ 반복</small></li>
+      <li>과목 수를 <strong>입력하지 않고</strong> 과목 이름에 <code>"done"</code>을 입력하면 입력 종료되도록 수정하기</li>
+      <li>모든 점수를 내림차순으로 정렬한 <strong>순위표</strong>를 추가 출력하기</li>
+    </ul>
+  </div>
+
+  <!-- ═══ 8. 이번 프로젝트에서 쓴 개념 ═══ -->
+  <h2><span class="n">8.</span>이번 프로젝트에서 쓴 개념 정리</h2>
+
+  <div class="review-grid">
+    <div class="review-card">
+      <div class="rc-label">사용자 입력</div>
+      <div class="rc-code">int(input("..."))</div>
+      <div class="rc-desc">문자열 → 정수 변환</div>
+    </div>
+    <div class="review-card">
+      <div class="rc-label">리스트 수집</div>
+      <div class="rc-code">lst.append(val)</div>
+      <div class="rc-desc">반복 입력 저장</div>
+    </div>
+    <div class="review-card">
+      <div class="rc-label">통계 함수</div>
+      <div class="rc-code">sum / max / min</div>
+      <div class="rc-desc">리스트 전체 집계</div>
+    </div>
+    <div class="review-card">
+      <div class="rc-label">위치 찾기</div>
+      <div class="rc-code">lst.index(val)</div>
+      <div class="rc-desc">값 → 인덱스 반환</div>
+    </div>
+    <div class="review-card">
+      <div class="rc-label">출력 정렬</div>
+      <div class="rc-code">{val:&lt;8} {val:&gt;4}</div>
+      <div class="rc-desc">f-string 폭 지정</div>
+    </div>
+    <div class="review-card">
+      <div class="rc-label">조건 분기</div>
+      <div class="rc-code">if / elif / else</div>
+      <div class="rc-desc">등급 판별 (18번↑)</div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <div class="cheer-box">
+    <span class="cheer-icon">🏆</span>
+    <div class="cheer-text">
+      <strong>기초 문법 2 섹션을 완주했습니다!</strong><br>
+      이제 사용자와 대화하는 프로그램을 직접 만들 수 있게 됐습니다. 다음 섹션인 <strong>흐름 제어</strong>에서는 조건문(if/elif/else)을 배워 프로그램이 스스로 판단할 수 있게 만들어봅니다. 지금까지 배운 것들이 훨씬 강력해집니다.
+    </div>
+  </div>
+
+  <div class="chap-nav">
+    <a href="16-quiz-input.html" class="chap-nav-btn">
+      <span class="cnb-dir">← 이전 챕터</span>
+      <span class="cnb-title"><span>16.</span> 연습문제 — input()</span>
+    </a>
+    <a href="18-if.html" class="chap-nav-btn next">
+      <span class="cnb-dir">다음 챕터 →</span>
+      <span class="cnb-title"><span>18.</span> 조건문 (if, elif, else)</span>
+    </a>
+  </div>
+
+</div>
+</main>
+</div>
+
+<script>
+  const isMobile = () => window.innerWidth <= 720;
+  const overlay  = document.getElementById('sidebarOverlay');
+  function toggleSidebar() { document.body.classList.toggle('sidebar-closed'); if (isMobile()) overlay.classList.toggle('visible', !document.body.classList.contains('sidebar-closed')); localStorage.setItem('sp-sidebar', document.body.classList.contains('sidebar-closed') ? 'closed' : 'open'); }
+  function closeSidebar()  { document.body.classList.add('sidebar-closed'); overlay.classList.remove('visible'); localStorage.setItem('sp-sidebar','closed'); }
+  function toggleGroup(id) { document.getElementById(id).classList.toggle('open'); }
+  window.addEventListener('DOMContentLoaded', () => {
+    if (isMobile()) document.body.classList.add('sidebar-closed');
+    else if (localStorage.getItem('sp-sidebar') === 'closed') document.body.classList.add('sidebar-closed');
+  });
+  window.addEventListener('resize', () => { if (!isMobile()) overlay.classList.remove('visible'); });
+
+  function toggleHint(id) {
+    const item = document.getElementById(id);
+    item.classList.toggle('open');
+  }
+  function toggleAnswer() {
+    const body = document.getElementById('answer-body');
+    const arrow = document.getElementById('answer-arrow');
+    const isVisible = body.classList.toggle('visible');
+    arrow.textContent = isVisible ? '▲' : '▼';
+  }
+</script>
+</body>
+</html>

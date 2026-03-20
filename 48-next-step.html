@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>다음 단계 미리보기 — 브론즈 완주 | 슈퍼파이썬</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#111111;--bg-nav:#0A0A0A;--bg-side:#0E0E0E;--bg-card:#181818;
+      --bg-code:#1A1A1A;--bg-tip:#131A13;--bg-info:#101520;
+      --accent:#00CC70;--accent-dim:#007A42;--accent-bg:rgba(0,204,112,0.07);
+      --accent2:#C8A000;--accent3:#BB88FF;--text:#D8D8D8;--text-head:#EFEFEF;
+      --text2:#888888;--text3:#444444;--border:#222222;--border2:#2E2E2E;
+      --sy-kw:#C792EA;--sy-fn:#82AAFF;--sy-str:#C3E88D;
+      --sy-cm:#546E7A;--sy-num:#F78C6C;--sy-pn:#89DDFF;--sy-ln-t:#555555;
+      --silver:#4FC3F7;--silver-dim:#1A3A52;--silver-bg:rgba(79,195,247,0.07);
+      --sidebar-w:248px;--content-max:720px;--header-h:48px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:15px;line-height:1.8;overflow-x:hidden;}
+    ::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--bg);}
+    ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+    ::-webkit-scrollbar-thumb:hover{background:var(--accent-dim);}
+
+    /* HEADER */
+    .top-header{position:fixed;top:0;left:0;right:0;z-index:200;height:var(--header-h);background:var(--bg-nav);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;}
+    .header-open-btn{display:none;align-items:center;justify-content:center;width:28px;height:28px;flex-shrink:0;margin-right:12px;background:var(--bg-card);border:1px solid var(--border2);border-radius:4px;cursor:pointer;color:var(--text2);font-size:12px;}
+    .header-open-btn:hover{background:var(--accent-bg);color:var(--accent);}
+    body.sidebar-closed .header-open-btn{display:flex;}
+    .header-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0;font-family:'JetBrains Mono',monospace;font-size:12px;overflow:hidden;}
+    .header-logo{color:var(--accent);text-decoration:none;font-weight:700;white-space:nowrap;}
+    .header-sep{color:var(--text3);flex-shrink:0;}
+    .header-grade{color:var(--text2);white-space:nowrap;}
+    .header-chap{color:var(--text-head);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .header-center{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);display:flex;align-items:center;gap:8px;flex-shrink:0;padding:0 16px;}
+    .progress-mini{width:80px;height:3px;background:var(--border2);border-radius:2px;overflow:hidden;}
+    .progress-mini-fill{height:100%;background:var(--accent);border-radius:2px;}
+    .header-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+    .nav-btn{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);background:transparent;border:1px solid var(--border2);padding:4px 12px;text-decoration:none;transition:border-color .15s,color .15s;white-space:nowrap;}
+    .nav-btn:hover{border-color:var(--accent);color:var(--accent);}
+    .nav-btn.silver{color:var(--silver);border-color:var(--silver-dim);background:var(--silver-bg);font-weight:700;}
+    .nav-btn.silver:hover{border-color:var(--silver);filter:brightness(1.15);}
+
+    /* LAYOUT */
+    .layout{display:flex;padding-top:var(--header-h);min-height:100vh;}
+
+    /* SIDEBAR */
+    .sidebar{width:var(--sidebar-w);flex-shrink:0;position:fixed;top:var(--header-h);bottom:0;left:0;background:var(--bg-side);border-right:1px solid var(--border);overflow-y:auto;overflow-x:hidden;transition:transform .22s ease;z-index:150;padding-top:8px;}
+    body.sidebar-closed .sidebar{transform:translateX(calc(-1 * var(--sidebar-w)));}
+    body.sidebar-closed .content{margin-left:0;}
+    .sidebar-toggle{position:absolute;top:10px;right:10px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:var(--bg-card);border:1px solid var(--border2);border-radius:4px;cursor:pointer;color:var(--text2);font-size:12px;z-index:10;}
+    .sidebar-toggle:hover{background:var(--accent-bg);color:var(--accent);}
+    body.sidebar-closed .sidebar-toggle{display:none;}
+    .sidebar-progress{margin:44px 12px 12px;padding:12px 14px;background:var(--bg-card);border:1px solid var(--border);}
+    .sp-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);margin-bottom:6px;letter-spacing:.08em;}
+    .sp-bar{height:4px;background:var(--border2);border-radius:2px;overflow:hidden;margin-bottom:5px;}
+    .sp-fill{height:100%;background:var(--accent);border-radius:2px;}
+    .sp-text{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2);}
+    .sp-text span{color:var(--accent);}
+    .sb-group{border-bottom:1px solid var(--border);}
+    .sb-group-header{display:flex;align-items:center;justify-content:space-between;padding:9px 14px 9px 12px;cursor:pointer;user-select:none;transition:background .12s;gap:8px;}
+    .sb-group-header:hover{background:rgba(255,255,255,.03);}
+    .sb-group-title{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--text2);text-transform:uppercase;flex:1;}
+    .sb-group.current .sb-group-title{color:var(--accent);}
+    .sb-group-arrow{font-size:9px;color:var(--text3);transition:transform .2s;flex-shrink:0;}
+    .sb-group.open .sb-group-arrow{transform:rotate(90deg);color:var(--accent);}
+    .sb-items{overflow:hidden;max-height:0;transition:max-height .28s ease;}
+    .sb-group.open .sb-items{max-height:1200px;}
+    .sb-item{display:flex;align-items:baseline;gap:8px;padding:6px 14px 6px 20px;font-size:13px;color:var(--text2);text-decoration:none;border-left:2px solid transparent;transition:background .1s,color .1s;line-height:1.45;}
+    .sb-item:hover{background:rgba(255,255,255,.03);color:var(--text);}
+    .sb-item.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-bg);font-weight:500;}
+    .sb-item.done{color:var(--text3);}
+    .sb-icon{font-size:9px;flex-shrink:0;font-family:'JetBrains Mono',monospace;width:10px;text-align:center;color:var(--text3);}
+    .sb-item.active .sb-icon{color:var(--accent);}
+    .sb-item.done .sb-icon{color:var(--accent-dim);}
+    .sb-num{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);flex-shrink:0;min-width:22px;}
+
+    /* CONTENT */
+    .content{margin-left:var(--sidebar-w);flex:1;min-width:0;padding:48px 52px 96px;transition:margin-left .22s ease;}
+    .content-inner{max-width:var(--content-max);margin:0 auto;}
+
+    /* TYPOGRAPHY */
+    .chap-meta{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+    .badge{font-size:10px;padding:2px 8px;letter-spacing:.06em;}
+    .badge.lesson{background:var(--accent-bg);color:var(--accent);border:1px solid rgba(0,204,112,.25);}
+    .badge.final{background:rgba(200,160,0,.1);color:var(--accent2);border:1px solid rgba(200,160,0,.25);}
+    .chap-title{font-family:'JetBrains Mono',monospace;font-size:clamp(22px,3.5vw,30px);font-weight:700;color:var(--text-head);line-height:1.25;margin-bottom:8px;}
+    .chap-title .hl{color:var(--accent);}
+    .chap-subtitle{font-size:15px;color:var(--text2);margin-bottom:32px;line-height:1.65;}
+    h2{font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:700;color:var(--text-head);margin:44px 0 16px;display:flex;align-items:baseline;gap:10px;}
+    h2 .n{color:var(--accent);font-size:13px;}
+    h3{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--accent);margin:28px 0 12px;}
+    p{color:var(--text);margin-bottom:16px;line-height:1.9;font-size:15px;}
+    code{font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--bg-code);color:var(--accent);padding:1px 6px;border:1px solid var(--border2);border-radius:2px;}
+    strong{color:var(--text-head);font-weight:700;}
+    ul{padding-left:20px;margin-bottom:16px;}
+    ul li{margin-bottom:6px;color:var(--text);line-height:1.75;}
+
+    /* ─── 수료증 ─── */
+    .cert-wrap{position:relative;margin:0 0 44px;padding:2px;background:linear-gradient(135deg,var(--accent),var(--accent2),var(--accent3));border-radius:2px;}
+    .cert-inner{background:#0D0D0D;padding:40px 44px;text-align:center;position:relative;overflow:hidden;}
+    .cert-inner::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(0,204,112,.06),transparent 70%);pointer-events:none;}
+    .cert-corner{position:absolute;font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--text3);}
+    .cert-corner.tl{top:14px;left:16px;}
+    .cert-corner.tr{top:14px;right:16px;}
+    .cert-corner.bl{bottom:14px;left:16px;}
+    .cert-corner.br{bottom:14px;right:16px;}
+    .cert-grade-badge{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;padding:4px 14px;border:1px solid rgba(0,204,112,.3);color:var(--accent);margin-bottom:20px;}
+    .cert-icon{font-size:40px;margin-bottom:12px;display:block;line-height:1;}
+    .cert-title{font-family:'JetBrains Mono',monospace;font-size:clamp(18px,3vw,26px);font-weight:700;color:var(--text-head);margin-bottom:6px;}
+    .cert-sub{font-size:14px;color:var(--text2);margin-bottom:20px;}
+    .cert-divider{width:80px;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);margin:0 auto 20px;}
+    .cert-name{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--accent);margin-bottom:6px;letter-spacing:.04em;}
+    .cert-desc{font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.7;}
+    .cert-stats{display:flex;justify-content:center;gap:32px;flex-wrap:wrap;margin-bottom:24px;}
+    .cert-stat{text-align:center;}
+    .cert-stat-num{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--accent);display:block;}
+    .cert-stat-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.08em;}
+    .cert-date{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);}
+
+    /* ─── 브론즈 성과 ─── */
+    .achievement-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin:20px 0;}
+    .ach-item{background:var(--bg-card);border:1px solid var(--border2);padding:14px 16px;display:flex;align-items:flex-start;gap:10px;transition:border-color .15s;}
+    .ach-item:hover{border-color:var(--accent-dim);}
+    .ach-icon{font-size:16px;flex-shrink:0;padding-top:2px;}
+    .ach-text{font-size:13px;color:var(--text2);line-height:1.55;}
+    .ach-text strong{color:var(--text-head);display:block;font-size:12px;font-family:'JetBrains Mono',monospace;margin-bottom:2px;}
+
+    /* ─── CODE BLOCK ─── */
+    .code-block{background:var(--bg-code);border:1px solid var(--border2);margin:16px 0 24px;overflow:hidden;}
+    .code-header{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;border-bottom:1px solid var(--border2);background:var(--bg-card);}
+    .code-lang{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.08em;}
+    .code-copy{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);background:transparent;border:1px solid var(--border2);padding:3px 10px;cursor:pointer;transition:color .15s,border-color .15s;}
+    .code-copy:hover{color:var(--accent);border-color:var(--accent);}
+    .code-body{padding:16px 20px;overflow-x:auto;}
+    .code-body pre{font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.8;color:var(--text);white-space:pre;}
+    .ln{display:inline-block;width:28px;text-align:right;margin-right:16px;color:var(--sy-ln-t);user-select:none;font-size:12px;}
+    .kw{color:var(--sy-kw);}.fn{color:var(--sy-fn);}.str{color:var(--sy-str);}
+    .cm{color:var(--sy-cm);}.num{color:var(--sy-num);}.pn{color:var(--sy-pn);}
+    .output-box{background:#0A0F0A;border:1px solid var(--border2);border-left:3px solid var(--accent);margin:0 0 24px;padding:14px 20px;}
+    .output-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);margin-bottom:8px;letter-spacing:.08em;}
+    .output-body{font-family:'JetBrains Mono',monospace;font-size:13px;color:#A8D8A8;line-height:1.85;white-space:pre-wrap;}
+
+    /* ─── TIP / INFO ─── */
+    .tip-box{background:var(--bg-tip);border:1px solid rgba(0,204,112,.15);border-left:3px solid var(--accent);padding:14px 18px;margin:16px 0 24px;}
+    .info-box{background:var(--bg-info);border:1px solid rgba(100,140,255,.15);border-left:3px solid #6488FF;padding:14px 18px;margin:16px 0 24px;}
+    .box-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;margin-bottom:8px;}
+    .tip-box .box-label{color:var(--accent);}
+    .info-box .box-label{color:#6488FF;}
+    .tip-box p,.info-box p{margin-bottom:0;font-size:14px;color:var(--text2);line-height:1.8;}
+
+    /* ─── OOP COMPARE ─── */
+    .compare-wrap{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0 28px;}
+    .compare-col{border:1px solid var(--border2);overflow:hidden;}
+    .compare-head{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.08em;padding:8px 14px;background:var(--bg-card);border-bottom:1px solid var(--border2);}
+    .compare-head.before{color:var(--text3);}
+    .compare-head.after{color:var(--silver);}
+    .compare-body{padding:14px 16px;font-size:13px;line-height:1.75;color:var(--text2);}
+    .compare-body ul{padding-left:16px;margin:0;}
+    .compare-body li{margin-bottom:4px;}
+    .compare-body li::marker{color:var(--accent);}
+    @media(max-width:520px){.compare-wrap{grid-template-columns:1fr;}}
+
+    /* ─── OOP PREVIEW CODE ─── */
+    .silver-code-block{background:var(--bg-code);border:1px solid var(--silver-dim);margin:16px 0 24px;overflow:hidden;}
+    .silver-code-block .code-header{border-color:var(--silver-dim);}
+    .silver-code-block .code-lang{color:var(--silver);}
+    .silver-badge-line{font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 16px;background:var(--silver-bg);color:var(--silver);border-bottom:1px solid var(--silver-dim);letter-spacing:.06em;}
+
+    /* ─── SILVER ROADMAP ─── */
+    .roadmap{display:flex;flex-direction:column;gap:0;margin:20px 0;}
+    .roadmap-section{border:1px solid var(--border2);border-bottom:none;}
+    .roadmap-section:last-child{border-bottom:1px solid var(--border2);}
+    .roadmap-head{display:flex;align-items:center;gap:12px;padding:11px 16px;background:var(--bg-card);}
+    .roadmap-num{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);min-width:28px;}
+    .roadmap-title{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--text-head);flex:1;}
+    .roadmap-count{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);padding:2px 8px;border:1px solid var(--border2);}
+    .roadmap-items{padding:10px 16px 10px 56px;font-size:13px;color:var(--text3);line-height:1.75;border-top:1px solid var(--border);}
+
+    /* ─── GRADE PATH ─── */
+    .grade-path{display:flex;align-items:center;gap:0;flex-wrap:wrap;margin:24px 0;padding:20px;background:var(--bg-card);border:1px solid var(--border2);}
+    .gp-item{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 16px;flex:1;min-width:80px;text-align:center;}
+    .gp-icon{font-size:20px;line-height:1;}
+    .gp-name{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;}
+    .gp-desc{font-size:11px;color:var(--text3);line-height:1.4;}
+    .gp-arrow{font-size:18px;color:var(--text3);padding:0 4px;}
+    .gp-item.current .gp-name{color:var(--accent);}
+    .gp-item.next .gp-name{color:var(--silver);}
+    .gp-item.future .gp-name{color:var(--text3);}
+    .gp-item.current{border:1px solid rgba(0,204,112,.2);background:var(--accent-bg);}
+    .gp-item.next{border:1px solid var(--silver-dim);background:var(--silver-bg);}
+
+    /* ─── CTA ─── */
+    .cta-wrap{margin:44px 0 0;padding:32px;background:var(--bg-card);border:1px solid var(--silver-dim);text-align:center;position:relative;overflow:hidden;}
+    .cta-wrap::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(79,195,247,.05),transparent 70%);pointer-events:none;}
+    .cta-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--silver);letter-spacing:.1em;margin-bottom:14px;}
+    .cta-title{font-family:'JetBrains Mono',monospace;font-size:clamp(17px,2.5vw,22px);font-weight:700;color:var(--text-head);margin-bottom:8px;}
+    .cta-sub{font-size:14px;color:var(--text2);margin-bottom:28px;line-height:1.7;}
+    .cta-btn{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#0A0A0A;background:var(--silver);padding:12px 36px;text-decoration:none;letter-spacing:.06em;transition:filter .15s,transform .1s;}
+    .cta-btn:hover{filter:brightness(1.12);transform:translateY(-1px);}
+    .cta-note{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);margin-top:14px;}
+
+    /* CHEER / NAV */
+    .section-divider{height:1px;background:var(--border);margin:44px 0;}
+    .chap-nav{display:flex;justify-content:flex-start;padding-top:32px;border-top:1px solid var(--border);}
+    .chap-nav-btn{display:flex;flex-direction:column;gap:4px;text-decoration:none;padding:14px 18px;border:1px solid var(--border2);background:var(--bg-card);flex:1;max-width:300px;transition:border-color .15s;}
+    .chap-nav-btn:hover{border-color:var(--accent);}
+    .cnb-dir{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.07em;}
+    .cnb-title{font-size:13px;color:var(--text2);line-height:1.45;}
+    .cnb-title span{color:var(--accent);font-family:'JetBrains Mono',monospace;}
+
+    /* RESPONSIVE */
+    .sidebar-overlay{display:none;position:fixed;inset:0;top:var(--header-h);z-index:140;background:rgba(0,0,0,.65);}
+    @media(max-width:720px){
+      .sidebar-overlay.visible{display:block;}
+      .content{margin-left:0;padding:28px 20px 72px;}
+      .header-center{display:none;}
+      .achievement-grid{grid-template-columns:1fr;}
+      .cert-stats{gap:20px;}
+    }
+    @media(max-width:480px){
+      .header-grade{display:none;}
+      .cert-inner{padding:28px 20px;}
+      .grade-path{gap:0;padding:12px;}
+      .gp-arrow{display:none;}
+    }
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important;}}
+  </style>
+</head>
+<body>
+
+<header class="top-header">
+  <button class="header-open-btn" onclick="toggleSidebar()">&#9658;</button>
+  <div class="header-left">
+    <a href="../index.html" class="header-logo">SUPERPYTHON</a>
+    <span class="header-sep">/</span>
+    <span class="header-grade">&#129412; BRONZE</span>
+    <span class="header-sep">/</span>
+    <span class="header-chap">48. 다음 단계 미리보기</span>
+  </div>
+  <div class="header-center">
+    <span>48 / 48</span>
+    <div class="progress-mini"><div class="progress-mini-fill" style="width:100%"></div></div>
+    <span style="color:var(--accent);font-weight:700;">100%</span>
+  </div>
+  <div class="header-right">
+    <a href="47-final-project.html" class="nav-btn">&#8592; 이전</a>
+    <a href="../silver/01-class-object.html" class="nav-btn silver">실버 시작 &#8594;</a>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <button class="sidebar-toggle" onclick="toggleSidebar()">&#9664;</button>
+    <div class="sidebar-progress">
+      <div class="sp-label">BRONZE 진행률</div>
+      <div class="sp-bar"><div class="sp-fill" style="width:100%"></div></div>
+      <div class="sp-text"><span>48</span> / 48 챕터 완료 &#10003;</div>
+    </div>
+    <div class="sb-group" id="grp-env">
+      <div class="sb-group-header" onclick="toggleGroup('grp-env')"><span class="sb-group-title">환경 설정</span><span class="sb-group-arrow">&#9658;</span></div>
+      <div class="sb-items">
+        <a href="01-what-is-python.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">01</span>파이썬이란?</a>
+        <a href="02-setup.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">02</span>개발환경 설치</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-basic1">
+      <div class="sb-group-header" onclick="toggleGroup('grp-basic1')"><span class="sb-group-title">기초 문법 1</span><span class="sb-group-arrow">&#9658;</span></div>
+      <div class="sb-items">
+        <a href="03-print.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">03</span>print()란?</a>
+        <a href="04-quiz-print.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">04</span>연습문제</a>
+        <a href="05-variables.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">05</span>변수와 데이터 타입</a>
+        <a href="06-operators.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">06</span>연산자</a>
+        <a href="07-quiz-variables-operators.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">07</span>연습문제</a>
+        <a href="08-string.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">08</span>문자열 String</a>
+        <a href="09-quiz-string.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">09</span>연습문제</a>
+        <a href="10-fstring.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">10</span>f-string 완전정리</a>
+        <a href="11-quiz-fstring.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">11</span>연습문제</a>
+        <a href="12-mini-project-01.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">12</span>&#127918; 미니 프로젝트 ①</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-basic2">
+      <div class="sb-group-header" onclick="toggleGroup('grp-basic2')"><span class="sb-group-title">기초 문법 2</span><span class="sb-group-arrow">&#9658;</span></div>
+      <div class="sb-items">
+        <a href="13-list.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">13</span>리스트</a>
+        <a href="14-quiz-list.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">14</span>연습문제</a>
+        <a href="15-input.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">15</span>input() 함수</a>
+        <a href="16-quiz-input.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">16</span>연습문제</a>
+        <a href="17-mini-project-02.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">17</span>&#127918; 미니 프로젝트 ②</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-flow">
+      <div class="sb-group-header" onclick="toggleGroup('grp-flow')"><span class="sb-group-title">흐름 제어</span><span class="sb-group-arrow">&#9658;</span></div>
+      <div class="sb-items">
+        <a href="18-if.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">18</span>조건문 (if)</a>
+        <a href="19-quiz-if.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">19</span>연습문제</a>
+        <a href="20-mini-project-03.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">20</span>&#127918; 미니 프로젝트 ③</a>
+        <a href="21-for-range.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">21</span>for문과 range()</a>
+        <a href="22-quiz-for.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">22</span>연습문제</a>
+        <a href="23-while.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">23</span>while문</a>
+        <a href="24-quiz-while.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">24</span>연습문제</a>
+        <a href="25-mini-project-04.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">25</span>&#127918; 미니 프로젝트 ④</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-error">
+      <div class="sb-group-header" onclick="toggleGroup('grp-error')"><span class="sb-group-title">에러 &amp; 디버깅</span><span class="sb-group-arrow">&#9658;</span></div>
+      <div class="sb-items">
+        <a href="26-error-types.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">26</span>에러 읽는 법</a>
+        <a href="27-debugging.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">27</span>기초 디버깅 실습</a>
+        <a href="28-quiz-debugging.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">28</span>연습문제</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-func">
+      <div class="sb-group-header" onclick="toggleGroup('grp-func')"><span class="sb-group-title">함수</span><span class="sb-group-arrow">&#9658;</span></div>
+      <div class="sb-items">
+        <a href="29-function-basic.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">29</span>함수 기초</a>
+        <a href="30-quiz-function-basic.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">30</span>연습문제</a>
+        <a href="31-mini-project-05.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">31</span>&#127918; 미니 프로젝트 ⑤</a>
+        <a href="32-function-advanced.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">32</span>함수 심화</a>
+        <a href="33-quiz-function-advanced.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">33</span>연습문제</a>
+        <a href="34-module.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">34</span>모듈</a>
+        <a href="35-quiz-module.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">35</span>연습문제</a>
+        <a href="36-mini-project-06.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">36</span>&#127918; 미니 프로젝트 ⑥</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-ds">
+      <div class="sb-group-header" onclick="toggleGroup('grp-ds')"><span class="sb-group-title">자료구조</span><span class="sb-group-arrow">&#9658;</span></div>
+      <div class="sb-items">
+        <a href="37-dictionary.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">37</span>딕셔너리</a>
+        <a href="38-quiz-dictionary.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">38</span>연습문제</a>
+        <a href="39-tuple-set.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">39</span>튜플과 셋</a>
+        <a href="40-quiz-tuple-set.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">40</span>연습문제</a>
+        <a href="41-mini-project-07.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">41</span>&#127918; 미니 프로젝트 ⑦</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-file">
+      <div class="sb-group-header" onclick="toggleGroup('grp-file')"><span class="sb-group-title">파일 &amp; 예외처리</span><span class="sb-group-arrow">&#9658;</span></div>
+      <div class="sb-items">
+        <a href="42-file-io.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">42</span>파일 입출력</a>
+        <a href="43-quiz-file-io.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">43</span>연습문제</a>
+        <a href="44-exception-basic.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">44</span>예외처리 기초</a>
+        <a href="45-quiz-exception.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">45</span>연습문제</a>
+        <a href="46-mini-project-08.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">46</span>&#127918; 미니 프로젝트 ⑧</a>
+      </div>
+    </div>
+    <div class="sb-group current open" id="grp-end">
+      <div class="sb-group-header" onclick="toggleGroup('grp-end')"><span class="sb-group-title">마무리</span><span class="sb-group-arrow">&#9658;</span></div>
+      <div class="sb-items">
+        <a href="47-final-project.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">47</span>&#9733; 최종 프로젝트</a>
+        <a href="48-next-step.html" class="sb-item active"><span class="sb-icon">&#9658;</span><span class="sb-num">48</span>다음 단계 미리보기</a>
+      </div>
+    </div>
+  </aside>
+
+  <main class="content" id="mainContent">
+    <div class="content-inner">
+
+      <div class="chap-meta">
+        <span class="badge final">COMPLETE</span>
+        <span>마무리</span>
+        <span style="color:var(--text3)">·</span>
+        <span>챕터 48 / 48</span>
+      </div>
+      <h1 class="chap-title">다음 단계 <span class="hl">미리보기</span></h1>
+      <p class="chap-subtitle">브론즈 과정이 끝났습니다. 지금까지 쌓아온 것을 되돌아보고, 실버에서 무엇이 기다리는지 미리 살펴봅니다.</p>
+
+      <!-- ─── 수료증 ─── -->
+      <div class="cert-wrap">
+        <div class="cert-inner">
+          <span class="cert-corner tl">&#9484;&#9472;</span>
+          <span class="cert-corner tr">&#9472;&#9488;</span>
+          <span class="cert-corner bl">&#9492;&#9472;</span>
+          <span class="cert-corner br">&#9472;&#9496;</span>
+          <div class="cert-grade-badge">&#129412; BRONZE COURSE</div>
+          <span class="cert-icon">&#127941;</span>
+          <div class="cert-title">수료를 축하합니다</div>
+          <div class="cert-sub">SUPERPYTHON — BRONZE COMPLETION</div>
+          <div class="cert-divider"></div>
+          <div class="cert-name">브론즈 과정 완주</div>
+          <div class="cert-desc">파이썬의 기초 문법부터 자료구조, 함수, 파일 처리, 예외처리까지<br>48개 챕터를 완주하여 혼자 힘으로 동작하는 파이썬 프로그램을 만들 수 있게 되었습니다.</div>
+          <div class="cert-stats">
+            <div class="cert-stat">
+              <span class="cert-stat-num">48</span>
+              <span class="cert-stat-label">CHAPTERS</span>
+            </div>
+            <div class="cert-stat">
+              <span class="cert-stat-num">8</span>
+              <span class="cert-stat-label">MINI PROJECTS</span>
+            </div>
+            <div class="cert-stat">
+              <span class="cert-stat-num">240+</span>
+              <span class="cert-stat-label">EXERCISES</span>
+            </div>
+            <div class="cert-stat">
+              <span class="cert-stat-num">1</span>
+              <span class="cert-stat-label">FINAL PROJECT</span>
+            </div>
+          </div>
+          <div class="cert-date">SUPERPYTHON · BRONZE TIER · 2026</div>
+        </div>
+      </div>
+
+      <!-- ─── 1. 내가 배운 것들 ─── -->
+      <h2><span class="n">1.</span>브론즈에서 배운 것들</h2>
+      <p>48개 챕터를 통해 파이썬의 뼈대를 완성했습니다. 아래 항목 하나하나가 이제 여러분의 것입니다.</p>
+
+      <div class="achievement-grid">
+        <div class="ach-item"><span class="ach-icon">&#128187;</span><div class="ach-text"><strong>개발 환경</strong>파이썬 설치, VS Code 세팅, 첫 코드 실행</div></div>
+        <div class="ach-item"><span class="ach-icon">&#128226;</span><div class="ach-text"><strong>출력 & 문자열</strong>print(), f-string으로 원하는 형식으로 출력</div></div>
+        <div class="ach-item"><span class="ach-icon">&#128256;</span><div class="ach-text"><strong>변수 & 연산자</strong>데이터 저장, 숫자·문자열 연산 처리</div></div>
+        <div class="ach-item"><span class="ach-icon">&#9654;&#65039;</span><div class="ach-text"><strong>흐름 제어</strong>if/elif/else, for, while로 프로그램 흐름 설계</div></div>
+        <div class="ach-item"><span class="ach-icon">&#128736;&#65039;</span><div class="ach-text"><strong>에러 & 디버깅</strong>오류 메시지를 읽고 스스로 고치는 능력</div></div>
+        <div class="ach-item"><span class="ach-icon">&#128229;</span><div class="ach-text"><strong>함수</strong>재사용 가능한 코드 블록 설계, 모듈 활용</div></div>
+        <div class="ach-item"><span class="ach-icon">&#128200;</span><div class="ach-text"><strong>자료구조</strong>리스트·딕셔너리·튜플·셋 — 상황에 맞는 선택</div></div>
+        <div class="ach-item"><span class="ach-icon">&#128196;</span><div class="ach-text"><strong>파일 & 예외처리</strong>데이터 영구 저장, 오류에도 죽지 않는 코드</div></div>
+      </div>
+
+      <!-- ─── 2. 절벽과 다리 ─── -->
+      <h2><span class="n">2.</span>지금 내 코드의 한계 — 그리고 실버</h2>
+      <p>브론즈에서 만든 프로그램들을 떠올려보세요. 훌륭하지만, 규모가 커질수록 한 가지 문제가 생깁니다. <strong>함수가 늘어날수록 코드가 흩어지고, 데이터와 동작이 따로 돈다는 것</strong>입니다.</p>
+
+      <div class="compare-wrap">
+        <div class="compare-col">
+          <div class="compare-head before">&#129412; 브론즈 방식 (절차형)</div>
+          <div class="compare-body">
+            <ul>
+              <li>캐릭터 이름 변수 따로</li>
+              <li>캐릭터 체력 변수 따로</li>
+              <li>공격 함수 따로</li>
+              <li>회복 함수 따로</li>
+              <li>캐릭터 2명이면 변수 두 배</li>
+              <li>코드가 넓게 퍼져서 관리 어려움</li>
+            </ul>
+          </div>
+        </div>
+        <div class="compare-col">
+          <div class="compare-head after">&#9898; 실버 방식 (객체지향)</div>
+          <div class="compare-body">
+            <ul>
+              <li>캐릭터 <code>class</code> 하나에 모든 것</li>
+              <li>이름·체력·공격·회복이 한 묶음</li>
+              <li>캐릭터 2명은 인스턴스 2개</li>
+              <li>코드가 단단하게 응집</li>
+              <li>기능 추가가 명확한 위치에</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── 3. OOP 맛보기 ─── -->
+      <h2><span class="n">3.</span>OOP 맛보기 — 클래스가 뭔가요?</h2>
+      <p><strong>클래스(class)</strong>는 데이터와 함수를 하나로 묶는 <em>설계도</em>입니다. 설계도에서 실제 객체를 찍어내는 것을 <strong>인스턴스화</strong>라고 합니다. 비유하자면 클래스는 붕어빵 틀, 인스턴스는 각각의 붕어빵입니다.</p>
+
+      <p>지금 이 코드는 읽기만 해도 충분합니다. 실버에서 처음부터 차근차근 배웁니다.</p>
+
+      <div class="silver-code-block">
+        <div class="silver-badge-line">&#9898; SILVER PREVIEW — 실버에서 배울 코드 스타일</div>
+        <div class="code-header">
+          <span class="code-lang">PYTHON — 클래스 기초 예시</span>
+        </div>
+        <div class="code-body"><pre><span class="ln"> 1</span><span class="cm"># ── 브론즈 방식 — 데이터와 함수가 분리 ─────────</span>
+<span class="ln"> 2</span>hero_name   <span class="pn">=</span> <span class="str">"김파이썬"</span>
+<span class="ln"> 3</span>hero_hp     <span class="pn">=</span> <span class="num">100</span>
+<span class="ln"> 4</span>hero_attack <span class="pn">=</span> <span class="num">15</span>
+<span class="ln"> 5</span>
+<span class="ln"> 6</span><span class="kw">def</span> <span class="fn">attack</span><span class="pn">(</span>name<span class="pn">,</span> atk<span class="pn">,</span> target_hp<span class="pn">):</span>
+<span class="ln"> 7</span>    <span class="fn">print</span><span class="pn">(</span><span class="str">f"{name}이 {atk} 데미지!"</span><span class="pn">)</span>
+<span class="ln"> 8</span>    <span class="kw">return</span> target_hp <span class="pn">-</span> atk
+<span class="ln"> 9</span>
+<span class="ln">10</span><span class="cm"># ── 실버 방식 — 클래스로 묶기 ─────────────────</span>
+<span class="ln">11</span><span class="kw">class</span> <span class="fn">Hero</span><span class="pn">:</span>
+<span class="ln">12</span>    <span class="kw">def</span> <span class="fn">__init__</span><span class="pn">(</span>self<span class="pn">,</span> name<span class="pn">,</span> hp<span class="pn">,</span> attack<span class="pn">):</span>
+<span class="ln">13</span>        self<span class="pn">.</span>name   <span class="pn">=</span> name    <span class="cm"># 인스턴스 변수</span>
+<span class="ln">14</span>        self<span class="pn">.</span>hp     <span class="pn">=</span> hp
+<span class="ln">15</span>        self<span class="pn">.</span>attack <span class="pn">=</span> attack
+<span class="ln">16</span>
+<span class="ln">17</span>    <span class="kw">def</span> <span class="fn">attack_enemy</span><span class="pn">(</span>self<span class="pn">,</span> enemy<span class="pn">):</span>  <span class="cm"># 메서드 (클래스 안 함수)</span>
+<span class="ln">18</span>        enemy<span class="pn">.</span>hp <span class="pn">-=</span> self<span class="pn">.</span>attack
+<span class="ln">19</span>        <span class="fn">print</span><span class="pn">(</span><span class="str">f"{self.name}이 {enemy.name}에게 {self.attack} 데미지!"</span><span class="pn">)</span>
+<span class="ln">20</span>
+<span class="ln">21</span>    <span class="kw">def</span> <span class="fn">heal</span><span class="pn">(</span>self<span class="pn">,</span> amount<span class="pn">):</span>
+<span class="ln">22</span>        self<span class="pn">.</span>hp <span class="pn">+=</span> amount
+<span class="ln">23</span>        <span class="fn">print</span><span class="pn">(</span><span class="str">f"{self.name}이 {amount} 회복! (HP: {self.hp})"</span><span class="pn">)</span>
+<span class="ln">24</span>
+<span class="ln">25</span>    <span class="kw">def</span> <span class="fn">status</span><span class="pn">(</span>self<span class="pn">):</span>
+<span class="ln">26</span>        <span class="fn">print</span><span class="pn">(</span><span class="str">f"[{self.name}] HP: {self.hp}  ATK: {self.attack}"</span><span class="pn">)</span>
+<span class="ln">27</span>
+<span class="ln">28</span><span class="cm"># 인스턴스 생성 — 붕어빵 찍기</span>
+<span class="ln">29</span>hero    <span class="pn">=</span> <span class="fn">Hero</span><span class="pn">(</span><span class="str">"김파이썬"</span><span class="pn">,</span> hp<span class="pn">=</span><span class="num">100</span><span class="pn">,</span> attack<span class="pn">=</span><span class="num">15</span><span class="pn">)</span>
+<span class="ln">30</span>monster <span class="pn">=</span> <span class="fn">Hero</span><span class="pn">(</span><span class="str">"고블린"</span><span class="pn">,</span>  hp<span class="pn">=</span><span class="num">50</span><span class="pn">,</span>  attack<span class="pn">=</span><span class="num">8</span><span class="pn">)</span>
+<span class="ln">31</span>
+<span class="ln">32</span>hero<span class="pn">.</span><span class="fn">attack_enemy</span><span class="pn">(</span>monster<span class="pn">)</span>
+<span class="ln">33</span>monster<span class="pn">.</span><span class="fn">attack_enemy</span><span class="pn">(</span>hero<span class="pn">)</span>
+<span class="ln">34</span>hero<span class="pn">.</span><span class="fn">heal</span><span class="pn">(</span><span class="num">20</span><span class="pn">)</span>
+<span class="ln">35</span>hero<span class="pn">.</span><span class="fn">status</span><span class="pn">()</span></pre></div>
+      </div>
+
+      <div class="output-box">
+        <div class="output-label">&#9658; 실행 결과</div>
+        <div class="output-body">김파이썬이 고블린에게 15 데미지!
+고블린이 김파이썬에게 8 데미지!
+김파이썬이 20 회복! (HP: 112)
+[김파이썬] HP: 112  ATK: 15</div>
+      </div>
+
+      <div class="tip-box">
+        <div class="box-label">&#128161; 지금 몰라도 됩니다</div>
+        <p><code>self</code>가 뭔지, <code>__init__</code>이 왜 저렇게 생겼는지 — 지금은 몰라도 괜찮습니다. <strong>실버 챕터 1에서 처음부터 한 줄씩 천천히 배웁니다.</strong> "이런 게 기다리고 있구나" 정도로만 느껴보세요.</p>
+      </div>
+
+      <!-- ─── 4. 실버 커리큘럼 ─── -->
+      <h2><span class="n">4.</span>실버에서 배울 것들</h2>
+
+      <div class="roadmap">
+        <div class="roadmap-section">
+          <div class="roadmap-head">
+            <span class="roadmap-num">01</span>
+            <span class="roadmap-title">객체지향 프로그래밍 (OOP)</span>
+            <span class="roadmap-count">15챕터</span>
+          </div>
+          <div class="roadmap-items">클래스와 객체 · 생성자와 인스턴스 변수 · 메서드 심화 · 캡슐화 · 상속 · 다형성 · 추상 클래스 · RPG 캐릭터 시스템 미니 프로젝트</div>
+        </div>
+        <div class="roadmap-section">
+          <div class="roadmap-head">
+            <span class="roadmap-num">02</span>
+            <span class="roadmap-title">함수형 프로그래밍 &amp; Pythonic 코드</span>
+            <span class="roadmap-count">12챕터</span>
+          </div>
+          <div class="roadmap-items">람다(lambda) · map / filter / reduce · 클로저 · 데코레이터 · 컴프리헨션 · 이터레이터와 제너레이터</div>
+        </div>
+        <div class="roadmap-section">
+          <div class="roadmap-head">
+            <span class="roadmap-num">03</span>
+            <span class="roadmap-title">고급 자료구조 &amp; 알고리즘 기초</span>
+            <span class="roadmap-count">10챕터</span>
+          </div>
+          <div class="roadmap-items">collections 모듈 · 스택 / 큐 · 정렬 알고리즘 · 이진 탐색 · 재귀 함수</div>
+        </div>
+        <div class="roadmap-section">
+          <div class="roadmap-head">
+            <span class="roadmap-num">04</span>
+            <span class="roadmap-title">실전 Python 패턴</span>
+            <span class="roadmap-count">8챕터</span>
+          </div>
+          <div class="roadmap-items">컨텍스트 매니저 · 예외 클래스 커스터마이징 · 타입 힌트 · 정규표현식 기초</div>
+        </div>
+        <div class="roadmap-section">
+          <div class="roadmap-head">
+            <span class="roadmap-num">05</span>
+            <span class="roadmap-title">최종 프로젝트</span>
+            <span class="roadmap-count">1챕터</span>
+          </div>
+          <div class="roadmap-items">OOP + 함수형 + 파일 I/O를 결합한 완성도 있는 콘솔 앱 구현</div>
+        </div>
+      </div>
+
+      <!-- ─── 5. 전체 로드맵 ─── -->
+      <h2><span class="n">5.</span>슈퍼파이썬 전체 로드맵</h2>
+      <p>브론즈는 시작일 뿐입니다. 실버부터 루비까지 — 각 단계마다 파이썬의 새로운 세계가 열립니다.</p>
+
+      <div class="grade-path">
+        <div class="gp-item current">
+          <span class="gp-icon">&#129412;</span>
+          <span class="gp-name">BRONZE</span>
+          <span class="gp-desc">기초 문법<br>완주 &#10003;</span>
+        </div>
+        <span class="gp-arrow">&#8594;</span>
+        <div class="gp-item next">
+          <span class="gp-icon">&#9898;</span>
+          <span class="gp-name">SILVER</span>
+          <span class="gp-desc">OOP &amp;<br>Pythonic</span>
+        </div>
+        <span class="gp-arrow">&#8594;</span>
+        <div class="gp-item future">
+          <span class="gp-icon">&#127941;</span>
+          <span class="gp-name">GOLD</span>
+          <span class="gp-desc">알고리즘<br>&amp; 자료구조</span>
+        </div>
+        <span class="gp-arrow">&#8594;</span>
+        <div class="gp-item future">
+          <span class="gp-icon">&#128142;</span>
+          <span class="gp-name">PLATINUM</span>
+          <span class="gp-desc">고급 패턴<br>&amp; 내부 원리</span>
+        </div>
+        <span class="gp-arrow">&#8594;</span>
+        <div class="gp-item future">
+          <span class="gp-icon">&#128142;</span>
+          <span class="gp-name">DIAMOND</span>
+          <span class="gp-desc">데이터 &amp;<br>머신러닝</span>
+        </div>
+        <span class="gp-arrow">&#8594;</span>
+        <div class="gp-item future">
+          <span class="gp-icon">&#128308;</span>
+          <span class="gp-name">RUBY</span>
+          <span class="gp-desc">게임<br>개발</span>
+        </div>
+      </div>
+
+      <!-- ─── CTA ─── -->
+      <div class="cta-wrap">
+        <div class="cta-label">&#9898; SILVER COURSE</div>
+        <div class="cta-title">실버로 올라갈 준비가 됐나요?</div>
+        <div class="cta-sub">
+          객체지향 프로그래밍을 배우는 순간, 코드를 보는 눈이 달라집니다.<br>
+          "이 데이터와 이 함수는 함께 있어야 해" — 그 설계의 쾌감이 기다립니다.
+        </div>
+        <a href="../silver/01-class-object.html" class="cta-btn">&#9898; 실버 시작하기</a>
+        <div class="cta-note">Silver Chapter 01 — 클래스와 객체</div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="chap-nav">
+        <a href="47-final-project.html" class="chap-nav-btn">
+          <span class="cnb-dir">&#8592; 이전 챕터</span>
+          <span class="cnb-title"><span>47.</span> &#9733; 최종 프로젝트</span>
+        </a>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+  const isMobile = () => window.innerWidth <= 720;
+  const overlay = document.getElementById('sidebarOverlay');
+  function toggleSidebar() {
+    document.body.classList.toggle('sidebar-closed');
+    if (isMobile()) overlay.classList.toggle('visible', !document.body.classList.contains('sidebar-closed'));
+    localStorage.setItem('sp-sidebar', document.body.classList.contains('sidebar-closed') ? 'closed' : 'open');
+  }
+  function closeSidebar() {
+    document.body.classList.add('sidebar-closed');
+    overlay.classList.remove('visible');
+    localStorage.setItem('sp-sidebar', 'closed');
+  }
+  function toggleGroup(id) { document.getElementById(id).classList.toggle('open'); }
+  window.addEventListener('DOMContentLoaded', () => {
+    if (isMobile()) document.body.classList.add('sidebar-closed');
+    else if (localStorage.getItem('sp-sidebar') === 'closed') document.body.classList.add('sidebar-closed');
+  });
+  window.addEventListener('resize', () => { if (!isMobile()) overlay.classList.remove('visible'); });
+</script>
+</body>
+</html>

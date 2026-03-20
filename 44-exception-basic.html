@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>예외처리 기초 — 브론즈 | 슈퍼파이썬</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#111111;--bg-nav:#0A0A0A;--bg-side:#0E0E0E;--bg-card:#181818;
+      --bg-code:#1A1A1A;--bg-tip:#131A13;--bg-warn:#1A1410;--bg-info:#101520;
+      --accent:#00CC70;--accent-dim:#007A42;--accent-bg:rgba(0,204,112,0.07);
+      --accent2:#C8A000;--accent3:#BB88FF;--text:#D8D8D8;--text-head:#EFEFEF;
+      --text2:#888888;--text3:#444444;--border:#222222;--border2:#2E2E2E;
+      --sy-kw:#C792EA;--sy-fn:#82AAFF;--sy-str:#C3E88D;
+      --sy-cm:#546E7A;--sy-num:#F78C6C;--sy-pn:#89DDFF;--sy-ln-t:#555555;
+      --sidebar-w:248px;--content-max:720px;--header-h:48px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:15px;line-height:1.8;overflow-x:hidden;}
+    ::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--bg);}
+    ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+    ::-webkit-scrollbar-thumb:hover{background:var(--accent-dim);}
+
+    /* HEADER */
+    .top-header{position:fixed;top:0;left:0;right:0;z-index:200;height:var(--header-h);background:var(--bg-nav);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;}
+    .header-open-btn{display:none;align-items:center;justify-content:center;width:28px;height:28px;flex-shrink:0;margin-right:12px;background:var(--bg-card);border:1px solid var(--border2);border-radius:4px;cursor:pointer;color:var(--text2);font-size:12px;transition:background .15s,color .15s;}
+    .header-open-btn:hover{background:var(--accent-bg);color:var(--accent);}
+    body.sidebar-closed .header-open-btn{display:flex;}
+    .header-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0;font-family:'JetBrains Mono',monospace;font-size:12px;overflow:hidden;}
+    .header-logo{color:var(--accent);text-decoration:none;font-weight:700;white-space:nowrap;}
+    .header-sep{color:var(--text3);flex-shrink:0;}
+    .header-grade{color:var(--text2);white-space:nowrap;}
+    .header-chap{color:var(--text-head);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .header-center{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);display:flex;align-items:center;gap:8px;flex-shrink:0;padding:0 16px;}
+    .progress-mini{width:80px;height:3px;background:var(--border2);border-radius:2px;overflow:hidden;}
+    .progress-mini-fill{height:100%;background:var(--accent);border-radius:2px;}
+    .header-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+    .nav-btn{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);background:transparent;border:1px solid var(--border2);padding:4px 12px;text-decoration:none;transition:border-color .15s,color .15s;white-space:nowrap;}
+    .nav-btn:hover{border-color:var(--accent);color:var(--accent);}
+    .nav-btn.primary{color:var(--bg-nav);background:var(--accent);border-color:var(--accent);font-weight:700;}
+    .nav-btn.primary:hover{filter:brightness(1.1);}
+
+    /* LAYOUT */
+    .layout{display:flex;padding-top:var(--header-h);min-height:100vh;}
+
+    /* SIDEBAR */
+    .sidebar{width:var(--sidebar-w);flex-shrink:0;position:fixed;top:var(--header-h);bottom:0;left:0;background:var(--bg-side);border-right:1px solid var(--border);overflow-y:auto;overflow-x:hidden;transition:transform .22s ease;z-index:150;padding-top:8px;}
+    body.sidebar-closed .sidebar{transform:translateX(calc(-1 * var(--sidebar-w)));}
+    body.sidebar-closed .content{margin-left:0;}
+    .sidebar-toggle{position:absolute;top:10px;right:10px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:var(--bg-card);border:1px solid var(--border2);border-radius:4px;cursor:pointer;color:var(--text2);font-size:12px;z-index:10;transition:background .15s,color .15s;}
+    .sidebar-toggle:hover{background:var(--accent-bg);color:var(--accent);}
+    body.sidebar-closed .sidebar-toggle{display:none;}
+    .sidebar-progress{margin:44px 12px 12px;padding:12px 14px;background:var(--bg-card);border:1px solid var(--border);}
+    .sp-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);margin-bottom:6px;letter-spacing:.08em;}
+    .sp-bar{height:4px;background:var(--border2);border-radius:2px;overflow:hidden;margin-bottom:5px;}
+    .sp-fill{height:100%;background:var(--accent);border-radius:2px;}
+    .sp-text{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2);}
+    .sp-text span{color:var(--accent);}
+    .sb-group{border-bottom:1px solid var(--border);}
+    .sb-group-header{display:flex;align-items:center;justify-content:space-between;padding:9px 14px 9px 12px;cursor:pointer;user-select:none;transition:background .12s;gap:8px;}
+    .sb-group-header:hover{background:rgba(255,255,255,.03);}
+    .sb-group-title{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--text2);text-transform:uppercase;flex:1;}
+    .sb-group.current .sb-group-title{color:var(--accent);}
+    .sb-group-arrow{font-size:9px;color:var(--text3);transition:transform .2s;flex-shrink:0;}
+    .sb-group.open .sb-group-arrow{transform:rotate(90deg);color:var(--accent);}
+    .sb-items{overflow:hidden;max-height:0;transition:max-height .28s ease;}
+    .sb-group.open .sb-items{max-height:1200px;}
+    .sb-item{display:flex;align-items:baseline;gap:8px;padding:6px 14px 6px 20px;font-size:13px;color:var(--text2);text-decoration:none;border-left:2px solid transparent;transition:background .1s,color .1s,border-color .1s;line-height:1.45;}
+    .sb-item:hover{background:rgba(255,255,255,.03);color:var(--text);}
+    .sb-item.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-bg);font-weight:500;}
+    .sb-item.done{color:var(--text3);}
+    .sb-icon{font-size:9px;flex-shrink:0;font-family:'JetBrains Mono',monospace;width:10px;text-align:center;color:var(--text3);}
+    .sb-item.active .sb-icon{color:var(--accent);}
+    .sb-item.done .sb-icon{color:var(--accent-dim);}
+    .sb-num{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);flex-shrink:0;min-width:22px;}
+
+    /* CONTENT */
+    .content{margin-left:var(--sidebar-w);flex:1;min-width:0;padding:48px 52px 96px;transition:margin-left .22s ease;}
+    .content-inner{max-width:var(--content-max);margin:0 auto;}
+
+    /* TYPOGRAPHY */
+    .chap-meta{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+    .badge{font-size:10px;padding:2px 8px;background:var(--accent-bg);color:var(--accent);border:1px solid rgba(0,204,112,.25);letter-spacing:.06em;}
+    .chap-title{font-family:'JetBrains Mono',monospace;font-size:clamp(22px,3.5vw,30px);font-weight:700;color:var(--text-head);line-height:1.25;margin-bottom:8px;}
+    .chap-title .hl{color:var(--accent);}
+    .chap-subtitle{font-size:15px;color:var(--text2);margin-bottom:32px;line-height:1.65;}
+    h2{font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:700;color:var(--text-head);margin:44px 0 16px;display:flex;align-items:baseline;gap:10px;}
+    h2 .n{color:var(--accent);font-size:13px;}
+    h3{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--accent);margin:28px 0 12px;}
+    p{color:var(--text);margin-bottom:16px;line-height:1.9;font-size:15px;}
+    code{font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--bg-code);color:var(--accent);padding:1px 6px;border:1px solid var(--border2);border-radius:2px;}
+    strong{color:var(--text-head);font-weight:700;}
+    ul,ol{padding-left:20px;margin-bottom:16px;}
+    ul li,ol li{margin-bottom:6px;color:var(--text);line-height:1.75;}
+
+    /* GOAL BOX */
+    .goal-box{background:var(--bg-card);border:1px solid var(--border2);border-left:3px solid var(--accent);padding:18px 22px;margin-bottom:32px;}
+    .goal-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:.08em;margin-bottom:12px;}
+    .goal-list{padding-left:18px;}
+    .goal-list li{color:var(--text);font-size:14px;margin-bottom:6px;line-height:1.7;}
+    .goal-list li::marker{color:var(--accent);}
+
+    /* CODE BLOCK */
+    .code-block{background:var(--bg-code);border:1px solid var(--border2);margin:16px 0 24px;overflow:hidden;}
+    .code-header{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;border-bottom:1px solid var(--border2);background:var(--bg-card);}
+    .code-lang{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.08em;}
+    .code-copy{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);background:transparent;border:1px solid var(--border2);padding:3px 10px;cursor:pointer;transition:color .15s,border-color .15s;}
+    .code-copy:hover{color:var(--accent);border-color:var(--accent);}
+    .code-body{padding:16px 20px;overflow-x:auto;}
+    .code-body pre{font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.8;color:var(--text);white-space:pre;}
+    .ln{display:inline-block;width:28px;text-align:right;margin-right:16px;color:var(--sy-ln-t);user-select:none;font-size:12px;}
+    .kw{color:var(--sy-kw);}.fn{color:var(--sy-fn);}.str{color:var(--sy-str);}
+    .cm{color:var(--sy-cm);}.num{color:var(--sy-num);}.pn{color:var(--sy-pn);}
+    .ex{color:#FF7070;}  /* 예외 클래스명 강조 */
+
+    /* OUTPUT BOX */
+    .output-box{background:#0A0F0A;border:1px solid var(--border2);border-left:3px solid var(--accent);margin:0 0 24px;padding:14px 20px;}
+    .output-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);margin-bottom:8px;letter-spacing:.08em;}
+    .output-body{font-family:'JetBrains Mono',monospace;font-size:13px;color:#A8D8A8;line-height:1.85;white-space:pre-wrap;}
+    .output-err{color:#FF9090;}
+
+    /* TIP / WARN / INFO */
+    .tip-box{background:var(--bg-tip);border:1px solid rgba(0,204,112,.15);border-left:3px solid var(--accent);padding:14px 18px;margin:16px 0 24px;}
+    .warn-box{background:var(--bg-warn);border:1px solid rgba(255,160,50,.15);border-left:3px solid var(--accent2);padding:14px 18px;margin:16px 0 24px;}
+    .info-box{background:var(--bg-info);border:1px solid rgba(100,140,255,.15);border-left:3px solid #6488FF;padding:14px 18px;margin:16px 0 24px;}
+    .box-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;margin-bottom:8px;}
+    .tip-box .box-label{color:var(--accent);}
+    .warn-box .box-label{color:var(--accent2);}
+    .info-box .box-label{color:#6488FF;}
+    .tip-box p,.warn-box p,.info-box p{margin-bottom:0;font-size:14px;color:var(--text2);line-height:1.8;}
+
+    /* ANATOMY — try/except 구조 해부 */
+    .anatomy-box{background:var(--bg-card);border:1px solid var(--border2);padding:24px 28px;margin:20px 0;font-family:'JetBrains Mono',monospace;}
+    .anatomy-line{display:flex;align-items:baseline;gap:16px;padding:3px 0;font-size:14px;line-height:1.7;}
+    .anat-code{flex:1;}
+    .anat-arrow{color:var(--text3);flex-shrink:0;}
+    .anat-desc{font-size:12px;color:var(--text2);font-family:'Noto Sans KR',sans-serif;min-width:180px;}
+    .anat-kw{color:var(--sy-kw);}
+    .anat-ex{color:#FF7070;}
+    .anat-cm{color:var(--sy-cm);}
+    .anat-str{color:var(--sy-str);}
+    .anat-fn{color:var(--sy-fn);}
+    .anat-ind{padding-left:28px;}
+    .anat-ind2{padding-left:56px;}
+
+    /* EXCEPTION TABLE */
+    .param-table{width:100%;border-collapse:collapse;margin:16px 0 24px;font-size:14px;}
+    .param-table th{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--text3);text-align:left;padding:8px 14px;border-bottom:1px solid var(--border);background:var(--bg-card);}
+    .param-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text2);line-height:1.6;vertical-align:top;}
+    .param-table td:first-child{font-family:'JetBrains Mono',monospace;font-size:13px;color:#FF7070;white-space:nowrap;}
+    .param-table tr:last-child td{border-bottom:none;}
+    .param-table tr:hover td{background:rgba(255,255,255,.015);}
+
+    /* FLOW DIAGRAM */
+    .flow-wrap{margin:20px 0;display:flex;flex-direction:column;gap:0;align-items:flex-start;}
+    .flow-row{display:flex;align-items:center;gap:0;}
+    .flow-box{font-family:'JetBrains Mono',monospace;font-size:12px;padding:10px 16px;border:1px solid;text-align:center;min-width:140px;}
+    .flow-box.try{background:var(--accent-bg);border-color:rgba(0,204,112,.3);color:var(--accent);}
+    .flow-box.err{background:rgba(255,80,80,.07);border-color:rgba(255,80,80,.3);color:#FF7070;}
+    .flow-box.ok{background:var(--bg-info);border-color:rgba(100,140,255,.3);color:#6488FF;}
+    .flow-box.fin{background:rgba(200,160,0,.07);border-color:rgba(200,160,0,.3);color:var(--accent2);}
+    .flow-box.else-box{background:rgba(187,136,255,.07);border-color:rgba(187,136,255,.3);color:var(--accent3);}
+    .flow-arrow{font-family:'JetBrains Mono',monospace;color:var(--text3);padding:0 10px;font-size:14px;}
+    .flow-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);padding:0 6px;}
+    .flow-down{font-family:'JetBrains Mono',monospace;color:var(--text3);font-size:16px;padding:4px 0;padding-left:55px;}
+
+    /* RULE LIST */
+    .rule-list{display:flex;flex-direction:column;gap:10px;margin:16px 0;}
+    .rule-item{display:flex;gap:12px;align-items:flex-start;}
+    .rule-icon{font-size:13px;flex-shrink:0;width:20px;text-align:center;padding-top:2px;}
+    .rule-text{font-size:14px;color:var(--text2);line-height:1.7;}
+    .rule-text code{font-size:12px;}
+
+    /* SUMMARY BOX */
+    .summary-box{background:var(--bg-card);border:1px solid var(--border2);padding:20px 24px;margin:32px 0;}
+    .summary-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.08em;margin-bottom:14px;}
+    .summary-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;}
+    .summary-item{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--text2);line-height:1.55;}
+    .summary-item::before{content:'✓';color:var(--accent);flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:12px;margin-top:2px;}
+
+    /* CHEER / NAV */
+    .section-divider{height:1px;background:var(--border);margin:44px 0;}
+    .cheer-box{border:1px solid var(--border);background:var(--bg);padding:18px 22px;margin-bottom:44px;display:flex;gap:14px;align-items:flex-start;}
+    .cheer-icon{font-size:18px;flex-shrink:0;line-height:1.5;}
+    .cheer-text{font-size:14px;color:var(--text2);line-height:1.85;}
+    .cheer-text strong{color:var(--text-head);}
+    .chap-nav{display:flex;justify-content:space-between;padding-top:32px;border-top:1px solid var(--border);gap:12px;flex-wrap:wrap;}
+    .chap-nav-btn{display:flex;flex-direction:column;gap:4px;text-decoration:none;padding:14px 18px;border:1px solid var(--border2);background:var(--bg-card);flex:1;max-width:300px;transition:border-color .15s;}
+    .chap-nav-btn:hover{border-color:var(--accent);}
+    .chap-nav-btn.next{text-align:right;}
+    .cnb-dir{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.07em;}
+    .cnb-title{font-size:13px;color:var(--text2);line-height:1.45;}
+    .cnb-title span{color:var(--accent);font-family:'JetBrains Mono',monospace;}
+
+    /* RESPONSIVE */
+    .sidebar-overlay{display:none;position:fixed;inset:0;top:var(--header-h);z-index:140;background:rgba(0,0,0,.65);}
+    @media(max-width:720px){
+      .sidebar-overlay.visible{display:block;}
+      .content{margin-left:0;padding:28px 20px 72px;}
+      .header-center{display:none;}
+      .summary-grid{grid-template-columns:1fr;}
+      .flow-wrap{overflow-x:auto;}
+    }
+    @media(max-width:480px){
+      .header-grade{display:none;}
+      .chap-nav-btn{max-width:100%;}
+      .header-right .nav-btn:not(.primary){display:none;}
+    }
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important;}}
+  </style>
+</head>
+<body>
+
+<header class="top-header">
+  <button class="header-open-btn" onclick="toggleSidebar()">&#9658;</button>
+  <div class="header-left">
+    <a href="../index.html" class="header-logo">SUPERPYTHON</a>
+    <span class="header-sep">/</span>
+    <span class="header-grade">&#129412; BRONZE</span>
+    <span class="header-sep">/</span>
+    <span class="header-chap">44. 예외처리 기초</span>
+  </div>
+  <div class="header-center">
+    <span>44 / 48</span>
+    <div class="progress-mini"><div class="progress-mini-fill" style="width:91.67%"></div></div>
+    <span>92%</span>
+  </div>
+  <div class="header-right">
+    <a href="43-quiz-file-io.html" class="nav-btn">&#8592; 이전</a>
+    <a href="45-quiz-exception.html" class="nav-btn primary">다음 &#8594;</a>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <button class="sidebar-toggle" onclick="toggleSidebar()">&#9664;</button>
+    <div class="sidebar-progress">
+      <div class="sp-label">BRONZE 진행률</div>
+      <div class="sp-bar"><div class="sp-fill" style="width:89.58%"></div></div>
+      <div class="sp-text"><span>43</span> / 48 챕터 완료</div>
+    </div>
+    <div class="sb-group" id="grp-env">
+      <div class="sb-group-header" onclick="toggleGroup('grp-env')"><span class="sb-group-title">환경 설정</span><span class="sb-group-arrow">&#9658;</span></div>
+      <div class="sb-items">
+        <a href="01-what-is-python.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">01</span>파이썬이란?</a>
+        <a href="02-setup.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">02</span>개발환경 설치</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-basic1">
+      <div class="sb-group-header" onclick="toggleGroup('grp-basic1')"><span class="sb-group-title">기초 문법 1</span><span class="sb-group-arrow">&#9658;</span></div>
+      <div class="sb-items">
+        <a href="03-print.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">03</span>print()란?</a>
+        <a href="04-quiz-print.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">04</span>연습문제</a>
+        <a href="05-variables.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">05</span>변수와 데이터 타입</a>
+        <a href="06-operators.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">06</span>연산자</a>
+        <a href="07-quiz-variables-operators.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">07</span>연습문제</a>
+        <a href="08-string.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">08</span>문자열 String</a>
+        <a href="09-quiz-string.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">09</span>연습문제</a>
+        <a href="10-fstring.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">10</span>f-string 완전정리</a>
+        <a href="11-quiz-fstring.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">11</span>연습문제</a>
+        <a href="12-mini-project-01.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">12</span>&#127918; 미니 프로젝트 ①</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-basic2">
+      <div class="sb-group-header" onclick="toggleGroup('grp-basic2')"><span class="sb-group-title">기초 문법 2</span><span class="sb-group-arrow">&#9658;</span></div>
+      <div class="sb-items">
+        <a href="13-list.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">13</span>리스트</a>
+        <a href="14-quiz-list.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">14</span>연습문제</a>
+        <a href="15-input.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">15</span>input() 함수</a>
+        <a href="16-quiz-input.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">16</span>연습문제</a>
+        <a href="17-mini-project-02.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">17</span>&#127918; 미니 프로젝트 ②</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-flow">
+      <div class="sb-group-header" onclick="toggleGroup('grp-flow')"><span class="sb-group-title">흐름 제어</span><span class="sb-group-arrow">&#9658;</span></div>
+      <div class="sb-items">
+        <a href="18-if.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">18</span>조건문 (if)</a>
+        <a href="19-quiz-if.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">19</span>연습문제</a>
+        <a href="20-mini-project-03.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">20</span>&#127918; 미니 프로젝트 ③</a>
+        <a href="21-for-range.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">21</span>for문과 range()</a>
+        <a href="22-quiz-for.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">22</span>연습문제</a>
+        <a href="23-while.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">23</span>while문</a>
+        <a href="24-quiz-while.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">24</span>연습문제</a>
+        <a href="25-mini-project-04.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">25</span>&#127918; 미니 프로젝트 ④</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-error">
+      <div class="sb-group-header" onclick="toggleGroup('grp-error')"><span class="sb-group-title">에러 &amp; 디버깅</span><span class="sb-group-arrow">&#9658;</span></div>
+      <div class="sb-items">
+        <a href="26-error-types.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">26</span>에러 읽는 법</a>
+        <a href="27-debugging.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">27</span>기초 디버깅 실습</a>
+        <a href="28-quiz-debugging.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">28</span>연습문제</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-func">
+      <div class="sb-group-header" onclick="toggleGroup('grp-func')"><span class="sb-group-title">함수</span><span class="sb-group-arrow">&#9658;</span></div>
+      <div class="sb-items">
+        <a href="29-function-basic.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">29</span>함수 기초</a>
+        <a href="30-quiz-function-basic.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">30</span>연습문제</a>
+        <a href="31-mini-project-05.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">31</span>&#127918; 미니 프로젝트 ⑤</a>
+        <a href="32-function-advanced.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">32</span>함수 심화</a>
+        <a href="33-quiz-function-advanced.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">33</span>연습문제</a>
+        <a href="34-module.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">34</span>모듈</a>
+        <a href="35-quiz-module.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">35</span>연습문제</a>
+        <a href="36-mini-project-06.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">36</span>&#127918; 미니 프로젝트 ⑥</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-ds">
+      <div class="sb-group-header" onclick="toggleGroup('grp-ds')"><span class="sb-group-title">자료구조</span><span class="sb-group-arrow">&#9658;</span></div>
+      <div class="sb-items">
+        <a href="37-dictionary.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">37</span>딕셔너리</a>
+        <a href="38-quiz-dictionary.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">38</span>연습문제</a>
+        <a href="39-tuple-set.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">39</span>튜플과 셋</a>
+        <a href="40-quiz-tuple-set.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">40</span>연습문제</a>
+        <a href="41-mini-project-07.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">41</span>&#127918; 미니 프로젝트 ⑦</a>
+      </div>
+    </div>
+    <div class="sb-group current open" id="grp-file">
+      <div class="sb-group-header" onclick="toggleGroup('grp-file')"><span class="sb-group-title">파일 &amp; 예외처리</span><span class="sb-group-arrow">&#9658;</span></div>
+      <div class="sb-items">
+        <a href="42-file-io.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">42</span>파일 입출력</a>
+        <a href="43-quiz-file-io.html" class="sb-item done"><span class="sb-icon">&#10003;</span><span class="sb-num">43</span>연습문제</a>
+        <a href="44-exception-basic.html" class="sb-item active"><span class="sb-icon">&#9658;</span><span class="sb-num">44</span>예외처리 기초</a>
+        <a href="45-quiz-exception.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">45</span>연습문제</a>
+        <a href="46-mini-project-08.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">46</span>&#127918; 미니 프로젝트 ⑧</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-end">
+      <div class="sb-group-header" onclick="toggleGroup('grp-end')"><span class="sb-group-title">마무리</span><span class="sb-group-arrow">&#9658;</span></div>
+      <div class="sb-items">
+        <a href="47-final-project.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">47</span>&#9733; 최종 프로젝트</a>
+        <a href="48-next-step.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">48</span>다음 단계 미리보기</a>
+      </div>
+    </div>
+  </aside>
+
+  <main class="content" id="mainContent">
+    <div class="content-inner">
+
+      <div class="chap-meta">
+        <span class="badge">LESSON</span>
+        <span>파일 &amp; 예외처리</span>
+        <span style="color:var(--text3)">·</span>
+        <span>챕터 44 / 48</span>
+      </div>
+      <h1 class="chap-title"><span class="hl">예외처리</span> 기초</h1>
+      <p class="chap-subtitle">프로그램은 언제든 예상치 못한 상황을 만납니다. 존재하지 않는 파일, 잘못된 입력, 0으로 나누기… <code>try / except</code>는 이런 상황을 <strong>프로그램이 죽지 않고 우아하게 처리</strong>하는 방법입니다.</p>
+
+      <div class="goal-box">
+        <div class="goal-label">&#9658; 이 챕터를 마치면</div>
+        <ul class="goal-list">
+          <li><code>try / except</code>의 기본 구조를 이해하고 작성할 수 있다</li>
+          <li>예외 종류에 따라 다른 <code>except</code> 절로 분기 처리할 수 있다</li>
+          <li><code>else</code>와 <code>finally</code>의 역할을 구분하고 활용할 수 있다</li>
+          <li>예외 메시지를 <code>as e</code>로 받아 출력할 수 있다</li>
+          <li>파일 입출력과 예외처리를 결합한 안전한 코드를 작성할 수 있다</li>
+        </ul>
+      </div>
+
+      <!-- ─── 1. 왜 예외처리가 필요한가 ─── -->
+      <h2><span class="n">1.</span>왜 예외처리가 필요한가?</h2>
+      <p>코드를 완벽하게 짜도 <strong>실행 중 예측 불가능한 상황</strong>은 반드시 생깁니다. 사용자가 숫자 대신 문자를 입력하거나, 읽으려는 파일이 없거나, 리스트 범위를 벗어나는 경우처럼요. 이때 예외처리 없이 그냥 두면 프로그램이 즉시 종료됩니다.</p>
+
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">PYTHON — 예외처리 없는 코드의 위험</span></div>
+        <div class="code-body"><pre><span class="cm"># 사용자가 "abc"를 입력하면?</span>
+num <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"숫자를 입력하세요: "</span><span class="pn">))</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">f"입력한 숫자: {num}"</span><span class="pn">)</span></pre></div>
+      </div>
+
+      <div class="output-box">
+        <div class="output-label">&#9658; 입력: abc</div>
+        <div class="output-body"><span class="output-err">ValueError: invalid literal for int() with base 10: 'abc'</span>
+<span class="output-err">프로그램 종료 &#x2620;</span></div>
+      </div>
+
+      <p>예외처리를 쓰면 오류가 발생해도 프로그램을 계속 실행시키거나, 친절한 메시지를 보여줄 수 있습니다.</p>
+
+      <!-- ─── 2. try / except 기본 구조 ─── -->
+      <h2><span class="n">2.</span>try / except 기본 구조</h2>
+      <p>파이썬의 예외처리는 네 개의 키워드로 구성됩니다: <code>try</code>, <code>except</code>, <code>else</code>, <code>finally</code>.</p>
+
+      <div class="anatomy-box">
+        <div class="anatomy-line"><span class="anat-code"><span class="anat-kw">try</span>:</span><span class="anat-arrow">&#8592;</span><span class="anat-desc">오류가 날 수 있는 코드를 감싸는 블록</span></div>
+        <div class="anatomy-line anat-ind"><span class="anat-code"><span class="anat-fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="anat-str">"입력: "</span><span class="pn">))</span></span><span class="anat-arrow">&#8592;</span><span class="anat-desc">여기서 오류 발생 가능</span></div>
+        <div class="anatomy-line" style="margin-top:4px;"><span class="anat-code"><span class="anat-kw">except</span> <span class="anat-ex">ValueError</span>:</span><span class="anat-arrow">&#8592;</span><span class="anat-desc">ValueError 발생 시 실행</span></div>
+        <div class="anatomy-line anat-ind"><span class="anat-code"><span class="anat-fn">print</span><span class="pn">(</span><span class="anat-str">"숫자를 입력하세요"</span><span class="pn">)</span></span></div>
+        <div class="anatomy-line" style="margin-top:4px;"><span class="anat-code"><span class="anat-kw">else</span>:</span><span class="anat-arrow">&#8592;</span><span class="anat-desc">오류 없이 성공했을 때 실행 (선택)</span></div>
+        <div class="anatomy-line anat-ind"><span class="anat-code"><span class="anat-fn">print</span><span class="pn">(</span><span class="anat-str">"성공!"</span><span class="pn">)</span></span></div>
+        <div class="anatomy-line" style="margin-top:4px;"><span class="anat-code"><span class="anat-kw">finally</span>:</span><span class="anat-arrow">&#8592;</span><span class="anat-desc">오류 여부와 관계없이 항상 실행 (선택)</span></div>
+        <div class="anatomy-line anat-ind"><span class="anat-code"><span class="anat-fn">print</span><span class="pn">(</span><span class="anat-str">"끝"</span><span class="pn">)</span></span></div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">PYTHON — 가장 기본적인 예외처리</span><button class="code-copy" onclick="copyCode(this)">복사</button></div>
+        <div class="code-body"><pre><span class="ln"> 1</span><span class="kw">try</span><span class="pn">:</span>
+<span class="ln"> 2</span>    num <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="fn">input</span><span class="pn">(</span><span class="str">"숫자를 입력하세요: "</span><span class="pn">))</span>
+<span class="ln"> 3</span>    <span class="fn">print</span><span class="pn">(</span><span class="str">f"입력한 숫자의 2배: {num * 2}"</span><span class="pn">)</span>
+<span class="ln"> 4</span><span class="kw">except</span> <span class="ex">ValueError</span><span class="pn">:</span>
+<span class="ln"> 5</span>    <span class="fn">print</span><span class="pn">(</span><span class="str">"❌ 올바른 숫자를 입력해주세요"</span><span class="pn">)</span></pre></div>
+      </div>
+
+      <div class="output-box">
+        <div class="output-label">&#9658; 입력: abc</div>
+        <div class="output-body">&#10060; 올바른 숫자를 입력해주세요
+<span style="color:var(--accent)">프로그램이 계속 실행됩니다 &#10004;</span></div>
+      </div>
+
+      <!-- ─── 3. 실행 흐름 ─── -->
+      <h2><span class="n">3.</span>실행 흐름 이해하기</h2>
+      <p><code>try</code> 블록 안에서 오류가 발생하면 <strong>즉시 해당 줄에서 실행을 멈추고</strong> 맞는 <code>except</code> 절로 점프합니다.</p>
+
+      <div class="flow-wrap">
+        <div class="flow-row">
+          <div class="flow-box try">try 블록 실행</div>
+        </div>
+        <div class="flow-down">&#8595;</div>
+        <div class="flow-row" style="gap:12px;align-items:flex-start;">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:0;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);margin-bottom:4px;">오류 발생</div>
+            <div class="flow-box err">except 절 실행</div>
+          </div>
+          <div style="padding-top:22px;color:var(--text3);font-family:'JetBrains Mono',monospace;">|</div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:0;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);margin-bottom:4px;">오류 없음</div>
+            <div class="flow-box else-box">else 절 실행</div>
+          </div>
+        </div>
+        <div class="flow-down">&#8595;</div>
+        <div class="flow-row">
+          <div class="flow-box fin">finally 절 실행 (항상)</div>
+        </div>
+        <div class="flow-down">&#8595;</div>
+        <div class="flow-row">
+          <div class="flow-box ok">다음 코드 계속 실행</div>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">PYTHON — 흐름 확인 예제</span><button class="code-copy" onclick="copyCode(this)">복사</button></div>
+        <div class="code-body"><pre><span class="ln"> 1</span><span class="kw">def</span> <span class="fn">safe_divide</span><span class="pn">(</span>a<span class="pn">,</span> b<span class="pn">):</span>
+<span class="ln"> 2</span>    <span class="kw">try</span><span class="pn">:</span>
+<span class="ln"> 3</span>        result <span class="pn">=</span> a <span class="pn">/</span> b         <span class="cm"># b가 0이면 ZeroDivisionError</span>
+<span class="ln"> 4</span>        <span class="fn">print</span><span class="pn">(</span><span class="str">f"try 블록 완료: {result}"</span><span class="pn">)</span>
+<span class="ln"> 5</span>    <span class="kw">except</span> <span class="ex">ZeroDivisionError</span><span class="pn">:</span>
+<span class="ln"> 6</span>        <span class="fn">print</span><span class="pn">(</span><span class="str">"except 실행: 0으로 나눌 수 없습니다"</span><span class="pn">)</span>
+<span class="ln"> 7</span>        result <span class="pn">=</span> <span class="num">0</span>
+<span class="ln"> 8</span>    <span class="kw">else</span><span class="pn">:</span>
+<span class="ln"> 9</span>        <span class="fn">print</span><span class="pn">(</span><span class="str">"else 실행: 나눗셈 성공!"</span><span class="pn">)</span>
+<span class="ln">10</span>    <span class="kw">finally</span><span class="pn">:</span>
+<span class="ln">11</span>        <span class="fn">print</span><span class="pn">(</span><span class="str">"finally 실행: 항상 여기까지 옵니다"</span><span class="pn">)</span>
+<span class="ln">12</span>    <span class="kw">return</span> result
+<span class="ln">13</span>
+<span class="ln">14</span><span class="fn">print</span><span class="pn">(</span><span class="str">"--- 정상 케이스 ---"</span><span class="pn">)</span>
+<span class="ln">15</span><span class="fn">safe_divide</span><span class="pn">(</span><span class="num">10</span><span class="pn">,</span> <span class="num">2</span><span class="pn">)</span>
+<span class="ln">16</span><span class="fn">print</span><span class="pn">(</span><span class="str">"--- 오류 케이스 ---"</span><span class="pn">)</span>
+<span class="ln">17</span><span class="fn">safe_divide</span><span class="pn">(</span><span class="num">10</span><span class="pn">,</span> <span class="num">0</span><span class="pn">)</span></pre></div>
+      </div>
+
+      <div class="output-box">
+        <div class="output-label">&#9658; 실행 결과</div>
+        <div class="output-body">--- 정상 케이스 ---
+try 블록 완료: 5.0
+else 실행: 나눗셈 성공!
+finally 실행: 항상 여기까지 옵니다
+--- 오류 케이스 ---
+except 실행: 0으로 나눌 수 없습니다
+finally 실행: 항상 여기까지 옵니다</div>
+      </div>
+
+      <div class="tip-box">
+        <div class="box-label">&#128161; else와 finally 언제 쓸까?</div>
+        <p><strong><code>else</code></strong> — 오류가 없을 때만 실행할 후속 작업에 사용. 성공한 경우만 로그 기록 등<br>
+        <strong><code>finally</code></strong> — 파일·네트워크 연결처럼 <em>오류 여부와 관계없이 반드시 닫아야 할 자원</em> 정리에 사용</p>
+      </div>
+
+      <!-- ─── 4. 여러 예외 처리 ─── -->
+      <h2><span class="n">4.</span>여러 예외 종류 처리하기</h2>
+      <p>하나의 <code>try</code> 블록에서 여러 종류의 오류가 날 수 있습니다. <code>except</code>를 여러 개 쓰거나, 괄호로 묶어 한꺼번에 처리할 수 있습니다.</p>
+
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">PYTHON — 다중 except</span><button class="code-copy" onclick="copyCode(this)">복사</button></div>
+        <div class="code-body"><pre><span class="ln"> 1</span><span class="kw">def</span> <span class="fn">get_item</span><span class="pn">(</span>lst<span class="pn">,</span> index_str<span class="pn">):</span>
+<span class="ln"> 2</span>    <span class="kw">try</span><span class="pn">:</span>
+<span class="ln"> 3</span>        idx <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span>index_str<span class="pn">)</span>    <span class="cm"># ValueError 가능</span>
+<span class="ln"> 4</span>        <span class="kw">return</span> lst<span class="pn">[</span>idx<span class="pn">]</span>          <span class="cm"># IndexError 가능</span>
+<span class="ln"> 5</span>    <span class="kw">except</span> <span class="ex">ValueError</span><span class="pn">:</span>
+<span class="ln"> 6</span>        <span class="fn">print</span><span class="pn">(</span><span class="str">f"  ❌ '{index_str}'는 숫자가 아닙니다"</span><span class="pn">)</span>
+<span class="ln"> 7</span>    <span class="kw">except</span> <span class="ex">IndexError</span><span class="pn">:</span>
+<span class="ln"> 8</span>        <span class="fn">print</span><span class="pn">(</span><span class="str">f"  ❌ 인덱스 {index_str}이 범위를 벗어났습니다"</span><span class="pn">)</span>
+<span class="ln"> 9</span>    <span class="kw">return</span> <span class="kw">None</span>
+<span class="ln">10</span>
+<span class="ln">11</span>data <span class="pn">=</span> <span class="pn">[</span><span class="str">"사과"</span><span class="pn">,</span> <span class="str">"바나나"</span><span class="pn">,</span> <span class="str">"포도"</span><span class="pn">]</span>
+<span class="ln">12</span><span class="fn">print</span><span class="pn">(</span><span class="fn">get_item</span><span class="pn">(</span>data<span class="pn">,</span> <span class="str">"1"</span><span class="pn">))</span>    <span class="cm"># 바나나</span>
+<span class="ln">13</span><span class="fn">get_item</span><span class="pn">(</span>data<span class="pn">,</span> <span class="str">"abc"</span><span class="pn">)</span>         <span class="cm"># ValueError</span>
+<span class="ln">14</span><span class="fn">get_item</span><span class="pn">(</span>data<span class="pn">,</span> <span class="str">"10"</span><span class="pn">)</span>          <span class="cm"># IndexError</span>
+<span class="ln">15</span>
+<span class="ln">16</span><span class="cm"># 여러 예외를 한꺼번에 처리 — 튜플로 묶기</span>
+<span class="ln">17</span><span class="kw">try</span><span class="pn">:</span>
+<span class="ln">18</span>    <span class="fn">int</span><span class="pn">(</span><span class="str">"abc"</span><span class="pn">)</span>
+<span class="ln">19</span><span class="kw">except</span> <span class="pn">(</span><span class="ex">ValueError</span><span class="pn">,</span> <span class="ex">TypeError</span><span class="pn">):</span>
+<span class="ln">20</span>    <span class="fn">print</span><span class="pn">(</span><span class="str">"값 오류 또는 타입 오류"</span><span class="pn">)</span></pre></div>
+      </div>
+
+      <div class="output-box">
+        <div class="output-label">&#9658; 실행 결과</div>
+        <div class="output-body">바나나
+  ❌ 'abc'는 숫자가 아닙니다
+  ❌ 인덱스 10이 범위를 벗어났습니다
+값 오류 또는 타입 오류</div>
+      </div>
+
+      <!-- ─── 5. as e — 예외 메시지 받기 ─── -->
+      <h2><span class="n">5.</span>예외 메시지 받기 — as e</h2>
+      <p>예외가 발생했을 때 파이썬이 만들어주는 <strong>오류 메시지를 변수로 받아</strong> 출력하거나 로그로 남길 수 있습니다.</p>
+
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">PYTHON</span><button class="code-copy" onclick="copyCode(this)">복사</button></div>
+        <div class="code-body"><pre><span class="ln"> 1</span><span class="kw">try</span><span class="pn">:</span>
+<span class="ln"> 2</span>    result <span class="pn">=</span> <span class="num">10</span> <span class="pn">/</span> <span class="num">0</span>
+<span class="ln"> 3</span><span class="kw">except</span> <span class="ex">ZeroDivisionError</span> <span class="kw">as</span> e<span class="pn">:</span>
+<span class="ln"> 4</span>    <span class="fn">print</span><span class="pn">(</span><span class="str">f"오류 발생: {e}"</span><span class="pn">)</span>     <span class="cm"># division by zero</span>
+<span class="ln"> 5</span>    <span class="fn">print</span><span class="pn">(</span><span class="str">f"오류 타입: {type(e).__name__}"</span><span class="pn">)</span>  <span class="cm"># ZeroDivisionError</span>
+<span class="ln"> 6</span>
+<span class="ln"> 7</span><span class="cm"># 여러 예외 + as e</span>
+<span class="ln"> 8</span><span class="kw">try</span><span class="pn">:</span>
+<span class="ln"> 9</span>    score <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span><span class="str">"백점"</span><span class="pn">)</span>
+<span class="ln">10</span><span class="kw">except</span> <span class="ex">ValueError</span> <span class="kw">as</span> e<span class="pn">:</span>
+<span class="ln">11</span>    <span class="fn">print</span><span class="pn">(</span><span class="str">f"입력 오류: {e}"</span><span class="pn">)</span>
+<span class="ln">12</span>    <span class="cm"># invalid literal for int() with base 10: '백점'</span>
+<span class="ln">13</span>
+<span class="ln">14</span><span class="cm"># 모든 예외를 잡는 Exception (마지막 안전망)</span>
+<span class="ln">15</span><span class="kw">try</span><span class="pn">:</span>
+<span class="ln">16</span>    <span class="pn">{}</span><span class="pn">[</span><span class="str">"없는키"</span><span class="pn">]</span>
+<span class="ln">17</span><span class="kw">except</span> <span class="ex">Exception</span> <span class="kw">as</span> e<span class="pn">:</span>
+<span class="ln">18</span>    <span class="fn">print</span><span class="pn">(</span><span class="str">f"예상치 못한 오류 [{type(e).__name__}]: {e}"</span><span class="pn">)</span></pre></div>
+      </div>
+
+      <div class="output-box">
+        <div class="output-label">&#9658; 실행 결과</div>
+        <div class="output-body">오류 발생: division by zero
+오류 타입: ZeroDivisionError
+입력 오류: invalid literal for int() with base 10: '백점'
+예상치 못한 오류 [KeyError]: '없는키'</div>
+      </div>
+
+      <div class="warn-box">
+        <div class="box-label">&#9888;&#65039; except Exception은 마지막 수단</div>
+        <p>모든 예외를 잡는 <code>except Exception</code>은 <strong>진짜 버그도 덮어버릴 수 있습니다.</strong> 구체적인 예외 타입을 먼저 처리하고, <code>Exception</code>은 예상치 못한 예외를 로그에 남기는 마지막 안전망으로만 쓰세요.</p>
+      </div>
+
+      <!-- ─── 6. 자주 쓰이는 예외 종류 ─── -->
+      <h2><span class="n">6.</span>자주 마주치는 예외 종류</h2>
+
+      <table class="param-table">
+        <tr><th>예외</th><th>언제 발생하나</th><th>예시 코드</th></tr>
+        <tr><td>ValueError</td><td>값 형식이 맞지 않을 때</td><td><code>int("abc")</code></td></tr>
+        <tr><td>TypeError</td><td>타입이 맞지 않을 때</td><td><code>"3" + 3</code></td></tr>
+        <tr><td>ZeroDivisionError</td><td>0으로 나눌 때</td><td><code>10 / 0</code></td></tr>
+        <tr><td>IndexError</td><td>리스트 범위 초과</td><td><code>[1,2,3][10]</code></td></tr>
+        <tr><td>KeyError</td><td>딕셔너리에 없는 키</td><td><code>{"a":1}["b"]</code></td></tr>
+        <tr><td>FileNotFoundError</td><td>파일이 없을 때</td><td><code>open("없음.txt")</code></td></tr>
+        <tr><td>AttributeError</td><td>없는 속성/메서드 호출</td><td><code>(42).upper()</code></td></tr>
+        <tr><td>NameError</td><td>정의되지 않은 변수 사용</td><td><code>print(x)</code> (x 없음)</td></tr>
+      </table>
+
+      <!-- ─── 7. 파일 입출력 + 예외처리 ─── -->
+      <h2><span class="n">7.</span>파일 입출력과 예외처리 결합</h2>
+      <p>파일을 다룰 때는 예외처리가 필수입니다. 파일이 없거나 권한이 없는 경우가 흔히 발생하기 때문입니다. <code>finally</code>로 파일을 반드시 닫는 패턴도 중요합니다.</p>
+
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">PYTHON — 안전한 파일 읽기</span><button class="code-copy" onclick="copyCode(this)">복사</button></div>
+        <div class="code-body"><pre><span class="ln"> 1</span><span class="cm"># 방법 1: try/except/finally 직접 사용</span>
+<span class="ln"> 2</span><span class="kw">def</span> <span class="fn">read_file_safe</span><span class="pn">(</span>filename<span class="pn">):</span>
+<span class="ln"> 3</span>    f <span class="pn">=</span> <span class="kw">None</span>
+<span class="ln"> 4</span>    <span class="kw">try</span><span class="pn">:</span>
+<span class="ln"> 5</span>        f <span class="pn">=</span> <span class="fn">open</span><span class="pn">(</span>filename<span class="pn">,</span> <span class="str">"r"</span><span class="pn">,</span> encoding<span class="pn">=</span><span class="str">"utf-8"</span><span class="pn">)</span>
+<span class="ln"> 6</span>        content <span class="pn">=</span> f<span class="pn">.</span><span class="fn">read</span><span class="pn">()</span>
+<span class="ln"> 7</span>        <span class="fn">print</span><span class="pn">(</span><span class="str">f"파일 읽기 성공: {len(content)}자"</span><span class="pn">)</span>
+<span class="ln"> 8</span>        <span class="kw">return</span> content
+<span class="ln"> 9</span>    <span class="kw">except</span> <span class="ex">FileNotFoundError</span><span class="pn">:</span>
+<span class="ln">10</span>        <span class="fn">print</span><span class="pn">(</span><span class="str">f"❌ '{filename}' 파일을 찾을 수 없습니다"</span><span class="pn">)</span>
+<span class="ln">11</span>        <span class="kw">return</span> <span class="kw">None</span>
+<span class="ln">12</span>    <span class="kw">except</span> <span class="ex">PermissionError</span><span class="pn">:</span>
+<span class="ln">13</span>        <span class="fn">print</span><span class="pn">(</span><span class="str">f"❌ '{filename}' 읽기 권한이 없습니다"</span><span class="pn">)</span>
+<span class="ln">14</span>        <span class="kw">return</span> <span class="kw">None</span>
+<span class="ln">15</span>    <span class="kw">finally</span><span class="pn">:</span>
+<span class="ln">16</span>        <span class="kw">if</span> f<span class="pn">:</span>
+<span class="ln">17</span>            f<span class="pn">.</span><span class="fn">close</span><span class="pn">()</span>   <span class="cm"># 오류가 나도 반드시 파일 닫기</span>
+<span class="ln">18</span>            <span class="fn">print</span><span class="pn">(</span><span class="str">"파일 닫음"</span><span class="pn">)</span>
+<span class="ln">19</span>
+<span class="ln">20</span><span class="fn">read_file_safe</span><span class="pn">(</span><span class="str">"없는파일.txt"</span><span class="pn">)</span></pre></div>
+      </div>
+
+      <h3>with문 — finally 없이도 자동으로 파일을 닫아주는 패턴</h3>
+      <p><code>with open(...) as f:</code> 구문은 블록이 끝나면 예외 발생 여부와 관계없이 <strong>자동으로 파일을 닫아줍니다.</strong> 파일 작업에서 가장 권장되는 패턴입니다.</p>
+
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">PYTHON — with문 + 예외처리 (권장 패턴)</span><button class="code-copy" onclick="copyCode(this)">복사</button></div>
+        <div class="code-body"><pre><span class="ln"> 1</span><span class="kw">def</span> <span class="fn">read_file</span><span class="pn">(</span>filename<span class="pn">):</span>
+<span class="ln"> 2</span>    <span class="kw">try</span><span class="pn">:</span>
+<span class="ln"> 3</span>        <span class="kw">with</span> <span class="fn">open</span><span class="pn">(</span>filename<span class="pn">,</span> <span class="str">"r"</span><span class="pn">,</span> encoding<span class="pn">=</span><span class="str">"utf-8"</span><span class="pn">)</span> <span class="kw">as</span> f<span class="pn">:</span>
+<span class="ln"> 4</span>            <span class="kw">return</span> f<span class="pn">.</span><span class="fn">read</span><span class="pn">()</span>   <span class="cm"># with 블록 끝에 자동으로 파일 닫힘</span>
+<span class="ln"> 5</span>    <span class="kw">except</span> <span class="ex">FileNotFoundError</span><span class="pn">:</span>
+<span class="ln"> 6</span>        <span class="fn">print</span><span class="pn">(</span><span class="str">f"파일 없음: {filename}"</span><span class="pn">)</span>
+<span class="ln"> 7</span>        <span class="kw">return</span> <span class="kw">None</span>
+<span class="ln"> 8</span>
+<span class="ln"> 9</span><span class="kw">def</span> <span class="fn">write_file</span><span class="pn">(</span>filename<span class="pn">,</span> content<span class="pn">):</span>
+<span class="ln">10</span>    <span class="kw">try</span><span class="pn">:</span>
+<span class="ln">11</span>        <span class="kw">with</span> <span class="fn">open</span><span class="pn">(</span>filename<span class="pn">,</span> <span class="str">"w"</span><span class="pn">,</span> encoding<span class="pn">=</span><span class="str">"utf-8"</span><span class="pn">)</span> <span class="kw">as</span> f<span class="pn">:</span>
+<span class="ln">12</span>            f<span class="pn">.</span><span class="fn">write</span><span class="pn">(</span>content<span class="pn">)</span>
+<span class="ln">13</span>        <span class="fn">print</span><span class="pn">(</span><span class="str">f"✅ '{filename}' 저장 완료"</span><span class="pn">)</span>
+<span class="ln">14</span>    <span class="kw">except</span> <span class="ex">IOError</span> <span class="kw">as</span> e<span class="pn">:</span>
+<span class="ln">15</span>        <span class="fn">print</span><span class="pn">(</span><span class="str">f"저장 실패: {e}"</span><span class="pn">)</span></pre></div>
+      </div>
+
+      <div class="tip-box">
+        <div class="box-label">&#128161; with문이 finally보다 좋은 이유</div>
+        <p>파일을 열 때 <code>with</code>를 쓰면 <code>finally: f.close()</code>를 매번 쓸 필요가 없고, 실수로 닫는 것을 잊는 실수도 방지됩니다. 파이썬에서 파일 작업의 표준 패턴입니다.</p>
+      </div>
+
+      <!-- ─── 8. 실전 예제 ─── -->
+      <h2><span class="n">8.</span>실전 예제 — 안전한 점수 입력기</h2>
+      <p>사용자 입력을 받는 현실적인 프로그램에서 예외처리가 어떻게 작동하는지 확인해보세요.</p>
+
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">PYTHON — 점수 입력 검증 함수</span><button class="code-copy" onclick="copyCode(this)">복사</button></div>
+        <div class="code-body"><pre><span class="ln"> 1</span><span class="kw">def</span> <span class="fn">get_valid_score</span><span class="pn">(</span>subject<span class="pn">):</span>
+<span class="ln"> 2</span>    <span class="str">"""유효한 점수(0~100)를 입력받을 때까지 반복합니다."""</span>
+<span class="ln"> 3</span>    <span class="kw">while</span> <span class="kw">True</span><span class="pn">:</span>
+<span class="ln"> 4</span>        <span class="kw">try</span><span class="pn">:</span>
+<span class="ln"> 5</span>            raw <span class="pn">=</span> <span class="fn">input</span><span class="pn">(</span><span class="str">f"{subject} 점수 입력 (0-100): "</span><span class="pn">)</span>
+<span class="ln"> 6</span>            score <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span>raw<span class="pn">)</span>           <span class="cm"># ValueError 가능</span>
+<span class="ln"> 7</span>            <span class="kw">if</span> <span class="kw">not</span> <span class="pn">(</span><span class="num">0</span> <span class="pn">&lt;=</span> score <span class="pn">&lt;=</span> <span class="num">100</span><span class="pn">):</span>
+<span class="ln"> 8</span>                <span class="kw">raise</span> <span class="ex">ValueError</span><span class="pn">(</span><span class="str">"점수는 0~100 사이여야 합니다"</span><span class="pn">)</span>
+<span class="ln"> 9</span>        <span class="kw">except</span> <span class="ex">ValueError</span> <span class="kw">as</span> e<span class="pn">:</span>
+<span class="ln">10</span>            <span class="fn">print</span><span class="pn">(</span><span class="str">f"  ❌ 입력 오류: {e}"</span><span class="pn">)</span>
+<span class="ln">11</span>        <span class="kw">else</span><span class="pn">:</span>
+<span class="ln">12</span>            <span class="kw">return</span> score              <span class="cm"># 오류 없이 성공하면 반환</span>
+<span class="ln">13</span>
+<span class="ln">14</span><span class="cm"># 사용 예 (실제 실행 시 입력받음)</span>
+<span class="ln">15</span><span class="cm"># math = get_valid_score("수학")</span>
+<span class="ln">16</span><span class="cm"># print(f"수학 점수: {math}")</span>
+<span class="ln">17</span>
+<span class="ln">18</span><span class="cm"># 시뮬레이션 — 입력 시나리오</span>
+<span class="ln">19</span>test_inputs <span class="pn">=</span> <span class="pn">[</span><span class="str">"abc"</span><span class="pn">,</span> <span class="str">"150"</span><span class="pn">,</span> <span class="str">"87"</span><span class="pn">]</span>
+<span class="ln">20</span><span class="kw">for</span> inp <span class="kw">in</span> test_inputs<span class="pn">:</span>
+<span class="ln">21</span>    <span class="kw">try</span><span class="pn">:</span>
+<span class="ln">22</span>        score <span class="pn">=</span> <span class="fn">int</span><span class="pn">(</span>inp<span class="pn">)</span>
+<span class="ln">23</span>        <span class="kw">if</span> <span class="kw">not</span> <span class="pn">(</span><span class="num">0</span> <span class="pn">&lt;=</span> score <span class="pn">&lt;=</span> <span class="num">100</span><span class="pn">):</span>
+<span class="ln">24</span>            <span class="kw">raise</span> <span class="ex">ValueError</span><span class="pn">(</span><span class="str">"점수는 0~100 사이여야 합니다"</span><span class="pn">)</span>
+<span class="ln">25</span>        <span class="fn">print</span><span class="pn">(</span><span class="str">f"  ✅ 유효한 점수: {score}"</span><span class="pn">)</span>
+<span class="ln">26</span>    <span class="kw">except</span> <span class="ex">ValueError</span> <span class="kw">as</span> e<span class="pn">:</span>
+<span class="ln">27</span>        <span class="fn">print</span><span class="pn">(</span><span class="str">f"  ❌ [{inp}] → {e}"</span><span class="pn">)</span></pre></div>
+      </div>
+
+      <div class="output-box">
+        <div class="output-label">&#9658; 실행 결과</div>
+        <div class="output-body">  ❌ [abc] → invalid literal for int() with base 10: 'abc'
+  ❌ [150] → 점수는 0~100 사이여야 합니다
+  ✅ 유효한 점수: 87</div>
+      </div>
+
+      <div class="info-box">
+        <div class="box-label">&#128204; raise — 예외를 직접 발생시키기</div>
+        <p>8번 줄의 <code>raise ValueError("...")</code>처럼 조건이 맞지 않을 때 <strong>예외를 직접 발생시킬 수 있습니다.</strong> 범위 검사, 유효성 검사에서 자주 쓰이는 패턴입니다.</p>
+      </div>
+
+      <!-- ─── 9. 자주 하는 실수 ─── -->
+      <h2><span class="n">9.</span>자주 하는 실수와 해결법</h2>
+
+      <div class="rule-list">
+        <div class="rule-item">
+          <span class="rule-icon">&#10060;</span>
+          <div class="rule-text">
+            <strong>try 블록이 너무 큼</strong> — 수십 줄을 하나의 try로 감싸면 어디서 오류가 났는지 알기 어렵습니다.<br>
+            오류 가능성이 있는 <em>최소한의 코드만</em> try로 감싸세요.
+          </div>
+        </div>
+        <div class="rule-item">
+          <span class="rule-icon">&#10060;</span>
+          <div class="rule-text">
+            <strong>except: 만 쓰기</strong> — <code>except:</code> (예외 타입 없이)는 <code>KeyboardInterrupt</code>까지 잡아 Ctrl+C로도 프로그램을 못 끄게 만듭니다. 최소한 <code>except Exception:</code>을 쓰세요.
+          </div>
+        </div>
+        <div class="rule-item">
+          <span class="rule-icon">&#10060;</span>
+          <div class="rule-text">
+            <strong>except에서 아무것도 안 하기</strong> — <code>except: pass</code>는 오류를 조용히 삼켜 버려 디버깅을 매우 어렵게 만듭니다. 최소한 <code>print</code>나 로그를 남기세요.
+          </div>
+        </div>
+        <div class="rule-item">
+          <span class="rule-icon">&#10060;</span>
+          <div class="rule-text">
+            <strong>except 순서 실수</strong> — 상위 예외(예: <code>Exception</code>)를 앞에 쓰면 하위 예외가 절대 실행되지 않습니다. <strong>구체적인 예외를 먼저, 넓은 예외를 나중에</strong> 쓰세요.
+          </div>
+        </div>
+        <div class="rule-item">
+          <span class="rule-icon">&#10003;</span>
+          <div class="rule-text">
+            <strong>올바른 패턴</strong> — 구체적 예외 → 일반 예외 순서, try는 최소 범위, except에는 반드시 처리 로직 작성
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── 핵심 요약 ─── -->
+      <div class="summary-box">
+        <div class="summary-label">&#128204; 핵심 요약</div>
+        <div class="summary-grid">
+          <div class="summary-item"><code>try</code> — 오류 날 수 있는 코드</div>
+          <div class="summary-item"><code>except 예외</code> — 오류 발생 시 처리</div>
+          <div class="summary-item"><code>else</code> — 오류 없이 성공 시 실행</div>
+          <div class="summary-item"><code>finally</code> — 항상 실행 (자원 정리)</div>
+          <div class="summary-item"><code>except E as e</code> — 오류 메시지 받기</div>
+          <div class="summary-item">여러 except — 구체적 순서로 작성</div>
+          <div class="summary-item"><code>raise</code> — 예외 직접 발생</div>
+          <div class="summary-item"><code>with open()</code> — 자동 파일 닫기</div>
+          <div class="summary-item">try는 최소 범위로 감싸기</div>
+          <div class="summary-item">except에는 반드시 처리 로직 작성</div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="cheer-box">
+        <span class="cheer-icon">&#128737;&#65039;</span>
+        <div class="cheer-text">
+          <strong>예외처리 완료!</strong><br>
+          이제 프로그램이 갑자기 죽는 일 없이 오류를 우아하게 처리할 수 있습니다. <code>try / except / else / finally</code> — 이 네 키워드만 있으면 어떤 예상치 못한 상황도 대비할 수 있습니다. 다음은 연습문제로 손으로 직접 써보며 완전히 굳혀봅시다!
+        </div>
+      </div>
+
+      <div class="chap-nav">
+        <a href="43-quiz-file-io.html" class="chap-nav-btn">
+          <span class="cnb-dir">&#8592; 이전 챕터</span>
+          <span class="cnb-title"><span>43.</span> 연습문제 — 파일 입출력</span>
+        </a>
+        <a href="45-quiz-exception.html" class="chap-nav-btn next">
+          <span class="cnb-dir">다음 챕터 &#8594;</span>
+          <span class="cnb-title"><span>45.</span> 연습문제 — 예외처리</span>
+        </a>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    const text = pre.innerText.split('\n').map(l => l.replace(/^\s*\d+\s{1,2}/, '')).join('\n').trim();
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '복사됨!';
+      setTimeout(() => btn.textContent = '복사', 1800);
+    });
+  }
+  const isMobile = () => window.innerWidth <= 720;
+  const overlay = document.getElementById('sidebarOverlay');
+  function toggleSidebar() {
+    document.body.classList.toggle('sidebar-closed');
+    if (isMobile()) overlay.classList.toggle('visible', !document.body.classList.contains('sidebar-closed'));
+    localStorage.setItem('sp-sidebar', document.body.classList.contains('sidebar-closed') ? 'closed' : 'open');
+  }
+  function closeSidebar() {
+    document.body.classList.add('sidebar-closed');
+    overlay.classList.remove('visible');
+    localStorage.setItem('sp-sidebar', 'closed');
+  }
+  function toggleGroup(id) { document.getElementById(id).classList.toggle('open'); }
+  window.addEventListener('DOMContentLoaded', () => {
+    if (isMobile()) document.body.classList.add('sidebar-closed');
+    else if (localStorage.getItem('sp-sidebar') === 'closed') document.body.classList.add('sidebar-closed');
+  });
+  window.addEventListener('resize', () => { if (!isMobile()) overlay.classList.remove('visible'); });
+</script>
+</body>
+</html>

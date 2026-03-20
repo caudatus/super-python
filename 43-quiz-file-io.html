@@ -1,0 +1,1551 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>43. 연습문제 — 파일 입출력 — 브론즈 | 슈퍼파이썬</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#111111; --bg-nav:#0A0A0A; --bg-side:#0E0E0E; --bg-card:#181818;
+      --bg-code:#1A1A1A; --bg-tip:#131A13; --bg-warn:#1A1410; --bg-info:#101520;
+      --accent:#00CC70; --accent-dim:#007A42; --accent-bg:rgba(0,204,112,0.07);
+      --accent2:#C8A000; --text:#D8D8D8; --text-head:#EFEFEF;
+      --text2:#888888; --text3:#444444; --border:#222222; --border2:#2E2E2E;
+      --sy-kw:#C792EA; --sy-fn:#82AAFF; --sy-str:#C3E88D;
+      --sy-cm:#546E7A; --sy-num:#F78C6C; --sy-pn:#89DDFF; --sy-ln-t:#555555;
+      --sidebar-w:248px; --content-max:720px; --header-h:48px;
+      font-variant-ligatures: none;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Noto Sans KR', sans-serif; font-size: 15px; line-height: 1.8; overflow-x: hidden; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent-dim); }
+
+    /* ━━━ HEADER ━━━ */
+    .top-header { position: fixed; top: 0; left: 0; right: 0; z-index: 200; height: var(--header-h); background: var(--bg-nav); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 16px; }
+    .header-open-btn { display: none; align-items: center; justify-content: center; width: 28px; height: 28px; flex-shrink: 0; margin-right: 12px; background: var(--bg-card); border: 1px solid var(--border2); border-radius: 4px; cursor: pointer; color: var(--text2); font-size: 12px; transition: background .15s, color .15s, border-color .15s; }
+    .header-open-btn:hover { background: var(--accent-bg); color: var(--accent); border-color: var(--accent); }
+    body.sidebar-closed .header-open-btn { display: flex; }
+    .header-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; font-family: 'JetBrains Mono', monospace; font-size: 12px; overflow: hidden; }
+    .header-logo  { color: var(--accent); text-decoration: none; font-weight: 700; white-space: nowrap; }
+    .header-sep   { color: var(--text3); flex-shrink: 0; }
+    .header-grade { color: var(--text2); white-space: nowrap; }
+    .header-chap  { color: var(--text-head); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .header-center { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text3); display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding: 0 16px; }
+    .progress-mini { width: 80px; height: 3px; background: var(--border2); border-radius: 2px; overflow: hidden; }
+    .progress-mini-fill { height: 100%; background: var(--accent); border-radius: 2px; }
+    .header-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .nav-btn { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text2); background: transparent; border: 1px solid var(--border2); padding: 4px 12px; text-decoration: none; transition: border-color .15s, color .15s; white-space: nowrap; }
+    .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .nav-btn.primary { color: var(--bg-nav); background: var(--accent); border-color: var(--accent); font-weight: 700; }
+    .nav-btn.primary:hover { filter: brightness(1.1); }
+
+    /* ━━━ LAYOUT ━━━ */
+    .layout { display: flex; padding-top: var(--header-h); min-height: 100vh; }
+
+    /* ━━━ SIDEBAR ━━━ */
+    .sidebar { width: var(--sidebar-w); flex-shrink: 0; position: fixed; top: var(--header-h); bottom: 0; left: 0; background: var(--bg-side); border-right: 1px solid var(--border); overflow-y: auto; overflow-x: hidden; transition: transform .22s ease; z-index: 150; padding-top: 8px; }
+    body.sidebar-closed .sidebar { transform: translateX(calc(-1 * var(--sidebar-w))); }
+    body.sidebar-closed .content { margin-left: 0; }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 140; }
+    .sidebar-overlay.visible { display: block; }
+    .sidebar-toggle { position: absolute; top: 10px; right: 10px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: var(--bg-card); border: 1px solid var(--border2); border-radius: 4px; cursor: pointer; color: var(--text2); font-size: 12px; z-index: 10; transition: background .15s, color .15s; }
+    .sidebar-toggle:hover { background: var(--accent-bg); color: var(--accent); border-color: var(--accent); }
+    body.sidebar-closed .sidebar-toggle { display: none; }
+    .sidebar-progress { margin: 44px 12px 12px; padding: 12px 14px; background: var(--bg-card); border: 1px solid var(--border); }
+    .sp-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); margin-bottom: 6px; letter-spacing: .08em; }
+    .sp-bar { height: 4px; background: var(--border2); border-radius: 2px; overflow: hidden; margin-bottom: 5px; }
+    .sp-fill { height: 100%; background: var(--accent); border-radius: 2px; }
+    .sp-text { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text2); }
+    .sp-text span { color: var(--accent); }
+    .sb-group { border-bottom: 1px solid var(--border); }
+    .sb-group-header { display: flex; align-items: center; justify-content: space-between; padding: 9px 14px 9px 12px; cursor: pointer; user-select: none; transition: background .12s; gap: 8px; }
+    .sb-group-header:hover { background: rgba(255,255,255,.03); }
+    .sb-group-title { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; letter-spacing: .06em; color: var(--text2); text-transform: uppercase; flex: 1; }
+    .sb-group.current .sb-group-title { color: var(--accent); }
+    .sb-group-arrow { font-size: 9px; color: var(--text3); transition: transform .2s; flex-shrink: 0; }
+    .sb-group.open .sb-group-arrow { transform: rotate(90deg); color: var(--accent); }
+    .sb-items { overflow: hidden; max-height: 0; transition: max-height .28s ease; }
+    .sb-group.open .sb-items { max-height: 1200px; }
+    .sb-item { display: flex; align-items: baseline; gap: 8px; padding: 6px 14px 6px 20px; font-size: 13px; color: var(--text2); text-decoration: none; border-left: 2px solid transparent; transition: background .1s, color .1s, border-color .1s; line-height: 1.45; }
+    .sb-item:hover { background: rgba(255,255,255,.03); color: var(--text); }
+    .sb-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--accent-bg); font-weight: 500; }
+    .sb-item.done { color: var(--text3); }
+    .sb-icon { font-size: 9px; flex-shrink: 0; font-family: 'JetBrains Mono', monospace; width: 10px; text-align: center; color: var(--text3); }
+    .sb-item.active .sb-icon { color: var(--accent); }
+    .sb-item.done   .sb-icon { color: var(--accent-dim); }
+    .sb-num { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); flex-shrink: 0; min-width: 22px; }
+
+    /* ━━━ CONTENT ━━━ */
+    .content { margin-left: var(--sidebar-w); flex: 1; min-width: 0; padding: 48px 52px 96px; transition: margin-left .22s ease; }
+    .content-inner { max-width: var(--content-max); margin: 0 auto; }
+    .chap-meta { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text3); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .badge { font-size: 10px; padding: 2px 8px; background: var(--accent-bg); color: var(--accent); border: 1px solid rgba(0,204,112,.25); letter-spacing: .06em; }
+    .badge.quiz { background: rgba(130,170,255,0.08); color: #82AAFF; border-color: rgba(130,170,255,0.25); }
+    .chap-title { font-family: 'JetBrains Mono', monospace; font-size: clamp(22px,3.5vw,30px); font-weight: 700; color: var(--text-head); line-height: 1.25; margin-bottom: 8px; }
+    .chap-title .hl { color: var(--accent); }
+    .chap-subtitle { font-size: 15px; color: var(--text2); margin-bottom: 32px; line-height: 1.65; }
+
+    /* ━━━ SCOREBOARD ━━━ */
+    .scoreboard { display: flex; gap: 12px; margin-bottom: 40px; flex-wrap: wrap; }
+    .score-card { flex: 1; min-width: 80px; background: var(--bg-card); border: 1px solid var(--border2); padding: 14px 16px; text-align: center; }
+    .score-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); letter-spacing: .1em; margin-bottom: 6px; }
+    .score-val { font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 700; color: var(--accent); line-height: 1; }
+    .score-val.total { color: var(--text2); }
+
+    /* ━━━ DIFFICULTY HEADER ━━━ */
+    .diff-header { display: flex; align-items: center; gap: 12px; margin: 36px 0 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+    .diff-badge { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; padding: 3px 10px; letter-spacing: .06em; }
+    .diff-badge.easy   { background: rgba(0,204,112,.12);  color: var(--accent);  border: 1px solid rgba(0,204,112,.3); }
+    .diff-badge.medium { background: rgba(200,160,0,.12);  color: var(--accent2); border: 1px solid rgba(200,160,0,.3); }
+    .diff-badge.hard   { background: rgba(240,80,80,.10);  color: #F07070;        border: 1px solid rgba(240,80,80,.3); }
+    .diff-title { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text2); flex: 1; }
+    .diff-count { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text3); }
+
+    /* ━━━ QUESTION CARD ━━━ */
+    .q-card { background: var(--bg-card); border: 1px solid var(--border2); margin-bottom: 16px; transition: border-color .2s; }
+    .q-card.solved { border-color: var(--accent-dim); }
+    .q-card.wrong  { border-color: rgba(240,80,80,.4); }
+    .q-header { padding: 16px 20px 12px; display: flex; gap: 14px; }
+    .q-num { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: var(--accent); flex-shrink: 0; padding-top: 2px; min-width: 28px; }
+    .q-body { flex: 1; min-width: 0; }
+    .q-text { font-size: 14px; color: var(--text); line-height: 1.75; margin-bottom: 10px; }
+    .q-text code { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; background: var(--bg-code); color: var(--accent); padding: 1px 6px; border: 1px solid var(--border2); border-radius: 2px; }
+    .q-code-block { background: var(--bg-code); border: 1px solid var(--border2); padding: 10px 14px; margin: 8px 0; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; line-height: 1.7; white-space: pre; overflow-x: auto; }
+    .q-expected { display: flex; align-items: baseline; gap: 8px; margin-top: 8px; padding: 8px 12px; background: rgba(0,0,0,.2); border-left: 2px solid var(--accent-dim); }
+    .q-expected-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); flex-shrink: 0; }
+    .q-expected-val { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--text); white-space: pre; }
+    .q-input-area { padding: 0 20px 16px 20px; }
+    .q-textarea { width: 100%; background: #0D0D0D; border: 1px solid var(--border2); color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 13px; padding: 10px 14px; resize: vertical; line-height: 1.7; outline: none; transition: border-color .15s; }
+    .q-textarea:focus { border-color: var(--accent); }
+    .q-actions { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+    .btn-check  { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; padding: 6px 16px; background: var(--accent); color: #000; border: none; cursor: pointer; transition: filter .15s; }
+    .btn-check:hover { filter: brightness(1.1); }
+    .btn-hint   { font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 6px 14px; background: transparent; color: var(--text2); border: 1px solid var(--border2); cursor: pointer; transition: border-color .15s, color .15s; }
+    .btn-hint:hover   { border-color: var(--accent2); color: var(--accent2); }
+    .btn-answer { font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 6px 14px; background: transparent; color: var(--text2); border: 1px solid var(--border2); cursor: pointer; transition: border-color .15s, color .15s; }
+    .btn-answer:hover { border-color: var(--text2); color: var(--text); }
+    .q-result { display: none; margin-top: 8px; padding: 7px 12px; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+    .q-result.ok  { background: rgba(0,204,112,.1);  color: var(--accent); border: 1px solid rgba(0,204,112,.25); }
+    .q-result.err { background: rgba(240,80,80,.08); color: #F07070;       border: 1px solid rgba(240,80,80,.2); }
+    .q-dropdown { display: none; border-top: 1px solid var(--border); padding: 14px 20px; background: rgba(0,0,0,.2); }
+    .q-dropdown.visible { display: block; }
+    .q-dropdown-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); letter-spacing: .08em; margin-bottom: 8px; }
+    .q-dropdown p { font-size: 13.5px; color: var(--text2); line-height: 1.75; margin-bottom: 8px; }
+    .q-dropdown code { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; background: var(--bg-code); color: var(--accent); padding: 1px 6px; border: 1px solid var(--border2); border-radius: 2px; }
+    .q-answer-code { background: var(--bg-code); border: 1px solid var(--border2); padding: 12px 16px; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; line-height: 1.75; white-space: pre; overflow-x: auto; margin-top: 8px; }
+
+    /* 구문 강조 */
+    .kw  { color: var(--sy-kw); }
+    .fn  { color: var(--sy-fn); }
+    .str { color: var(--sy-str); }
+    .cm  { color: var(--sy-cm); }
+    .num { color: var(--sy-num); }
+    .pn  { color: var(--sy-pn); }
+
+    /* ━━━ CHAP NAV ━━━ */
+    .chap-nav { display: flex; gap: 12px; margin-top: 56px; flex-wrap: wrap; }
+    .chap-nav-btn { flex: 1; min-width: 180px; display: flex; flex-direction: column; gap: 4px; padding: 16px 20px; background: var(--bg-card); border: 1px solid var(--border2); text-decoration: none; transition: border-color .15s, background .15s; }
+    .chap-nav-btn:hover { border-color: var(--accent); background: var(--accent-bg); }
+    .chap-nav-btn.next { align-items: flex-end; text-align: right; }
+    .cnb-dir   { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); letter-spacing: .06em; }
+    .cnb-title { font-size: 13px; color: var(--text2); }
+    .cnb-title span { color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+
+    /* ━━━ RESPONSIVE ━━━ */
+    @media (max-width: 720px) {
+      .content { padding: 32px 20px 80px; }
+      .header-center { display: none; }
+      .chap-nav-btn { min-width: 120px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ━━━ TOP HEADER ━━━ -->
+<header class="top-header">
+  <button class="header-open-btn" onclick="toggleSidebar()">☰</button>
+  <div class="header-left">
+    <a href="../index.html" class="header-logo">🐍 SuperPython</a>
+    <span class="header-sep">/</span>
+    <span class="header-grade">🟤 브론즈</span>
+    <span class="header-sep">/</span>
+    <span class="header-chap">43. 연습문제 — 파일 입출력</span>
+  </div>
+  <div class="header-center">
+    <span>43 / 48</span>
+    <div class="progress-mini"><div class="progress-mini-fill" style="width:89.58%"></div></div>
+    <span>89%</span>
+  </div>
+  <div class="header-right">
+    <a href="42-file-io.html"         class="nav-btn">← 이전</a>
+    <a href="44-exception-basic.html" class="nav-btn primary">다음 →</a>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<div class="layout">
+  <!-- ━━━ SIDEBAR ━━━ -->
+  <aside class="sidebar">
+    <button class="sidebar-toggle" onclick="toggleSidebar()">◀</button>
+    <div class="sidebar-progress">
+      <div class="sp-label">BRONZE 진행률</div>
+      <div class="sp-bar"><div class="sp-fill" style="width:89.58%"></div></div>
+      <div class="sp-text"><span>42</span> / 48 챕터 완료</div>
+    </div>
+
+    <div class="sb-group" id="grp-env">
+      <div class="sb-group-header" onclick="toggleGroup('grp-env')"><span class="sb-group-title">환경 설정</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="01-what-is-python.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">01</span>파이썬이란?</a>
+        <a href="02-setup.html"          class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">02</span>개발환경 설치</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-basic1">
+      <div class="sb-group-header" onclick="toggleGroup('grp-basic1')"><span class="sb-group-title">기초 문법 1</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="03-print.html"                    class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">03</span>print()란?</a>
+        <a href="04-quiz-print.html"               class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">04</span>연습문제</a>
+        <a href="05-variables.html"                class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">05</span>변수와 데이터 타입</a>
+        <a href="06-operators.html"                class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">06</span>연산자</a>
+        <a href="07-quiz-variables-operators.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">07</span>연습문제</a>
+        <a href="08-string.html"                   class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">08</span>문자열 String</a>
+        <a href="09-quiz-string.html"              class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">09</span>연습문제</a>
+        <a href="10-fstring.html"                  class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">10</span>f-string 완전정리</a>
+        <a href="11-quiz-fstring.html"             class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">11</span>연습문제</a>
+        <a href="12-mini-project-01.html"          class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">12</span>🎮 미니 프로젝트 ①</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-basic2">
+      <div class="sb-group-header" onclick="toggleGroup('grp-basic2')"><span class="sb-group-title">기초 문법 2</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="13-list.html"            class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">13</span>리스트</a>
+        <a href="14-quiz-list.html"       class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">14</span>연습문제</a>
+        <a href="15-input.html"           class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">15</span>input() 함수</a>
+        <a href="16-quiz-input.html"      class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">16</span>연습문제</a>
+        <a href="17-mini-project-02.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">17</span>🎮 미니 프로젝트 ②</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-flow">
+      <div class="sb-group-header" onclick="toggleGroup('grp-flow')"><span class="sb-group-title">흐름 제어</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="18-if.html"              class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">18</span>조건문 (if)</a>
+        <a href="19-quiz-if.html"         class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">19</span>연습문제</a>
+        <a href="20-mini-project-03.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">20</span>🎮 미니 프로젝트 ③</a>
+        <a href="21-for-range.html"       class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">21</span>for문과 range()</a>
+        <a href="22-quiz-for.html"        class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">22</span>연습문제</a>
+        <a href="23-while.html"           class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">23</span>while문</a>
+        <a href="24-quiz-while.html"      class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">24</span>연습문제</a>
+        <a href="25-mini-project-04.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">25</span>🎮 미니 프로젝트 ④</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-error">
+      <div class="sb-group-header" onclick="toggleGroup('grp-error')"><span class="sb-group-title">에러 &amp; 디버깅</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="26-error-types.html"    class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">26</span>에러 읽는 법</a>
+        <a href="27-debugging.html"      class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">27</span>기초 디버깅 실습</a>
+        <a href="28-quiz-debugging.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">28</span>연습문제</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-func">
+      <div class="sb-group-header" onclick="toggleGroup('grp-func')"><span class="sb-group-title">함수</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="29-function-basic.html"         class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">29</span>함수 기초</a>
+        <a href="30-quiz-function-basic.html"    class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">30</span>연습문제</a>
+        <a href="31-mini-project-05.html"        class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">31</span>🎮 미니 프로젝트 ⑤</a>
+        <a href="32-function-advanced.html"      class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">32</span>함수 심화</a>
+        <a href="33-quiz-function-advanced.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">33</span>연습문제</a>
+        <a href="34-module.html"                 class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">34</span>모듈</a>
+        <a href="35-quiz-module.html"            class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">35</span>연습문제</a>
+        <a href="36-mini-project-06.html"        class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">36</span>🎮 미니 프로젝트 ⑥</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-ds">
+      <div class="sb-group-header" onclick="toggleGroup('grp-ds')"><span class="sb-group-title">자료구조</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="37-dictionary.html"      class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">37</span>딕셔너리</a>
+        <a href="38-quiz-dictionary.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">38</span>연습문제</a>
+        <a href="39-tuple-set.html"       class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">39</span>튜플과 셋</a>
+        <a href="40-quiz-tuple-set.html"  class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">40</span>연습문제</a>
+        <a href="41-mini-project-07.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">41</span>🎮 미니 프로젝트 ⑦</a>
+      </div>
+    </div>
+    <div class="sb-group open current" id="grp-file">
+      <div class="sb-group-header" onclick="toggleGroup('grp-file')"><span class="sb-group-title">파일 &amp; 예외처리</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="42-file-io.html"         class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">42</span>파일 입출력</a>
+        <a href="43-quiz-file-io.html"    class="sb-item active"><span class="sb-icon">→</span><span class="sb-num">43</span>연습문제</a>
+        <a href="44-exception-basic.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">44</span>예외처리 기초</a>
+        <a href="45-quiz-exception.html"  class="sb-item"><span class="sb-icon"> </span><span class="sb-num">45</span>연습문제</a>
+        <a href="46-mini-project-08.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">46</span>🎮 미니 프로젝트 ⑧</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-end">
+      <div class="sb-group-header" onclick="toggleGroup('grp-end')"><span class="sb-group-title">마무리</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="47-final-project.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">47</span>★ 최종 프로젝트</a>
+        <a href="48-next-step.html"     class="sb-item"><span class="sb-icon"> </span><span class="sb-num">48</span>다음 단계 미리보기</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ━━━ MAIN CONTENT ━━━ -->
+  <main class="content" id="mainContent">
+    <div class="content-inner">
+
+      <div class="chap-meta">
+        <span class="badge quiz">QUIZ</span>
+        <span>파일 &amp; 예외처리</span>
+        <span style="color:var(--text3)">·</span>
+        <span>챕터 43 / 48</span>
+      </div>
+      <h1 class="chap-title">연습문제 — <span class="hl">파일 입출력</span></h1>
+      <p class="chap-subtitle">open(), with 문, 읽기·쓰기·추가 모드까지. 파일을 직접 다루는 코드를 써보며 손에 완전히 익혀보세요.</p>
+
+      <!-- 스코어보드 -->
+      <div class="scoreboard">
+        <div class="score-card"><div class="score-label">SOLVED</div><div class="score-val" id="solved-count">0</div></div>
+        <div class="score-card"><div class="score-label">TOTAL</div><div class="score-val total">30</div></div>
+        <div class="score-card"><div class="score-label">LEVEL</div><div class="score-val" id="level-text" style="font-size:13px;padding-top:4px;">도전 중...</div></div>
+      </div>
+
+      <!-- ══════════════════════════════
+           난이도 하 (Q1~Q9)
+      ══════════════════════════════ -->
+      <div class="diff-header">
+        <span class="diff-badge easy">하</span>
+        <span class="diff-title">open() · with · 모드 · 기초 읽기/쓰기</span>
+        <span class="diff-count">1 – 9번</span>
+      </div>
+
+      <!-- Q1 -->
+      <div class="q-card" id="q1">
+        <div class="q-header">
+          <span class="q-num">Q1.</span>
+          <div class="q-body">
+            <p class="q-text"><code>open()</code>의 세 가지 필수 인자를 빈칸에 채워 파일을 올바르게 열어보세요.<br>파일 이름은 <code>"hello.txt"</code>, 모드는 읽기, 인코딩은 UTF-8로 설정하세요.</p>
+            <div class="q-code-block">f = open(<span style="color:#F07070">___</span>, <span style="color:#F07070">___</span>, encoding=<span style="color:#F07070">___</span>)
+f.close()</div>
+            <div class="q-expected"><span class="q-expected-label">답 (3가지):</span><span class="q-expected-val">"hello.txt", "r", "utf-8"</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q1-input" rows="2" placeholder="세 인자를 쉼표로 구분해 작성하세요..." spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check" onclick="check(1)">확인</button>
+            <button class="btn-hint" onclick="toggleHint(1)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(1)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q1-result"></div>
+        </div>
+        <div class="q-dropdown" id="q1-hint">
+          <div class="q-dropdown-label">HINT</div>
+          <p><code>open(파일이름, 모드, encoding=인코딩)</code> — 파일 이름과 인코딩은 문자열, 읽기 모드는 <code>"r"</code>입니다.</p>
+        </div>
+        <div class="q-dropdown" id="q1-answer">
+          <div class="q-dropdown-label">ANSWER</div>
+          <div class="q-answer-code">f = <span class="fn">open</span>(<span class="str">"hello.txt"</span>, <span class="str">"r"</span>, encoding=<span class="str">"utf-8"</span>)
+f.<span class="fn">close</span>()</div>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="q-card" id="q2">
+        <div class="q-header">
+          <span class="q-num">Q2.</span>
+          <div class="q-body">
+            <p class="q-text"><code>"w"</code>, <code>"r"</code>, <code>"a"</code> 세 모드의 차이를 설명한 것 중, <strong>틀린 설명</strong>을 찾아 모드 이름을 적으세요.</p>
+            <div class="q-code-block">A. "r" — 파일을 읽기 전용으로 열고, 파일이 없으면 오류가 발생한다
+B. "w" — 파일에 새로 쓰며, 파일이 이미 있어도 내용이 보존된다
+C. "a" — 파일 끝에 내용을 이어 쓰며, 파일이 없으면 새로 만든다</div>
+            <div class="q-expected"><span class="q-expected-label">답:</span><span class="q-expected-val">B ("w"가 틀림 — 기존 내용을 덮어씀)</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q2-input" rows="2" placeholder="틀린 설명의 모드 이름(영어 한 글자)을 쓰세요..." spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check" onclick="check(2)">확인</button>
+            <button class="btn-hint" onclick="toggleHint(2)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(2)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q2-result"></div>
+        </div>
+        <div class="q-dropdown" id="q2-hint">
+          <div class="q-dropdown-label">HINT</div>
+          <p><code>"w"</code> 모드로 열면 기존 파일의 내용이 어떻게 될까요? '보존'될까요, '삭제'될까요?</p>
+        </div>
+        <div class="q-dropdown" id="q2-answer">
+          <div class="q-dropdown-label">ANSWER</div>
+          <div class="q-answer-code"><span class="cm"># B가 틀렸습니다.</span>
+<span class="cm"># "w" 모드는 파일이 이미 있으면 내용을 완전히 덮어씁니다.</span>
+<span class="cm"># 기존 내용을 보존하면서 추가하려면 "a" 모드를 사용해야 합니다.</span>
+<span class="cm"># 답: w</span></div>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="q-card" id="q3">
+        <div class="q-header">
+          <span class="q-num">Q3.</span>
+          <div class="q-body">
+            <p class="q-text"><code>with</code> 문을 사용해 <code>"note.txt"</code>를 쓰기 모드로 열고, <code>"Python is fun!"</code>을 파일에 써보세요.</p>
+            <div class="q-expected"><span class="q-expected-label">파일 내용:</span><span class="q-expected-val">Python is fun!</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q3-input" rows="3" placeholder="코드를 입력하세요..." spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check" onclick="check(3)">확인</button>
+            <button class="btn-hint" onclick="toggleHint(3)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(3)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q3-result"></div>
+        </div>
+        <div class="q-dropdown" id="q3-hint">
+          <div class="q-dropdown-label">HINT</div>
+          <p><code>with open("note.txt", "w", encoding="utf-8") as f:</code> 다음 줄에 들여써서 <code>f.write(...)</code>를 호출하세요.</p>
+        </div>
+        <div class="q-dropdown" id="q3-answer">
+          <div class="q-dropdown-label">ANSWER</div>
+          <div class="q-answer-code"><span class="kw">with</span> <span class="fn">open</span>(<span class="str">"note.txt"</span>, <span class="str">"w"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    f.<span class="fn">write</span>(<span class="str">"Python is fun!"</span>)</div>
+        </div>
+      </div>
+
+      <!-- Q4 -->
+      <div class="q-card" id="q4">
+        <div class="q-header">
+          <span class="q-num">Q4.</span>
+          <div class="q-body">
+            <p class="q-text">아래 코드를 실행하면 <code>result.txt</code>에 어떤 내용이 저장되는지 쓰세요.</p>
+            <div class="q-code-block"><span class="kw">with</span> <span class="fn">open</span>(<span class="str">"result.txt"</span>, <span class="str">"w"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    f.<span class="fn">write</span>(<span class="str">"첫 번째\n"</span>)
+    f.<span class="fn">write</span>(<span class="str">"두 번째\n"</span>)
+    f.<span class="fn">write</span>(<span class="str">"세 번째"</span>)</div>
+            <div class="q-expected"><span class="q-expected-label">파일 내용:</span><span class="q-expected-val">첫 번째
+두 번째
+세 번째</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q4-input" rows="3" placeholder="파일에 저장될 내용을 그대로 적어보세요..." spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check" onclick="check(4)">확인</button>
+            <button class="btn-hint" onclick="toggleHint(4)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(4)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q4-result"></div>
+        </div>
+        <div class="q-dropdown" id="q4-hint">
+          <div class="q-dropdown-label">HINT</div>
+          <p><code>\n</code>은 줄바꿈 문자입니다. 마지막 줄은 <code>\n</code>이 없어서 줄바꿈 없이 끝납니다.</p>
+        </div>
+        <div class="q-dropdown" id="q4-answer">
+          <div class="q-dropdown-label">ANSWER</div>
+          <div class="q-answer-code"><span class="cm"># result.txt 내용:</span>
+첫 번째
+두 번째
+세 번째
+<span class="cm"># \n이 실제 줄바꿈으로 표현됩니다.</span>
+<span class="cm"># 세 번째는 \n 없이 끝납니다.</span></div>
+        </div>
+      </div>
+
+      <!-- Q5 -->
+      <div class="q-card" id="q5">
+        <div class="q-header">
+          <span class="q-num">Q5.</span>
+          <div class="q-body">
+            <p class="q-text">아래 코드에서 <code>with</code> 블록이 끝난 뒤 파일의 상태로 올바른 것을 고르고, 그 이유를 한 문장으로 설명하세요.</p>
+            <div class="q-code-block"><span class="kw">with</span> <span class="fn">open</span>(<span class="str">"data.txt"</span>, <span class="str">"r"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    text = f.<span class="fn">read</span>()
+<span class="cm"># with 블록 종료 후</span></div>
+            <div class="q-expected"><span class="q-expected-label">답:</span><span class="q-expected-val">파일이 자동으로 닫혀있다</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q5-input" rows="2" placeholder="올바른 상태와 이유를 쓰세요..." spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check" onclick="check(5)">확인</button>
+            <button class="btn-hint" onclick="toggleHint(5)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(5)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q5-result"></div>
+        </div>
+        <div class="q-dropdown" id="q5-hint">
+          <div class="q-dropdown-label">HINT</div>
+          <p><code>with</code> 문의 핵심 장점이 무엇인지 생각해보세요. <code>close()</code>를 직접 부르지 않아도 되는 이유는?</p>
+        </div>
+        <div class="q-dropdown" id="q5-answer">
+          <div class="q-dropdown-label">ANSWER</div>
+          <div class="q-answer-code"><span class="cm"># with 블록이 끝나면 파일이 자동으로 닫힙니다.</span>
+<span class="cm"># with 문은 블록 종료 시 f.close()를 자동 호출하기 때문입니다.</span>
+<span class="cm"># 오류가 발생해도 반드시 닫힙니다.</span></div>
+        </div>
+      </div>
+
+      <!-- Q6 -->
+      <div class="q-card" id="q6">
+        <div class="q-header">
+          <span class="q-num">Q6.</span>
+          <div class="q-body">
+            <p class="q-text"><code>read()</code>로 파일 전체를 읽어 변수 <code>content</code>에 저장하고 출력하는 코드를 작성하세요. 파일 이름은 <code>"poem.txt"</code>입니다.</p>
+            <div class="q-expected"><span class="q-expected-label">패턴:</span><span class="q-expected-val">with open(...) as f: / content = f.read() / print(content)</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q6-input" rows="4" placeholder="코드를 입력하세요..." spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check" onclick="check(6)">확인</button>
+            <button class="btn-hint" onclick="toggleHint(6)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(6)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q6-result"></div>
+        </div>
+        <div class="q-dropdown" id="q6-hint">
+          <div class="q-dropdown-label">HINT</div>
+          <p>읽기 모드 <code>"r"</code>로 열고, <code>f.read()</code>의 반환값을 변수에 담은 뒤 출력합니다.</p>
+        </div>
+        <div class="q-dropdown" id="q6-answer">
+          <div class="q-dropdown-label">ANSWER</div>
+          <div class="q-answer-code"><span class="kw">with</span> <span class="fn">open</span>(<span class="str">"poem.txt"</span>, <span class="str">"r"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    content = f.<span class="fn">read</span>()  <span class="cm"># 파일 전체를 문자열로</span>
+<span class="fn">print</span>(content)</div>
+        </div>
+      </div>
+
+      <!-- Q7 -->
+      <div class="q-card" id="q7">
+        <div class="q-header">
+          <span class="q-num">Q7.</span>
+          <div class="q-body">
+            <p class="q-text">아래 코드의 실행 결과를 예상하세요. <code>scores.txt</code>의 내용은 다음과 같습니다.</p>
+            <div class="q-code-block"><span class="cm"># scores.txt 내용</span>
+90
+85
+78</div>
+            <div class="q-code-block"><span class="kw">with</span> <span class="fn">open</span>(<span class="str">"scores.txt"</span>, <span class="str">"r"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    lines = f.<span class="fn">readlines</span>()
+<span class="fn">print</span>(<span class="fn">len</span>(lines))</div>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">3</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q7-input" rows="2" placeholder="출력 결과를 입력하세요..." spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check" onclick="check(7)">확인</button>
+            <button class="btn-hint" onclick="toggleHint(7)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(7)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q7-result"></div>
+        </div>
+        <div class="q-dropdown" id="q7-hint">
+          <div class="q-dropdown-label">HINT</div>
+          <p><code>readlines()</code>는 각 줄을 원소로 갖는 리스트를 반환합니다. 파일이 3줄이면 리스트 길이는?</p>
+        </div>
+        <div class="q-dropdown" id="q7-answer">
+          <div class="q-dropdown-label">ANSWER</div>
+          <div class="q-answer-code"><span class="cm"># readlines()는 ['90\n', '85\n', '78'] 같은 리스트를 반환</span>
+<span class="cm"># 줄 수 = 리스트 길이 → 3</span></div>
+        </div>
+      </div>
+
+      <!-- Q8 -->
+      <div class="q-card" id="q8">
+        <div class="q-header">
+          <span class="q-num">Q8.</span>
+          <div class="q-body">
+            <p class="q-text">존재하지 않는 파일을 읽으려 할 때 발생하는 오류의 이름을 영어로 쓰세요.</p>
+            <div class="q-code-block"><span class="kw">with</span> <span class="fn">open</span>(<span class="str">"없는파일.txt"</span>, <span class="str">"r"</span>) <span class="kw">as</span> f:
+    text = f.<span class="fn">read</span>()</div>
+            <div class="q-expected"><span class="q-expected-label">오류:</span><span class="q-expected-val">FileNotFoundError</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q8-input" rows="2" placeholder="오류 이름을 입력하세요..." spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check" onclick="check(8)">확인</button>
+            <button class="btn-hint" onclick="toggleHint(8)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(8)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q8-result"></div>
+        </div>
+        <div class="q-dropdown" id="q8-hint">
+          <div class="q-dropdown-label">HINT</div>
+          <p>"파일을 찾을 수 없음" — 영어로 File Not Found, 파이썬 오류 이름 형식(PascalCase)으로 쓰세요.</p>
+        </div>
+        <div class="q-dropdown" id="q8-answer">
+          <div class="q-dropdown-label">ANSWER</div>
+          <div class="q-answer-code"><span class="cm"># FileNotFoundError</span>
+<span class="cm"># "r" 모드로 존재하지 않는 파일을 열면 발생합니다.</span>
+<span class="cm"># "w", "a" 모드는 파일이 없으면 새로 만들어서 오류가 나지 않습니다.</span></div>
+        </div>
+      </div>
+
+      <!-- Q9 -->
+      <div class="q-card" id="q9">
+        <div class="q-header">
+          <span class="q-num">Q9.</span>
+          <div class="q-body">
+            <p class="q-text">한글이 포함된 파일을 읽고 쓸 때 지정해야 하는 인코딩 값을 쓰세요.</p>
+            <div class="q-expected"><span class="q-expected-label">답:</span><span class="q-expected-val">utf-8</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q9-input" rows="2" placeholder="인코딩 값을 입력하세요..." spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check" onclick="check(9)">확인</button>
+            <button class="btn-hint" onclick="toggleHint(9)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(9)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q9-result"></div>
+        </div>
+        <div class="q-dropdown" id="q9-hint">
+          <div class="q-dropdown-label">HINT</div>
+          <p>세계 표준 인코딩으로, 한글·영어·이모지를 모두 표현할 수 있습니다. 숫자 8이 들어갑니다.</p>
+        </div>
+        <div class="q-dropdown" id="q9-answer">
+          <div class="q-dropdown-label">ANSWER</div>
+          <div class="q-answer-code"><span class="cm"># utf-8 (또는 "utf-8")</span>
+<span class="cm"># open() 호출 시: encoding="utf-8"</span>
+<span class="cm"># 윈도우 기본값인 cp949와 혼용하면 한글이 깨질 수 있으니</span>
+<span class="cm"># 항상 명시적으로 지정하는 습관을 들이세요.</span></div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════
+           난이도 중 (Q10~Q18)
+      ══════════════════════════════ -->
+      <div class="diff-header">
+        <span class="diff-badge medium">중</span>
+        <span class="diff-title">readlines · for 순회 · append · strip · 줄 처리</span>
+        <span class="diff-count">10 – 18번</span>
+      </div>
+
+      <!-- Q10 -->
+      <div class="q-card" id="q10">
+        <div class="q-header">
+          <span class="q-num">Q10.</span>
+          <div class="q-body">
+            <p class="q-text">아래 코드의 출력 결과를 예상하세요. <code>items.txt</code>의 내용은 다음과 같습니다.</p>
+            <div class="q-code-block"><span class="cm"># items.txt 내용</span>
+사과
+바나나
+딸기</div>
+            <div class="q-code-block"><span class="kw">with</span> <span class="fn">open</span>(<span class="str">"items.txt"</span>, <span class="str">"r"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    <span class="kw">for</span> line <span class="kw">in</span> f:
+        <span class="fn">print</span>(line.<span class="fn">strip</span>())</div>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">사과
+바나나
+딸기</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q10-input" rows="3" placeholder="출력 결과를 입력하세요..." spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check" onclick="check(10)">확인</button>
+            <button class="btn-hint" onclick="toggleHint(10)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(10)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q10-result"></div>
+        </div>
+        <div class="q-dropdown" id="q10-hint">
+          <div class="q-dropdown-label">HINT</div>
+          <p><code>for line in f</code>는 한 줄씩 읽으며, 각 줄 끝에 <code>\n</code>이 포함됩니다. <code>.strip()</code>이 그것을 제거합니다.</p>
+        </div>
+        <div class="q-dropdown" id="q10-answer">
+          <div class="q-dropdown-label">ANSWER</div>
+          <div class="q-answer-code"><span class="cm"># strip()이 각 줄의 앞뒤 공백과 \n을 제거하므로</span>
+<span class="cm"># 깔끔하게 한 줄씩 출력됩니다.</span>
+사과
+바나나
+딸기</div>
+        </div>
+      </div>
+
+      <!-- Q11 -->
+      <div class="q-card" id="q11">
+        <div class="q-header">
+          <span class="q-num">Q11.</span>
+          <div class="q-body">
+            <p class="q-text"><code>"a"</code>(append) 모드를 사용해 <code>"log.txt"</code>에 <code>"새 항목 추가\n"</code>를 이어쓰는 코드를 작성하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">패턴:</span><span class="q-expected-val">with open("log.txt", "a", ...) as f: f.write(...)</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q11-input" rows="3" placeholder="코드를 입력하세요..." spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check" onclick="check(11)">확인</button>
+            <button class="btn-hint" onclick="toggleHint(11)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(11)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q11-result"></div>
+        </div>
+        <div class="q-dropdown" id="q11-hint">
+          <div class="q-dropdown-label">HINT</div>
+          <p>기존 내용을 유지하며 끝에 추가할 때는 <code>"w"</code>가 아닌 <code>"a"</code> 모드를 사용하세요.</p>
+        </div>
+        <div class="q-dropdown" id="q11-answer">
+          <div class="q-dropdown-label">ANSWER</div>
+          <div class="q-answer-code"><span class="kw">with</span> <span class="fn">open</span>(<span class="str">"log.txt"</span>, <span class="str">"a"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    f.<span class="fn">write</span>(<span class="str">"새 항목 추가\n"</span>)</div>
+        </div>
+      </div>
+
+      <!-- Q12 -->
+      <div class="q-card" id="q12">
+        <div class="q-header">
+          <span class="q-num">Q12.</span>
+          <div class="q-body">
+            <p class="q-text">아래 코드를 <strong>두 번 실행</strong>하면 <code>counter.txt</code>에 최종적으로 어떤 내용이 저장되는지 쓰세요.</p>
+            <div class="q-code-block"><span class="kw">with</span> <span class="fn">open</span>(<span class="str">"counter.txt"</span>, <span class="str">"w"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    f.<span class="fn">write</span>(<span class="str">"실행 횟수: 1\n"</span>)</div>
+            <div class="q-expected"><span class="q-expected-label">최종 내용:</span><span class="q-expected-val">실행 횟수: 1</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q12-input" rows="2" placeholder="두 번 실행 후 파일 내용을 쓰세요..." spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check" onclick="check(12)">확인</button>
+            <button class="btn-hint" onclick="toggleHint(12)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(12)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q12-result"></div>
+        </div>
+        <div class="q-dropdown" id="q12-hint">
+          <div class="q-dropdown-label">HINT</div>
+          <p><code>"w"</code> 모드는 실행할 때마다 파일 전체를 새로 씁니다. 두 번째 실행 시 첫 번째 내용은?</p>
+        </div>
+        <div class="q-dropdown" id="q12-answer">
+          <div class="q-dropdown-label">ANSWER</div>
+          <div class="q-answer-code"><span class="cm"># "w" 모드는 실행할 때마다 파일을 완전히 덮어씁니다.</span>
+<span class="cm"># 두 번째 실행도 동일한 내용을 씁니다.</span>
+<span class="cm"># 최종 파일 내용: "실행 횟수: 1"</span></div>
+        </div>
+      </div>
+
+      <!-- Q13 -->
+      <div class="q-card" id="q13">
+        <div class="q-header">
+          <span class="q-num">Q13.</span>
+          <div class="q-body">
+            <p class="q-text"><code>readlines()</code>로 읽은 줄 목록에서 각 줄의 <code>\n</code>을 제거해 숫자 리스트로 만드세요.</p>
+            <div class="q-code-block"><span class="cm"># scores.txt: "90\n85\n78\n"</span>
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"scores.txt"</span>, <span class="str">"r"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    lines = f.<span class="fn">readlines</span>()
+<span class="cm"># lines → ['90\n', '85\n', '78\n']</span>
+<span class="cm"># 아래 코드를 작성해 숫자 리스트로 변환하세요</span></div>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">[90, 85, 78]</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q13-input" rows="4" placeholder="변환 코드와 print()를 작성하세요..." spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check" onclick="check(13)">확인</button>
+            <button class="btn-hint" onclick="toggleHint(13)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(13)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q13-result"></div>
+        </div>
+        <div class="q-dropdown" id="q13-hint">
+          <div class="q-dropdown-label">HINT</div>
+          <p>리스트 컴프리헨션 <code>[int(line.strip()) for line in lines]</code> — <code>strip()</code>으로 <code>\n</code>을 제거하고 <code>int()</code>로 숫자 변환.</p>
+        </div>
+        <div class="q-dropdown" id="q13-answer">
+          <div class="q-dropdown-label">ANSWER</div>
+          <div class="q-answer-code">numbers = [<span class="fn">int</span>(line.<span class="fn">strip</span>()) <span class="kw">for</span> line <span class="kw">in</span> lines]
+<span class="fn">print</span>(numbers)  <span class="cm"># [90, 85, 78]</span></div>
+        </div>
+      </div>
+
+      <!-- Q14 -->
+      <div class="q-card" id="q14">
+        <div class="q-header">
+          <span class="q-num">Q14.</span>
+          <div class="q-body">
+            <p class="q-text"><code>writelines()</code>를 사용해 아래 리스트의 내용을 <code>"fruits.txt"</code>에 한 줄씩 저장하는 코드를 작성하세요.</p>
+            <div class="q-code-block">fruits = [<span class="str">"apple"</span>, <span class="str">"banana"</span>, <span class="str">"cherry"</span>]</div>
+            <div class="q-expected"><span class="q-expected-label">파일 내용:</span><span class="q-expected-val">apple
+banana
+cherry</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q14-input" rows="5" placeholder="코드를 입력하세요..." spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check" onclick="check(14)">확인</button>
+            <button class="btn-hint" onclick="toggleHint(14)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(14)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q14-result"></div>
+        </div>
+        <div class="q-dropdown" id="q14-hint">
+          <div class="q-dropdown-label">HINT</div>
+          <p><code>writelines()</code>는 줄바꿈을 자동으로 넣지 않습니다. 각 항목에 <code>"\n"</code>을 더하거나, 리스트 컴프리헨션으로 처리하세요.</p>
+        </div>
+        <div class="q-dropdown" id="q14-answer">
+          <div class="q-dropdown-label">ANSWER</div>
+          <div class="q-answer-code">fruits = [<span class="str">"apple"</span>, <span class="str">"banana"</span>, <span class="str">"cherry"</span>]
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"fruits.txt"</span>, <span class="str">"w"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    f.<span class="fn">writelines</span>(fruit + <span class="str">"\n"</span> <span class="kw">for</span> fruit <span class="kw">in</span> fruits)</div>
+        </div>
+      </div>
+
+      <!-- Q15 -->
+      <div class="q-card" id="q15">
+        <div class="q-header">
+          <span class="q-num">Q15.</span>
+          <div class="q-body">
+            <p class="q-text">아래 코드에서 버그를 찾아 고친 올바른 코드를 작성하세요.</p>
+            <div class="q-code-block"><span class="cm"># 버그 있는 코드</span>
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"memo.txt"</span>, <span class="str">"w"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    f.<span class="fn">write</span>(<span class="str">"메모 1"</span>)
+    f.<span class="fn">write</span>(<span class="str">"메모 2"</span>)
+    f.<span class="fn">write</span>(<span class="str">"메모 3"</span>)
+<span class="cm"># 파일 내용이 한 줄로 붙어서 저장됨</span></div>
+            <div class="q-expected"><span class="q-expected-label">파일 내용 (올바른):</span><span class="q-expected-val">메모 1
+메모 2
+메모 3</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q15-input" rows="5" placeholder="수정된 코드를 입력하세요..." spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check" onclick="check(15)">확인</button>
+            <button class="btn-hint" onclick="toggleHint(15)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(15)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q15-result"></div>
+        </div>
+        <div class="q-dropdown" id="q15-hint">
+          <div class="q-dropdown-label">HINT</div>
+          <p><code>write()</code>는 줄바꿈을 자동으로 추가하지 않습니다. 각 문자열 끝에 <code>\n</code>을 붙여주세요.</p>
+        </div>
+        <div class="q-dropdown" id="q15-answer">
+          <div class="q-dropdown-label">ANSWER</div>
+          <div class="q-answer-code"><span class="kw">with</span> <span class="fn">open</span>(<span class="str">"memo.txt"</span>, <span class="str">"w"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    f.<span class="fn">write</span>(<span class="str">"메모 1\n"</span>)  <span class="cm"># \n 추가</span>
+    f.<span class="fn">write</span>(<span class="str">"메모 2\n"</span>)
+    f.<span class="fn">write</span>(<span class="str">"메모 3\n"</span>)</div>
+        </div>
+      </div>
+
+      <!-- Q16 -->
+      <div class="q-card" id="q16">
+        <div class="q-header">
+          <span class="q-num">Q16.</span>
+          <div class="q-body">
+            <p class="q-text">파일을 <code>for</code> 루프로 순회해 줄 번호를 함께 출력하는 코드를 작성하세요. <code>numbers.txt</code>는 3줄짜리 파일입니다.</p>
+            <div class="q-expected"><span class="q-expected-label">출력 형태:</span><span class="q-expected-val">1: 첫째줄내용
+2: 둘째줄내용
+3: 셋째줄내용</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q16-input" rows="5" placeholder="코드를 입력하세요..." spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check" onclick="check(16)">확인</button>
+            <button class="btn-hint" onclick="toggleHint(16)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(16)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q16-result"></div>
+        </div>
+        <div class="q-dropdown" id="q16-hint">
+          <div class="q-dropdown-label">HINT</div>
+          <p><code>enumerate(f, start=1)</code>을 사용하면 줄 번호와 내용을 동시에 얻을 수 있습니다.</p>
+        </div>
+        <div class="q-dropdown" id="q16-answer">
+          <div class="q-dropdown-label">ANSWER</div>
+          <div class="q-answer-code"><span class="kw">with</span> <span class="fn">open</span>(<span class="str">"numbers.txt"</span>, <span class="str">"r"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    <span class="kw">for</span> i, line <span class="kw">in</span> <span class="fn">enumerate</span>(f, start=<span class="num">1</span>):
+        <span class="fn">print</span>(<span class="str">f"{i}: {line.strip()}"</span>)</div>
+        </div>
+      </div>
+
+      <!-- Q17 -->
+      <div class="q-card" id="q17">
+        <div class="q-header">
+          <span class="q-num">Q17.</span>
+          <div class="q-body">
+            <p class="q-text">아래 두 코드의 차이점을 설명하세요. 어떤 상황에 어떤 방법이 더 적합한지도 서술하세요.</p>
+            <div class="q-code-block"><span class="cm"># 방법 A</span>
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"big.txt"</span>, <span class="str">"r"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    content = f.<span class="fn">read</span>()
+
+<span class="cm"># 방법 B</span>
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"big.txt"</span>, <span class="str">"r"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    <span class="kw">for</span> line <span class="kw">in</span> f:
+        <span class="fn">print</span>(line.<span class="fn">strip</span>())</div>
+            <div class="q-expected"><span class="q-expected-label">핵심:</span><span class="q-expected-val">A는 전체를 메모리에 올림, B는 한 줄씩 처리</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q17-input" rows="3" placeholder="차이점과 적합한 상황을 설명하세요..." spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check" onclick="check(17)">확인</button>
+            <button class="btn-hint" onclick="toggleHint(17)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(17)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q17-result"></div>
+        </div>
+        <div class="q-dropdown" id="q17-hint">
+          <div class="q-dropdown-label">HINT</div>
+          <p>파일 크기가 1GB라면 A와 B 중 어느 방법이 메모리를 더 적게 쓸까요?</p>
+        </div>
+        <div class="q-dropdown" id="q17-answer">
+          <div class="q-dropdown-label">ANSWER</div>
+          <div class="q-answer-code"><span class="cm"># A (read): 파일 전체를 메모리에 한 번에 올림</span>
+<span class="cm">#   → 작은 파일, 내용 전체가 필요할 때 적합</span>
+<span class="cm"># B (for): 한 줄씩 읽어 처리 후 버림 → 메모리 절약</span>
+<span class="cm">#   → 대용량 파일, 줄 단위 처리할 때 적합</span></div>
+        </div>
+      </div>
+
+      <!-- Q18 -->
+      <div class="q-card" id="q18">
+        <div class="q-header">
+          <span class="q-num">Q18.</span>
+          <div class="q-body">
+            <p class="q-text">아래 코드가 실행될 때 <code>diary.txt</code>의 최종 내용을 예상하세요.</p>
+            <div class="q-code-block"><span class="kw">with</span> <span class="fn">open</span>(<span class="str">"diary.txt"</span>, <span class="str">"w"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    f.<span class="fn">write</span>(<span class="str">"1일차: 시작!\n"</span>)
+
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"diary.txt"</span>, <span class="str">"a"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    f.<span class="fn">write</span>(<span class="str">"2일차: 계속!\n"</span>)
+
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"diary.txt"</span>, <span class="str">"w"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    f.<span class="fn">write</span>(<span class="str">"리셋\n"</span>)</div>
+            <div class="q-expected"><span class="q-expected-label">최종 내용:</span><span class="q-expected-val">리셋</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q18-input" rows="3" placeholder="최종 파일 내용을 입력하세요..." spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check" onclick="check(18)">확인</button>
+            <button class="btn-hint" onclick="toggleHint(18)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(18)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q18-result"></div>
+        </div>
+        <div class="q-dropdown" id="q18-hint">
+          <div class="q-dropdown-label">HINT</div>
+          <p>순서대로 실행: ① "w"로 1일차 씀 → ② "a"로 2일차 추가 → ③ "w"로 다시 씀. 세 번째 "w"가 모든 것을 덮어씁니다.</p>
+        </div>
+        <div class="q-dropdown" id="q18-answer">
+          <div class="q-dropdown-label">ANSWER</div>
+          <div class="q-answer-code"><span class="cm"># 실행 순서:</span>
+<span class="cm"># 1. "w" → 파일: "1일차: 시작!\n"</span>
+<span class="cm"># 2. "a" → 파일: "1일차: 시작!\n2일차: 계속!\n"</span>
+<span class="cm"># 3. "w" → 파일: "리셋\n"  ← 모두 덮어씀</span>
+<span class="cm"># 최종 내용: 리셋</span></div>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════
+           난이도 상 (Q19~Q30)
+      ══════════════════════════════ -->
+      <div class="diff-header">
+        <span class="diff-badge hard">상</span>
+        <span class="diff-title">오류 처리 · 데이터 가공 · 종합 응용</span>
+        <span class="diff-count">19 – 30번</span>
+      </div>
+
+      <!-- Q19 -->
+      <div class="q-card" id="q19">
+        <div class="q-header">
+          <span class="q-num">Q19.</span>
+          <div class="q-body">
+            <p class="q-text">아래 코드에서 발생하는 문제를 설명하고, <code>try/except</code>를 사용해 안전하게 처리하는 코드로 수정하세요.</p>
+            <div class="q-code-block"><span class="cm"># 문제 있는 코드</span>
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"config.txt"</span>, <span class="str">"r"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    data = f.<span class="fn">read</span>()
+<span class="fn">print</span>(data)</div>
+            <div class="q-expected"><span class="q-expected-label">수정:</span><span class="q-expected-val">try/except FileNotFoundError로 감싸기</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q19-input" rows="7" placeholder="try/except를 사용해 수정된 코드를 작성하세요..." spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check" onclick="check(19)">확인</button>
+            <button class="btn-hint" onclick="toggleHint(19)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(19)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q19-result"></div>
+        </div>
+        <div class="q-dropdown" id="q19-hint">
+          <div class="q-dropdown-label">HINT</div>
+          <p><code>try:</code> 블록에 파일 읽기 코드를 넣고, <code>except FileNotFoundError:</code>에 오류 메시지를 출력하세요.</p>
+        </div>
+        <div class="q-dropdown" id="q19-answer">
+          <div class="q-dropdown-label">ANSWER</div>
+          <div class="q-answer-code"><span class="kw">try</span>:
+    <span class="kw">with</span> <span class="fn">open</span>(<span class="str">"config.txt"</span>, <span class="str">"r"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+        data = f.<span class="fn">read</span>()
+    <span class="fn">print</span>(data)
+<span class="kw">except</span> <span class="fn">FileNotFoundError</span>:
+    <span class="fn">print</span>(<span class="str">"파일을 찾을 수 없습니다."</span>)</div>
+        </div>
+      </div>
+
+      <!-- Q20 -->
+      <div class="q-card" id="q20">
+        <div class="q-header">
+          <span class="q-num">Q20.</span>
+          <div class="q-body">
+            <p class="q-text">아래 숫자 파일을 읽어 모든 숫자의 합계와 평균을 출력하는 코드를 작성하세요.</p>
+            <div class="q-code-block"><span class="cm"># numbers.txt 내용</span>
+10
+20
+30
+40
+50</div>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">합계: 150
+평균: 30.0</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q20-input" rows="8" placeholder="코드를 입력하세요..." spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check" onclick="check(20)">확인</button>
+            <button class="btn-hint" onclick="toggleHint(20)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(20)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q20-result"></div>
+        </div>
+        <div class="q-dropdown" id="q20-hint">
+          <div class="q-dropdown-label">HINT</div>
+          <p>파일을 <code>for</code>로 순회하며 <code>int(line.strip())</code>으로 변환, 누적합을 계산한 뒤 줄 수로 나누세요.</p>
+        </div>
+        <div class="q-dropdown" id="q20-answer">
+          <div class="q-dropdown-label">ANSWER</div>
+          <div class="q-answer-code"><span class="kw">with</span> <span class="fn">open</span>(<span class="str">"numbers.txt"</span>, <span class="str">"r"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    nums = [<span class="fn">int</span>(line.<span class="fn">strip</span>()) <span class="kw">for</span> line <span class="kw">in</span> f <span class="kw">if</span> line.<span class="fn">strip</span>()]
+
+total = <span class="fn">sum</span>(nums)
+avg   = total / <span class="fn">len</span>(nums)
+<span class="fn">print</span>(<span class="str">f"합계: {total}"</span>)
+<span class="fn">print</span>(<span class="str">f"평균: {avg}"</span>)</div>
+        </div>
+      </div>
+
+      <!-- Q21 -->
+      <div class="q-card" id="q21">
+        <div class="q-header">
+          <span class="q-num">Q21.</span>
+          <div class="q-body">
+            <p class="q-text">아래 코드를 실행하면 어떤 결과가 출력되는지 예상하세요. <code>"w"</code> 모드와 <code>"a"</code> 모드의 차이에 집중하세요.</p>
+            <div class="q-code-block"><span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="num">1</span>, <span class="num">4</span>):
+    <span class="kw">with</span> <span class="fn">open</span>(<span class="str">"test.txt"</span>, <span class="str">"a"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+        f.<span class="fn">write</span>(<span class="str">f"줄 {i}\n"</span>)
+
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"test.txt"</span>, <span class="str">"r"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    <span class="fn">print</span>(f.<span class="fn">read</span>())</div>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">줄 1
+줄 2
+줄 3</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q21-input" rows="4" placeholder="출력 결과를 입력하세요..." spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check" onclick="check(21)">확인</button>
+            <button class="btn-hint" onclick="toggleHint(21)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(21)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q21-result"></div>
+        </div>
+        <div class="q-dropdown" id="q21-hint">
+          <div class="q-dropdown-label">HINT</div>
+          <p><code>"a"</code> 모드는 열 때마다 파일 끝에 이어씁니다. 루프가 3번 돌면 줄이 3개 쌓입니다.</p>
+        </div>
+        <div class="q-dropdown" id="q21-answer">
+          <div class="q-dropdown-label">ANSWER</div>
+          <div class="q-answer-code"><span class="cm"># "a" 모드로 3번 열어 각각 "줄 1\n", "줄 2\n", "줄 3\n" 추가</span>
+<span class="cm"># 최종 파일: "줄 1\n줄 2\n줄 3\n"</span>
+줄 1
+줄 2
+줄 3</div>
+        </div>
+      </div>
+
+      <!-- Q22 -->
+      <div class="q-card" id="q22">
+        <div class="q-header">
+          <span class="q-num">Q22.</span>
+          <div class="q-body">
+            <p class="q-text">아래 CSV 형식의 파일을 읽어 각 행을 딕셔너리 리스트로 만들어 출력하세요.</p>
+            <div class="q-code-block"><span class="cm"># students.txt 내용</span>
+Alice,90
+Bob,85
+Carol,92</div>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">[{'name': 'Alice', 'score': 90}, {'name': 'Bob', 'score': 85}, {'name': 'Carol', 'score': 92}]</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q22-input" rows="8" placeholder="코드를 입력하세요..." spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check" onclick="check(22)">확인</button>
+            <button class="btn-hint" onclick="toggleHint(22)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(22)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q22-result"></div>
+        </div>
+        <div class="q-dropdown" id="q22-hint">
+          <div class="q-dropdown-label">HINT</div>
+          <p>각 줄을 <code>.strip().split(",")</code>으로 분리하면 <code>["Alice", "90"]</code> 형태가 됩니다. 이를 딕셔너리로 만드세요.</p>
+        </div>
+        <div class="q-dropdown" id="q22-answer">
+          <div class="q-dropdown-label">ANSWER</div>
+          <div class="q-answer-code">students = []
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"students.txt"</span>, <span class="str">"r"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    <span class="kw">for</span> line <span class="kw">in</span> f:
+        name, score = line.<span class="fn">strip</span>().<span class="fn">split</span>(<span class="str">","</span>)
+        students.<span class="fn">append</span>({<span class="str">"name"</span>: name, <span class="str">"score"</span>: <span class="fn">int</span>(score)})
+<span class="fn">print</span>(students)</div>
+        </div>
+      </div>
+
+      <!-- Q23 -->
+      <div class="q-card" id="q23">
+        <div class="q-header">
+          <span class="q-num">Q23.</span>
+          <div class="q-body">
+            <p class="q-text">파일에서 빈 줄을 제외한 줄만 읽어 출력하는 코드를 작성하세요.</p>
+            <div class="q-code-block"><span class="cm"># data.txt 내용</span>
+첫째 줄
+
+셋째 줄
+
+다섯째 줄</div>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">첫째 줄
+셋째 줄
+다섯째 줄</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q23-input" rows="5" placeholder="코드를 입력하세요..." spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check" onclick="check(23)">확인</button>
+            <button class="btn-hint" onclick="toggleHint(23)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(23)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q23-result"></div>
+        </div>
+        <div class="q-dropdown" id="q23-hint">
+          <div class="q-dropdown-label">HINT</div>
+          <p><code>if line.strip()</code> — <code>strip()</code> 후 빈 문자열은 falsy이므로 <code>if</code>로 걸러낼 수 있습니다.</p>
+        </div>
+        <div class="q-dropdown" id="q23-answer">
+          <div class="q-dropdown-label">ANSWER</div>
+          <div class="q-answer-code"><span class="kw">with</span> <span class="fn">open</span>(<span class="str">"data.txt"</span>, <span class="str">"r"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    <span class="kw">for</span> line <span class="kw">in</span> f:
+        line = line.<span class="fn">strip</span>()
+        <span class="kw">if</span> line:  <span class="cm"># 빈 줄 제외</span>
+            <span class="fn">print</span>(line)</div>
+        </div>
+      </div>
+
+      <!-- Q24 -->
+      <div class="q-card" id="q24">
+        <div class="q-header">
+          <span class="q-num">Q24.</span>
+          <div class="q-body">
+            <p class="q-text">특정 단어(<code>"ERROR"</code>)가 포함된 줄만 걸러 새 파일 <code>"errors.txt"</code>에 저장하는 코드를 작성하세요.</p>
+            <div class="q-code-block"><span class="cm"># app.log 내용</span>
+INFO: 서버 시작
+ERROR: 연결 실패
+INFO: 재시도 중
+ERROR: 타임아웃
+INFO: 종료</div>
+            <div class="q-expected"><span class="q-expected-label">errors.txt 내용:</span><span class="q-expected-val">ERROR: 연결 실패
+ERROR: 타임아웃</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q24-input" rows="7" placeholder="코드를 입력하세요..." spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check" onclick="check(24)">확인</button>
+            <button class="btn-hint" onclick="toggleHint(24)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(24)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q24-result"></div>
+        </div>
+        <div class="q-dropdown" id="q24-hint">
+          <div class="q-dropdown-label">HINT</div>
+          <p>읽기 파일과 쓰기 파일 두 개를 동시에 열 수 있습니다: <code>with open(A) as fin, open(B, "w") as fout:</code></p>
+        </div>
+        <div class="q-dropdown" id="q24-answer">
+          <div class="q-dropdown-label">ANSWER</div>
+          <div class="q-answer-code"><span class="kw">with</span> <span class="fn">open</span>(<span class="str">"app.log"</span>, <span class="str">"r"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> fin, \
+     <span class="fn">open</span>(<span class="str">"errors.txt"</span>, <span class="str">"w"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> fout:
+    <span class="kw">for</span> line <span class="kw">in</span> fin:
+        <span class="kw">if</span> <span class="str">"ERROR"</span> <span class="kw">in</span> line:
+            fout.<span class="fn">write</span>(line)</div>
+        </div>
+      </div>
+
+      <!-- Q25 -->
+      <div class="q-card" id="q25">
+        <div class="q-header">
+          <span class="q-num">Q25.</span>
+          <div class="q-body">
+            <p class="q-text">파일을 읽어 각 줄을 역순으로 뒤집어 새 파일에 저장하는 코드를 작성하세요.</p>
+            <div class="q-code-block"><span class="cm"># original.txt 내용</span>
+첫째
+둘째
+셋째</div>
+            <div class="q-expected"><span class="q-expected-label">reversed.txt 내용:</span><span class="q-expected-val">셋째
+둘째
+첫째</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q25-input" rows="7" placeholder="코드를 입력하세요..." spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check" onclick="check(25)">확인</button>
+            <button class="btn-hint" onclick="toggleHint(25)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(25)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q25-result"></div>
+        </div>
+        <div class="q-dropdown" id="q25-hint">
+          <div class="q-dropdown-label">HINT</div>
+          <p><code>readlines()</code>로 전체 줄을 읽어 리스트로 만든 뒤, <code>reversed()</code> 또는 슬라이싱 <code>[::-1]</code>으로 뒤집어 씁니다.</p>
+        </div>
+        <div class="q-dropdown" id="q25-answer">
+          <div class="q-dropdown-label">ANSWER</div>
+          <div class="q-answer-code"><span class="kw">with</span> <span class="fn">open</span>(<span class="str">"original.txt"</span>, <span class="str">"r"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    lines = f.<span class="fn">readlines</span>()
+
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"reversed.txt"</span>, <span class="str">"w"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    <span class="kw">for</span> line <span class="kw">in</span> <span class="fn">reversed</span>(lines):
+        f.<span class="fn">write</span>(line)</div>
+        </div>
+      </div>
+
+      <!-- Q26 -->
+      <div class="q-card" id="q26">
+        <div class="q-header">
+          <span class="q-num">Q26.</span>
+          <div class="q-body">
+            <p class="q-text">파일을 읽어 단어의 총 개수를 출력하는 코드를 작성하세요. 각 줄을 <code>split()</code>으로 분리해 누적 계산합니다.</p>
+            <div class="q-code-block"><span class="cm"># essay.txt 내용</span>
+파이썬은 배우기 쉬운 언어입니다
+파일 입출력도 간단합니다</div>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">총 단어 수: 9</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q26-input" rows="6" placeholder="코드를 입력하세요..." spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check" onclick="check(26)">확인</button>
+            <button class="btn-hint" onclick="toggleHint(26)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(26)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q26-result"></div>
+        </div>
+        <div class="q-dropdown" id="q26-hint">
+          <div class="q-dropdown-label">HINT</div>
+          <p><code>word_count += len(line.split())</code> — 각 줄을 공백으로 쪼개 단어 수를 누적합니다.</p>
+        </div>
+        <div class="q-dropdown" id="q26-answer">
+          <div class="q-dropdown-label">ANSWER</div>
+          <div class="q-answer-code">word_count = <span class="num">0</span>
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"essay.txt"</span>, <span class="str">"r"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    <span class="kw">for</span> line <span class="kw">in</span> f:
+        word_count += <span class="fn">len</span>(line.<span class="fn">split</span>())
+<span class="fn">print</span>(<span class="str">f"총 단어 수: {word_count}"</span>)</div>
+        </div>
+      </div>
+
+      <!-- Q27 -->
+      <div class="q-card" id="q27">
+        <div class="q-header">
+          <span class="q-num">Q27.</span>
+          <div class="q-body">
+            <p class="q-text">점수 파일을 읽어 70점 미만인 학생의 이름만 출력하는 코드를 작성하세요.</p>
+            <div class="q-code-block"><span class="cm"># grades.txt 내용</span>
+민준,88
+서연,62
+지호,95
+하은,55
+도윤,73</div>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">서연
+하은</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q27-input" rows="7" placeholder="코드를 입력하세요..." spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check" onclick="check(27)">확인</button>
+            <button class="btn-hint" onclick="toggleHint(27)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(27)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q27-result"></div>
+        </div>
+        <div class="q-dropdown" id="q27-hint">
+          <div class="q-dropdown-label">HINT</div>
+          <p>각 줄을 <code>split(",")</code>으로 이름과 점수로 분리 → <code>int(score) &lt; 70</code>이면 이름 출력.</p>
+        </div>
+        <div class="q-dropdown" id="q27-answer">
+          <div class="q-dropdown-label">ANSWER</div>
+          <div class="q-answer-code"><span class="kw">with</span> <span class="fn">open</span>(<span class="str">"grades.txt"</span>, <span class="str">"r"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    <span class="kw">for</span> line <span class="kw">in</span> f:
+        name, score = line.<span class="fn">strip</span>().<span class="fn">split</span>(<span class="str">","</span>)
+        <span class="kw">if</span> <span class="fn">int</span>(score) &lt; <span class="num">70</span>:
+            <span class="fn">print</span>(name)</div>
+        </div>
+      </div>
+
+      <!-- Q28 -->
+      <div class="q-card" id="q28">
+        <div class="q-header">
+          <span class="q-num">Q28.</span>
+          <div class="q-body">
+            <p class="q-text">파일의 모든 내용을 대문자로 변환해 새 파일에 저장하는 코드를 작성하세요.</p>
+            <div class="q-code-block"><span class="cm"># input.txt 내용</span>
+hello world
+python is great</div>
+            <div class="q-expected"><span class="q-expected-label">output.txt 내용:</span><span class="q-expected-val">HELLO WORLD
+PYTHON IS GREAT</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q28-input" rows="6" placeholder="코드를 입력하세요..." spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check" onclick="check(28)">확인</button>
+            <button class="btn-hint" onclick="toggleHint(28)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(28)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q28-result"></div>
+        </div>
+        <div class="q-dropdown" id="q28-hint">
+          <div class="q-dropdown-label">HINT</div>
+          <p>두 파일을 동시에 열어 읽은 줄에 <code>.upper()</code>를 적용한 뒤 씁니다.</p>
+        </div>
+        <div class="q-dropdown" id="q28-answer">
+          <div class="q-dropdown-label">ANSWER</div>
+          <div class="q-answer-code"><span class="kw">with</span> <span class="fn">open</span>(<span class="str">"input.txt"</span>, <span class="str">"r"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> fin, \
+     <span class="fn">open</span>(<span class="str">"output.txt"</span>, <span class="str">"w"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> fout:
+    <span class="kw">for</span> line <span class="kw">in</span> fin:
+        fout.<span class="fn">write</span>(line.<span class="fn">upper</span>())</div>
+        </div>
+      </div>
+
+      <!-- Q29 -->
+      <div class="q-card" id="q29">
+        <div class="q-header">
+          <span class="q-num">Q29.</span>
+          <div class="q-body">
+            <p class="q-text">파일이 존재하면 내용을 읽어 출력하고, 없으면 기본 내용을 써서 새로 만드는 코드를 작성하세요.</p>
+            <div class="q-expected"><span class="q-expected-label">동작:</span><span class="q-expected-val">파일 있음 → 내용 출력 / 없음 → "새 파일 생성" 저장 후 "파일을 새로 만들었습니다." 출력</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q29-input" rows="9" placeholder="코드를 입력하세요..." spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check" onclick="check(29)">확인</button>
+            <button class="btn-hint" onclick="toggleHint(29)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(29)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q29-result"></div>
+        </div>
+        <div class="q-dropdown" id="q29-hint">
+          <div class="q-dropdown-label">HINT</div>
+          <p><code>try</code>에서 <code>"r"</code>로 읽기 시도, <code>except FileNotFoundError</code>에서 <code>"w"</code>로 새 파일 생성.</p>
+        </div>
+        <div class="q-dropdown" id="q29-answer">
+          <div class="q-dropdown-label">ANSWER</div>
+          <div class="q-answer-code"><span class="kw">try</span>:
+    <span class="kw">with</span> <span class="fn">open</span>(<span class="str">"settings.txt"</span>, <span class="str">"r"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+        <span class="fn">print</span>(f.<span class="fn">read</span>())
+<span class="kw">except</span> <span class="fn">FileNotFoundError</span>:
+    <span class="kw">with</span> <span class="fn">open</span>(<span class="str">"settings.txt"</span>, <span class="str">"w"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+        f.<span class="fn">write</span>(<span class="str">"새 파일 생성\n"</span>)
+    <span class="fn">print</span>(<span class="str">"파일을 새로 만들었습니다."</span>)</div>
+        </div>
+      </div>
+
+      <!-- Q30 -->
+      <div class="q-card" id="q30">
+        <div class="q-header">
+          <span class="q-num">Q30.</span>
+          <div class="q-body">
+            <p class="q-text">🏆 종합 도전 문제 — 성적 관리 프로그램을 완성하세요.</p>
+            <ul style="margin:8px 0 10px 16px; font-size:14px; color:var(--text2); line-height:2;">
+              <li>아래 형식의 <code>scores.txt</code> 파일을 읽습니다</li>
+              <li>전체 평균, 최고점 학생, 최저점 학생을 출력합니다</li>
+              <li>평균 이상인 학생만 골라 <code>pass.txt</code>에 저장합니다</li>
+            </ul>
+            <div class="q-code-block"><span class="cm"># scores.txt 내용</span>
+민준,88
+서연,95
+지호,72
+하은,81
+도윤,90</div>
+            <div class="q-expected"><span class="q-expected-label">출력:</span><span class="q-expected-val">평균: 85.2
+최고점: 서연 (95점)
+최저점: 지호 (72점)
+pass.txt 저장 완료 (3명)</span></div>
+          </div>
+        </div>
+        <div class="q-input-area">
+          <textarea class="q-textarea" id="q30-input" rows="20" placeholder="코드를 입력하세요..." spellcheck="false"></textarea>
+          <div class="q-actions">
+            <button class="btn-check" onclick="check(30)">확인</button>
+            <button class="btn-hint" onclick="toggleHint(30)">힌트</button>
+            <button class="btn-answer" onclick="toggleAnswer(30)">정답 보기</button>
+          </div>
+          <div class="q-result" id="q30-result"></div>
+        </div>
+        <div class="q-dropdown" id="q30-hint">
+          <div class="q-dropdown-label">HINT</div>
+          <p>① 파일 읽어 리스트 of 튜플 만들기 → ② 평균 계산 → ③ max/min으로 최고/최저점 찾기 → ④ 평균 이상만 골라 파일 쓰기</p>
+        </div>
+        <div class="q-dropdown" id="q30-answer">
+          <div class="q-dropdown-label">ANSWER</div>
+          <div class="q-answer-code"><span class="cm"># 1단계: 파일 읽기</span>
+students = []
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"scores.txt"</span>, <span class="str">"r"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    <span class="kw">for</span> line <span class="kw">in</span> f:
+        name, score = line.<span class="fn">strip</span>().<span class="fn">split</span>(<span class="str">","</span>)
+        students.<span class="fn">append</span>((name, <span class="fn">int</span>(score)))
+
+<span class="cm"># 2단계: 통계 계산</span>
+avg  = <span class="fn">sum</span>(s <span class="kw">for</span> _, s <span class="kw">in</span> students) / <span class="fn">len</span>(students)
+best = <span class="fn">max</span>(students, key=<span class="kw">lambda</span> x: x[<span class="num">1</span>])
+worst= <span class="fn">min</span>(students, key=<span class="kw">lambda</span> x: x[<span class="num">1</span>])
+
+<span class="fn">print</span>(<span class="str">f"평균: {avg}"</span>)
+<span class="fn">print</span>(<span class="str">f"최고점: {best[0]} ({best[1]}점)"</span>)
+<span class="fn">print</span>(<span class="str">f"최저점: {worst[0]} ({worst[1]}점)"</span>)
+
+<span class="cm"># 3단계: 평균 이상 학생 파일 저장</span>
+passed = [(n, s) <span class="kw">for</span> n, s <span class="kw">in</span> students <span class="kw">if</span> s >= avg]
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"pass.txt"</span>, <span class="str">"w"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    <span class="kw">for</span> name, score <span class="kw">in</span> passed:
+        f.<span class="fn">write</span>(<span class="str">f"{name},{score}\n"</span>)
+<span class="fn">print</span>(<span class="str">f"pass.txt 저장 완료 ({len(passed)}명)"</span>)</div>
+        </div>
+      </div>
+
+      <!-- 챕터 하단 네비게이션 -->
+      <div class="chap-nav">
+        <a href="42-file-io.html" class="chap-nav-btn">
+          <span class="cnb-dir">← 이전 챕터</span>
+          <span class="cnb-title"><span>42.</span> 파일 입출력</span>
+        </a>
+        <a href="44-exception-basic.html" class="chap-nav-btn next">
+          <span class="cnb-dir">다음 챕터 →</span>
+          <span class="cnb-title"><span>44.</span> 예외처리 기초</span>
+        </a>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+  /* ━━━ 사이드바 ━━━ */
+  const isMobile = () => window.innerWidth <= 720;
+  const overlay  = document.getElementById('sidebarOverlay');
+  function toggleSidebar() {
+    document.body.classList.toggle('sidebar-closed');
+    if (isMobile()) overlay.classList.toggle('visible', !document.body.classList.contains('sidebar-closed'));
+    localStorage.setItem('sp-sidebar', document.body.classList.contains('sidebar-closed') ? 'closed' : 'open');
+  }
+  function closeSidebar() { document.body.classList.add('sidebar-closed'); overlay.classList.remove('visible'); localStorage.setItem('sp-sidebar','closed'); }
+  function toggleGroup(id) { document.getElementById(id).classList.toggle('open'); }
+  window.addEventListener('DOMContentLoaded', () => {
+    if (isMobile()) document.body.classList.add('sidebar-closed');
+    else if (localStorage.getItem('sp-sidebar') === 'closed') document.body.classList.add('sidebar-closed');
+  });
+  window.addEventListener('resize', () => { if (!isMobile()) overlay.classList.remove('visible'); });
+
+  /* ━━━ 힌트 / 정답 토글 ━━━ */
+  function toggleHint(n)   { toggleDropdown(`q${n}-hint`); }
+  function toggleAnswer(n) { toggleDropdown(`q${n}-answer`); }
+  function toggleDropdown(id) {
+    document.querySelectorAll('.q-dropdown').forEach(d => { if (d.id !== id) d.classList.remove('visible'); });
+    document.getElementById(id).classList.toggle('visible');
+  }
+
+  /* ━━━ 정답 데이터 ━━━
+     파일 입출력 문제는 실행 불가 → 전부 type: 'text'
+     expected: 답안에 반드시 포함되어야 할 핵심 키워드
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  const ANSWERS = {
+    1:  { type: 'text', expected: '"r"' },
+    2:  { type: 'text', expected: 'w' },
+    3:  { type: 'text', expected: 'write' },
+    4:  { type: 'text', expected: '세 번째' },
+    5:  { type: 'text', expected: '자동' },
+    6:  { type: 'text', expected: 'read' },
+    7:  { type: 'text', expected: '3' },
+    8:  { type: 'text', expected: 'FileNotFoundError' },
+    9:  { type: 'text', expected: 'utf' },
+    10: { type: 'text', expected: '사과' },
+    11: { type: 'text', expected: '"a"' },
+    12: { type: 'text', expected: '실행 횟수: 1' },
+    13: { type: 'text', expected: 'strip' },
+    14: { type: 'text', expected: 'writelines' },
+    15: { type: 'text', expected: '\\n' },
+    16: { type: 'text', expected: 'enumerate' },
+    17: { type: 'text', expected: '메모리' },
+    18: { type: 'text', expected: '리셋' },
+    19: { type: 'text', expected: 'FileNotFoundError' },
+    20: { type: 'text', expected: '합계: 150' },
+    21: { type: 'text', expected: '줄 1' },
+    22: { type: 'text', expected: 'Alice' },
+    23: { type: 'text', expected: 'strip' },
+    24: { type: 'text', expected: 'ERROR' },
+    25: { type: 'text', expected: 'reversed' },
+    26: { type: 'text', expected: '총 단어 수: 9' },
+    27: { type: 'text', expected: '서연' },
+    28: { type: 'text', expected: 'upper' },
+    29: { type: 'text', expected: 'FileNotFoundError' },
+    30: { type: 'text', expected: 'pass.txt' },
+  };
+
+  /* ━━━ 채점 / 스코어 ━━━ */
+  let solvedSet = new Set();
+
+  function check(n) {
+    const input  = document.getElementById(`q${n}-input`).value;
+    const ans    = ANSWERS[n];
+    const result = document.getElementById(`q${n}-result`);
+    const card   = document.getElementById(`q${n}`);
+    result.style.display = 'block';
+
+    const ok = input.trim().toLowerCase().includes(ans.expected.toLowerCase());
+    if (ok) {
+      result.className = 'q-result ok';
+      result.textContent = '✓ 정답입니다!';
+      card.className = 'q-card solved';
+      solvedSet.add(n);
+    } else {
+      result.className = 'q-result err';
+      result.textContent = '✗ 다시 확인해보세요. 힌트를 참고하세요.';
+      card.className = 'q-card wrong';
+    }
+    updateScore();
+  }
+
+  function updateScore() {
+    const total = Object.keys(ANSWERS).length;
+    const cnt   = solvedSet.size;
+    document.getElementById('solved-count').textContent = cnt;
+    const pct = cnt / total;
+    const lvl = cnt <= 0 ? '도전 중...' : pct < 0.4 ? '🌱 시작!' : pct < 0.7 ? '🔥 잘하고 있어요!' : pct < 1 ? '⚡ 거의 다 왔어요!' : '🏆 완벽!';
+    document.getElementById('level-text').textContent = lvl;
+  }
+</script>
+</body>
+</html>
