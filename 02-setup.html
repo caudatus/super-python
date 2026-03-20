@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>02. 개발환경 설치 — 브론즈 | 슈퍼파이썬</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ══════════════════════════════════════════════════
+       🎨 COLOR SYSTEM — 변수만 바꾸면 전체 색상 변경
+       ══════════════════════════════════════════════════
+       ── 현재: 브론즈 (다크 블랙 + 민트 그린) ──
+       ⚪ 실버:      --accent:#4FC3F7; --bg:#0B0F18; --bg-side:#080C14;
+       🟡 골드:      --accent:#FFD700; --bg:#0C0C00; --bg-side:#090900;
+       🟠 골드+:     --accent:#FF6B00; --bg:#080808; --bg-side:#060606;
+       🩵 플래티넘:  --accent:#00B4D8; --bg:#F0F4F8; --bg-side:#E8EDF4;
+                     --text:#1A2332; --text2:#4A5568; --text3:#9AA5B4;
+                     --bg-card:#E8EDF4; --bg-code:#DDE4EC; --border:#C8D4E0;
+       💎 다이아몬드: --accent:#06B6D4; --bg:#07020F; --bg-side:#050009;
+       🔴 루비:      --accent:#E0115F; --bg:#0A0000; --bg-side:#080000;
+    ══════════════════════════════════════════════════ */
+    :root {
+      --bg:          #111111;
+      --bg-nav:      #0A0A0A;
+      --bg-side:     #0E0E0E;
+      --bg-card:     #181818;
+      --bg-code:     #1A1A1A;
+      --bg-tip:      #131A13;
+      --bg-warn:     #1A1410;
+      --bg-info:     #101520;
+      --accent:      #00CC70;
+      --accent-dim:  #007A42;
+      --accent-bg:   rgba(0,204,112,0.07);
+      --accent2:     #C8A000;
+      --text:        #D8D8D8;
+      --text-head:   #EFEFEF;
+      --text2:       #888888;
+      --text3:       #444444;
+      --border:      #222222;
+      --border2:     #2E2E2E;
+      --sy-kw:       #C792EA;
+      --sy-fn:       #82AAFF;
+      --sy-str:      #C3E88D;
+      --sy-cm:       #546E7A;
+      --sy-num:      #F78C6C;
+      --sy-pn:       #89DDFF;
+      --sy-ln-t:     #555555;
+      --sidebar-w:   248px;
+      --content-max: 720px;
+      --header-h:    48px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'Noto Sans KR', sans-serif; font-size: 15px; line-height: 1.8; overflow-x: hidden; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent-dim); }
+
+    /* ━━━ HEADER ━━━ */
+    .top-header { position: fixed; top: 0; left: 0; right: 0; z-index: 200; height: var(--header-h); background: var(--bg-nav); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 16px; }
+    .header-open-btn { display: none; align-items: center; justify-content: center; width: 28px; height: 28px; flex-shrink: 0; margin-right: 12px; background: var(--bg-card); border: 1px solid var(--border2); border-radius: 4px; cursor: pointer; color: var(--text2); font-size: 12px; transition: background 0.15s, color 0.15s, border-color 0.15s; }
+    .header-open-btn:hover { background: var(--accent-bg); color: var(--accent); border-color: var(--accent); }
+    body.sidebar-closed .header-open-btn { display: flex; }
+    .header-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; font-family: 'JetBrains Mono', monospace; font-size: 12px; overflow: hidden; }
+    .header-logo { color: var(--accent); text-decoration: none; font-weight: 700; white-space: nowrap; }
+    .header-sep  { color: var(--text3); flex-shrink: 0; }
+    .header-grade { color: var(--text2); white-space: nowrap; }
+    .header-chap  { color: var(--text-head); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .header-center { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text3); display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding: 0 16px; }
+    .progress-mini { width: 80px; height: 3px; background: var(--border2); border-radius: 2px; overflow: hidden; }
+    .progress-mini-fill { height: 100%; background: var(--accent); width: 4.17%; border-radius: 2px; } /* 2/48 */
+    .header-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .nav-btn { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text2); background: transparent; border: 1px solid var(--border2); padding: 4px 12px; text-decoration: none; transition: border-color 0.15s, color 0.15s; white-space: nowrap; }
+    .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .nav-btn.primary { color: var(--bg-nav); background: var(--accent); border-color: var(--accent); font-weight: 700; }
+    .nav-btn.primary:hover { filter: brightness(1.1); }
+
+    /* ━━━ LAYOUT ━━━ */
+    .layout { display: flex; padding-top: var(--header-h); min-height: 100vh; }
+
+    /* ━━━ SIDEBAR ━━━ */
+    .sidebar { width: var(--sidebar-w); flex-shrink: 0; position: fixed; top: var(--header-h); bottom: 0; left: 0; background: var(--bg-side); border-right: 1px solid var(--border); overflow-y: auto; overflow-x: hidden; transition: transform 0.22s ease; z-index: 150; padding-top: 8px; }
+    body.sidebar-closed .sidebar { transform: translateX(calc(-1 * var(--sidebar-w))); }
+    body.sidebar-closed .content { margin-left: 0; }
+    .sidebar-toggle { position: absolute; top: 10px; right: 10px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: var(--bg-card); border: 1px solid var(--border2); border-radius: 4px; cursor: pointer; color: var(--text2); font-size: 12px; transition: background 0.15s, color 0.15s, border-color 0.15s; z-index: 10; }
+    .sidebar-toggle:hover { background: var(--accent-bg); color: var(--accent); border-color: var(--accent); }
+    body.sidebar-closed .sidebar-toggle { display: none; }
+    .sidebar-progress { margin: 44px 12px 12px; padding: 12px 14px; background: var(--bg-card); border: 1px solid var(--border); }
+    .sp-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); margin-bottom: 6px; letter-spacing: 0.08em; }
+    .sp-bar { height: 4px; background: var(--border2); border-radius: 2px; overflow: hidden; margin-bottom: 5px; }
+    .sp-fill { height: 100%; background: var(--accent); width: 4.17%; border-radius: 2px; }
+    .sp-text { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text2); }
+    .sp-text span { color: var(--accent); }
+    .sb-group { border-bottom: 1px solid var(--border); }
+    .sb-group-header { display: flex; align-items: center; justify-content: space-between; padding: 9px 14px 9px 12px; cursor: pointer; user-select: none; transition: background 0.12s; gap: 8px; }
+    .sb-group-header:hover { background: rgba(255,255,255,0.03); }
+    .sb-group-title { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; letter-spacing: 0.06em; color: var(--text2); text-transform: uppercase; flex: 1; }
+    .sb-group.current .sb-group-title { color: var(--accent); }
+    .sb-group-arrow { font-size: 9px; color: var(--text3); transition: transform 0.2s; flex-shrink: 0; }
+    .sb-group.open .sb-group-arrow { transform: rotate(90deg); color: var(--accent); }
+    .sb-group.current .sb-group-arrow { color: var(--accent); }
+    .sb-items { overflow: hidden; max-height: 0; transition: max-height 0.28s ease; }
+    .sb-group.open .sb-items { max-height: 1000px; }
+    .sb-item { display: flex; align-items: baseline; gap: 8px; padding: 6px 14px 6px 20px; font-size: 13px; color: var(--text2); text-decoration: none; border-left: 2px solid transparent; transition: background 0.1s, color 0.1s, border-color 0.1s; line-height: 1.45; }
+    .sb-item:hover { background: rgba(255,255,255,0.03); color: var(--text); }
+    .sb-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--accent-bg); font-weight: 500; }
+    .sb-item.done   { color: var(--text3); }
+    .sb-icon { font-size: 9px; flex-shrink: 0; font-family: 'JetBrains Mono', monospace; width: 10px; text-align: center; color: var(--text3); }
+    .sb-item.active .sb-icon { color: var(--accent); }
+    .sb-item.done   .sb-icon { color: var(--accent-dim); }
+    .sb-num { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); flex-shrink: 0; min-width: 22px; }
+
+    /* ━━━ CONTENT ━━━ */
+    .content { margin-left: var(--sidebar-w); flex: 1; min-width: 0; padding: 48px 52px 96px; transition: margin-left 0.22s ease; }
+    .content-inner { max-width: var(--content-max);margin:0 auto; }
+
+    /* ━━━ CHAPTER HEADER ━━━ */
+    .chap-meta { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text3); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .badge { font-size: 10px; padding: 2px 8px; background: var(--accent-bg); color: var(--accent); border: 1px solid rgba(0,204,112,0.25); letter-spacing: 0.06em; }
+    .chap-title { font-family: 'JetBrains Mono', monospace; font-size: clamp(22px, 3.5vw, 30px); font-weight: 700; color: var(--text-head); line-height: 1.25; margin-bottom: 8px; }
+    .chap-title .hl { color: var(--accent); }
+    .chap-subtitle { font-size: 15px; color: var(--text2); margin-bottom: 32px; line-height: 1.65; }
+    .goal-box { border: 1px solid var(--border2); border-left: 3px solid var(--accent); background: var(--bg-card); padding: 16px 20px; margin-bottom: 44px; }
+    .goal-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--accent); letter-spacing: 0.1em; margin-bottom: 12px; }
+    .goal-list { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+    .goal-list li { font-size: 14px; color: var(--text2); display: flex; align-items: baseline; gap: 10px; line-height: 1.65; }
+    .goal-list li::before { content: '▸'; color: var(--accent); font-size: 10px; flex-shrink: 0; font-family: 'JetBrains Mono', monospace; }
+
+    /* ━━━ CONTENT ELEMENTS ━━━ */
+    .section-divider { height: 1px; background: var(--border); margin: 44px 0; }
+    h2 { font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 700; color: var(--text-head); margin: 44px 0 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+    h2:first-child { margin-top: 0; }
+    h2 .n { color: var(--text3); font-weight: 400; margin-right: 6px; }
+    h3 { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: var(--accent); margin: 28px 0 10px; }
+    p { color: var(--text); margin-bottom: 16px; line-height: 1.9; font-size: 15px; }
+    p:last-child { margin-bottom: 0; }
+    code { font-family: 'JetBrains Mono', monospace; font-size: 13px; background: var(--bg-code); color: var(--accent); padding: 1px 6px; border: 1px solid var(--border2); border-radius: 2px; }
+    strong { color: var(--text-head); font-weight: 700; }
+    em     { color: var(--accent); font-style: normal; font-weight: 500; }
+
+    /* 단계 박스 */
+    .step-list { display: flex; flex-direction: column; gap: 2px; margin: 20px 0; }
+    .step-item { display: flex; gap: 0; }
+    .step-num {
+      flex-shrink: 0; width: 36px; min-height: 36px;
+      background: var(--accent); color: var(--bg-nav);
+      font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      align-self: flex-start; margin-top: 12px;
+    }
+    .step-body { flex: 1; background: var(--bg-card); border: 1px solid var(--border2); border-left: none; padding: 12px 16px; }
+    .step-title { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: var(--text-head); margin-bottom: 6px; }
+    .step-body p { font-size: 14px; color: var(--text2); margin-bottom: 0; line-height: 1.7; }
+
+    /* OS 탭 */
+    .os-tabs { display: flex; gap: 0; margin-bottom: -1px; position: relative; z-index: 1; }
+    .os-tab { font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 7px 16px; background: var(--bg-card); border: 1px solid var(--border2); color: var(--text3); cursor: pointer; transition: color 0.15s, background 0.15s; user-select: none; }
+    .os-tab + .os-tab { border-left: none; }
+    .os-tab.active { color: var(--accent); border-bottom-color: var(--bg-card); background: var(--bg-card); }
+    .os-tab:hover:not(.active) { color: var(--text2); }
+    .os-panel { display: none; border: 1px solid var(--border2); background: var(--bg-card); padding: 20px; margin-bottom: 24px; }
+    .os-panel.active { display: block; }
+    .os-panel ol { list-style: none; counter-reset: os-step; display: flex; flex-direction: column; gap: 12px; }
+    .os-panel ol li { counter-increment: os-step; display: flex; gap: 12px; align-items: baseline; font-size: 14px; color: var(--text2); line-height: 1.7; }
+    .os-panel ol li::before { content: counter(os-step); font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent); background: var(--accent-bg); border: 1px solid rgba(0,204,112,0.2); min-width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+
+    /* 코드 블록 */
+    .code-block { background: var(--bg-code); border: 1px solid var(--border2); margin: 16px 0; overflow: hidden; }
+    .code-block-header { display: flex; align-items: center; justify-content: space-between; padding: 7px 14px; background: #141414; border-bottom: 1px solid var(--border); }
+    .cb-lang { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text3); }
+    .cb-copy { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); background: transparent; border: none; cursor: pointer; transition: color 0.15s; padding: 0; }
+    .cb-copy:hover { color: var(--accent); }
+    .code-block-body { display: flex; overflow-x: auto; padding: 12px 0; }
+    .ln-col { min-width: 40px; padding: 0 10px; text-align: right; border-right: 1px solid var(--border); user-select: none; flex-shrink: 0; }
+    .ln-col span { display: block; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.7; color: var(--sy-ln-t); }
+    .code-pre-col { padding: 0 18px; flex: 1; }
+    .code-pre-col pre { font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.7; color: var(--text); white-space: pre; margin: 0; }
+    .kw { color: var(--sy-kw); } .fn { color: var(--sy-fn); } .str { color: var(--sy-str); }
+    .cm { color: var(--sy-cm); } .num { color: var(--sy-num); } .pn { color: var(--sy-pn); }
+    .output-block { background: #0D0D0D; border: 1px solid var(--border); border-top: none; padding: 10px 18px; }
+    .out-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); letter-spacing: 0.08em; margin-bottom: 6px; }
+    .output-block pre { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #AAAAAA; line-height: 1.7; margin: 0; white-space: pre; }
+    .out-g { color: var(--accent); }
+
+    /* 팁/경고/정보 */
+    .tip-box, .warn-box, .info-box { padding: 14px 18px; margin: 20px 0; border-left: 3px solid; }
+    .tip-box  { background: var(--bg-tip);  border-color: var(--accent); }
+    .warn-box { background: var(--bg-warn); border-color: var(--accent2); }
+    .info-box { background: var(--bg-info); border-color: #4FC3F7; }
+    .box-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; margin-bottom: 8px; font-weight: 700; }
+    .tip-box  .box-label { color: var(--accent); }
+    .warn-box .box-label { color: var(--accent2); }
+    .info-box .box-label { color: #4FC3F7; }
+    .tip-box p, .warn-box p, .info-box p { font-size: 14px; color: var(--text2); margin-bottom: 0; line-height: 1.8; }
+
+    /* 터미널 블록 (bash 명령어용) */
+    .terminal-block { background: #0D0D0D; border: 1px solid var(--border2); margin: 16px 0; overflow: hidden; }
+    .terminal-header { display: flex; align-items: center; gap: 7px; padding: 8px 14px; background: #141414; border-bottom: 1px solid var(--border); }
+    .t-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .t-dot.r { background: #FF5F57; } .t-dot.y { background: #FEBC2E; } .t-dot.g { background: #28C840; }
+    .t-title { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text3); margin-left: 4px; }
+    .terminal-body { padding: 14px 18px; }
+    .terminal-body pre { font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.8; color: #CCCCCC; margin: 0; white-space: pre; }
+    .t-prompt { color: var(--accent); } /* $ 프롬프트 */
+    .t-cmd    { color: #EFEFEF; }       /* 명령어 */
+    .t-out    { color: #888888; }       /* 출력 */
+    .t-hi     { color: var(--accent); } /* 강조 출력 */
+
+    /* 성공 체크 */
+    .check-box { display: flex; align-items: flex-start; gap: 14px; padding: 16px 18px; background: var(--bg-tip); border: 1px solid rgba(0,204,112,0.2); margin: 20px 0; }
+    .check-icon { font-size: 20px; flex-shrink: 0; line-height: 1.3; }
+    .check-text { font-size: 14px; color: var(--text2); line-height: 1.8; }
+    .check-text strong { color: var(--accent); }
+
+    /* 따라하기 */
+    .try-section { border: 1px solid var(--border2); background: var(--bg-card); margin: 36px 0; }
+    .try-header { padding: 11px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+    .try-title { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; color: var(--accent); }
+    .try-body { padding: 18px 20px; }
+    .try-body p { font-size: 14px; margin-bottom: 16px; color: var(--text2); }
+    .try-step { display: flex; gap: 12px; margin-bottom: 10px; align-items: baseline; }
+    .try-step-n { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent); flex-shrink: 0; min-width: 26px; }
+    .try-step-t { font-size: 14px; color: var(--text2); line-height: 1.75; }
+
+    /* 요약 */
+    .summary-box { border: 1px solid var(--border2); border-top: 2px solid var(--accent); background: var(--bg-card); padding: 20px 22px; margin: 44px 0 32px; }
+    .summary-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--accent); letter-spacing: 0.1em; margin-bottom: 16px; }
+    .summary-grid { display: grid; grid-template-columns: 150px 1fr; gap: 10px 18px; }
+    .sg-key { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text3); padding-top: 2px; }
+    .sg-val { font-size: 14px; color: var(--text2); line-height: 1.65; }
+
+    /* 격려 */
+    .cheer-box { border: 1px solid var(--border); background: var(--bg); padding: 18px 22px; margin-bottom: 44px; display: flex; gap: 14px; align-items: flex-start; }
+    .cheer-icon { font-size: 18px; flex-shrink: 0; line-height: 1.5; }
+    .cheer-text { font-size: 14px; color: var(--text2); line-height: 1.85; }
+    .cheer-text strong { color: var(--text-head); }
+
+    /* 챕터 네비 */
+    .chap-nav { display: flex; justify-content: space-between; padding-top: 32px; border-top: 1px solid var(--border); gap: 12px; flex-wrap: wrap; }
+    .chap-nav-btn { display: flex; flex-direction: column; gap: 4px; text-decoration: none; padding: 14px 18px; border: 1px solid var(--border2); background: var(--bg-card); flex: 1; max-width: 300px; transition: border-color 0.15s; }
+    .chap-nav-btn:hover { border-color: var(--accent); }
+    .chap-nav-btn.next { text-align: right; }
+    .cnb-dir { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); letter-spacing: 0.07em; }
+    .cnb-title { font-size: 13px; color: var(--text2); line-height: 1.45; }
+    .cnb-title span { color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+
+    /* 반응형 */
+    .sidebar-overlay { display: none; position: fixed; inset: 0; top: var(--header-h); z-index: 140; background: rgba(0,0,0,0.65); }
+    @media (max-width: 720px) {
+      .sidebar-overlay.visible { display: block; }
+      .content { margin-left: 0; padding: 28px 20px 72px; }
+      .header-center { display: none; }
+      .summary-grid { grid-template-columns: 1fr; gap: 6px; }
+    }
+    @media (max-width: 480px) {
+      .header-grade { display: none; }
+      .chap-nav-btn { max-width: 100%; }
+      .header-right .nav-btn:not(.primary) { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ━━━ TOP HEADER ━━━ -->
+<header class="top-header">
+  <button class="header-open-btn" onclick="toggleSidebar()" title="사이드바 열기">▶</button>
+  <div class="header-left">
+    <a href="../index.html" class="header-logo">SUPERPYTHON</a>
+    <span class="header-sep">/</span>
+    <span class="header-grade">🟤 BRONZE</span>
+    <span class="header-sep">/</span>
+    <span class="header-chap">02. 개발환경 설치</span>
+  </div>
+  <div class="header-center">
+    <span>02 / 48</span>
+    <div class="progress-mini"><div class="progress-mini-fill"></div></div>
+    <span>4%</span>
+  </div>
+  <div class="header-right">
+    <a href="01-what-is-python.html" class="nav-btn">← 이전</a>
+    <a href="03-print.html" class="nav-btn primary">다음 →</a>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<div class="layout">
+
+  <!-- ━━━ SIDEBAR ━━━ -->
+  <aside class="sidebar" id="sidebar">
+    <button class="sidebar-toggle" onclick="toggleSidebar()" title="사이드바 닫기">◀</button>
+    <div class="sidebar-progress">
+      <div class="sp-label">BRONZE 진행률</div>
+      <div class="sp-bar"><div class="sp-fill"></div></div>
+      <div class="sp-text"><span>2</span> / 48 챕터 완료</div>
+    </div>
+
+    <div class="sb-group open current" id="grp-env">
+      <div class="sb-group-header" onclick="toggleGroup('grp-env')"><span class="sb-group-title">환경 설정</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="01-what-is-python.html" class="sb-item done"><span class="sb-icon">✓</span><span class="sb-num">01</span>파이썬이란?</a>
+        <a href="02-setup.html" class="sb-item active"><span class="sb-icon">→</span><span class="sb-num">02</span>개발환경 설치</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-basic1">
+      <div class="sb-group-header" onclick="toggleGroup('grp-basic1')"><span class="sb-group-title">기초 문법 1</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="03-print.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">03</span>print()란?</a>
+        <a href="04-quiz-print.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">04</span>연습문제</a>
+        <a href="05-variables.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">05</span>변수와 데이터 타입</a>
+        <a href="06-operators.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">06</span>연산자</a>
+        <a href="07-quiz-variables-operators.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">07</span>연습문제</a>
+        <a href="08-string.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">08</span>문자열 String</a>
+        <a href="09-quiz-string.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">09</span>연습문제</a>
+        <a href="10-fstring.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">10</span>f-string 완전정리</a>
+        <a href="11-quiz-fstring.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">11</span>연습문제</a>
+        <a href="12-mini-project-01.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">12</span>🎮 미니 프로젝트 ①</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-basic2">
+      <div class="sb-group-header" onclick="toggleGroup('grp-basic2')"><span class="sb-group-title">기초 문법 2</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="13-list.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">13</span>리스트</a>
+        <a href="14-quiz-list.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">14</span>연습문제</a>
+        <a href="15-input.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">15</span>input() 함수</a>
+        <a href="16-quiz-input.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">16</span>연습문제</a>
+        <a href="17-mini-project-02.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">17</span>🎮 미니 프로젝트 ②</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-flow">
+      <div class="sb-group-header" onclick="toggleGroup('grp-flow')"><span class="sb-group-title">흐름 제어</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="18-if.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">18</span>조건문 (if)</a>
+        <a href="19-quiz-if.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">19</span>연습문제</a>
+        <a href="20-mini-project-03.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">20</span>🎮 미니 프로젝트 ③</a>
+        <a href="21-for-range.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">21</span>for문과 range()</a>
+        <a href="22-quiz-for.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">22</span>연습문제</a>
+        <a href="23-while.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">23</span>while문</a>
+        <a href="24-quiz-while.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">24</span>연습문제</a>
+        <a href="25-mini-project-04.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">25</span>🎮 미니 프로젝트 ④</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-error">
+      <div class="sb-group-header" onclick="toggleGroup('grp-error')"><span class="sb-group-title">에러 & 디버깅</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="26-error-types.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">26</span>에러 읽는 법</a>
+        <a href="27-debugging.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">27</span>기초 디버깅 실습</a>
+        <a href="28-quiz-debugging.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">28</span>연습문제</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-func">
+      <div class="sb-group-header" onclick="toggleGroup('grp-func')"><span class="sb-group-title">함수</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="29-function-basic.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">29</span>함수 기초</a>
+        <a href="30-quiz-function-basic.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">30</span>연습문제</a>
+        <a href="31-mini-project-05.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">31</span>🎮 미니 프로젝트 ⑤</a>
+        <a href="32-function-advanced.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">32</span>함수 심화</a>
+        <a href="33-quiz-function-advanced.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">33</span>연습문제</a>
+        <a href="34-module.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">34</span>모듈</a>
+        <a href="35-quiz-module.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">35</span>연습문제</a>
+        <a href="36-mini-project-06.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">36</span>🎮 미니 프로젝트 ⑥</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-ds">
+      <div class="sb-group-header" onclick="toggleGroup('grp-ds')"><span class="sb-group-title">자료구조</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="37-dictionary.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">37</span>딕셔너리</a>
+        <a href="38-quiz-dictionary.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">38</span>연습문제</a>
+        <a href="39-tuple-set.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">39</span>튜플과 셋</a>
+        <a href="40-quiz-tuple-set.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">40</span>연습문제</a>
+        <a href="41-mini-project-07.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">41</span>🎮 미니 프로젝트 ⑦</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-file">
+      <div class="sb-group-header" onclick="toggleGroup('grp-file')"><span class="sb-group-title">파일 & 예외처리</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="42-file-io.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">42</span>파일 입출력</a>
+        <a href="43-quiz-file-io.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">43</span>연습문제</a>
+        <a href="44-exception-basic.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">44</span>예외처리 기초</a>
+        <a href="45-quiz-exception.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">45</span>연습문제</a>
+        <a href="46-mini-project-08.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">46</span>🎮 미니 프로젝트 ⑧</a>
+      </div>
+    </div>
+    <div class="sb-group" id="grp-end">
+      <div class="sb-group-header" onclick="toggleGroup('grp-end')"><span class="sb-group-title">마무리</span><span class="sb-group-arrow">▶</span></div>
+      <div class="sb-items">
+        <a href="47-final-project.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">47</span>★ 최종 프로젝트</a>
+        <a href="48-next-step.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">48</span>다음 단계 미리보기</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ━━━ CONTENT ━━━ -->
+  <main class="content" id="mainContent">
+    <div class="content-inner">
+
+      <div class="chap-meta">
+        <span class="badge">SETUP</span>
+        <span>환경 설정</span>
+        <span style="color:var(--text3)">·</span>
+        <span>챕터 02 / 48</span>
+      </div>
+      <h1 class="chap-title"><span class="hl">개발환경</span> 설치</h1>
+      <p class="chap-subtitle">파이썬을 설치하고, 코드를 편하게 쓸 수 있는 환경을 만들어봅시다</p>
+
+      <div class="goal-box">
+        <div class="goal-label">▸ 이 챕터를 마치면</div>
+        <ul class="goal-list">
+          <li>파이썬 3.12 이상을 내 컴퓨터에 설치할 수 있다</li>
+          <li>VS Code를 설치하고 파이썬 확장을 추가할 수 있다</li>
+          <li><code>print("Hello, Python!")</code>을 직접 실행해서 결과를 확인할 수 있다</li>
+        </ul>
+      </div>
+
+      <!-- 1. 필요한 것 두 가지 -->
+      <h2><span class="n">1.</span>필요한 것 두 가지</h2>
+
+      <p>파이썬 코딩을 시작하려면 딱 두 가지만 설치하면 됩니다.</p>
+
+      <div class="step-list">
+        <div class="step-item">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="step-title">Python 인터프리터</div>
+            <p>파이썬 코드를 실제로 실행하는 프로그램입니다. 우리가 쓴 코드를 컴퓨터가 이해할 수 있도록 번역하고 실행합니다. <strong>python.org</strong>에서 무료로 다운로드합니다.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="step-title">VS Code (코드 편집기)</div>
+            <p>코드를 작성하는 프로그램입니다. 메모장에도 쓸 수 있지만, VS Code는 자동완성·색상 강조·디버깅 기능이 있어 훨씬 편합니다. <strong>code.visualstudio.com</strong>에서 무료로 다운로드합니다.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="tip-box">
+        <div class="box-label">💡 IDE vs 에디터</div>
+        <p>VS Code는 코드 편집기(Editor)입니다. PyCharm 같은 IDE(통합개발환경)도 있지만, 입문자에게는 가볍고 빠른 VS Code를 권장합니다. 나중에 익숙해지면 다른 도구로 바꿔도 됩니다.</p>
+      </div>
+
+      <!-- 2. Python 설치 -->
+      <h2><span class="n">2.</span>Python 설치</h2>
+
+      <p>OS에 맞는 탭을 선택해서 따라하세요.</p>
+
+      <div class="os-tabs">
+        <div class="os-tab active" onclick="switchTab('windows')">🪟 Windows</div>
+        <div class="os-tab" onclick="switchTab('mac')">🍎 macOS</div>
+        <div class="os-tab" onclick="switchTab('linux')">🐧 Linux</div>
+      </div>
+
+      <!-- Windows -->
+      <div class="os-panel active" id="tab-windows">
+        <ol>
+          <li><strong>python.org/downloads</strong> 에 접속합니다.</li>
+          <li>노란 버튼 <em>"Download Python 3.x.x"</em> 를 클릭해서 설치 파일을 다운로드합니다.</li>
+          <li>다운로드된 <code>.exe</code> 파일을 실행합니다.</li>
+          <li>설치 화면 맨 아래 <strong>"Add Python to PATH"</strong> 체크박스를 반드시 체크합니다. ← 이게 핵심!</li>
+          <li><em>"Install Now"</em> 를 클릭하고 설치가 완료될 때까지 기다립니다.</li>
+        </ol>
+        <div class="warn-box" style="margin-top:16px;">
+          <div class="box-label">⚠ PATH 체크를 빠뜨리면</div>
+          <p>나중에 터미널에서 <code>python</code> 명령을 쳤을 때 "명령어를 찾을 수 없습니다" 오류가 납니다. 설치 시 반드시 체크하세요. 빠뜨렸다면 제어판 → 앱 → Python → 수정에서 다시 설정할 수 있습니다.</p>
+        </div>
+      </div>
+
+      <!-- macOS -->
+      <div class="os-panel" id="tab-mac">
+        <ol>
+          <li><strong>python.org/downloads</strong> 에 접속합니다.</li>
+          <li><em>"Download Python 3.x.x"</em> 버튼을 클릭해서 <code>.pkg</code> 파일을 다운로드합니다.</li>
+          <li>다운로드된 파일을 더블클릭해서 설치를 진행합니다.</li>
+          <li>또는 Homebrew가 설치되어 있다면 터미널에서 아래 명령으로 설치할 수 있습니다.</li>
+        </ol>
+        <div class="terminal-block" style="margin-top:12px;">
+          <div class="terminal-header">
+            <div class="t-dot r"></div><div class="t-dot y"></div><div class="t-dot g"></div>
+            <span class="t-title">Terminal</span>
+          </div>
+          <div class="terminal-body">
+            <pre><span class="t-prompt">$</span> <span class="t-cmd">brew install python</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Linux -->
+      <div class="os-panel" id="tab-linux">
+        <ol>
+          <li>대부분의 Linux 배포판에는 파이썬이 이미 설치되어 있습니다.</li>
+          <li>터미널에서 버전을 먼저 확인하세요.</li>
+          <li>3.10 미만이거나 설치되지 않은 경우 아래 명령으로 설치합니다.</li>
+        </ol>
+        <div class="terminal-block" style="margin-top:12px;">
+          <div class="terminal-header">
+            <div class="t-dot r"></div><div class="t-dot y"></div><div class="t-dot g"></div>
+            <span class="t-title">Terminal — Ubuntu / Debian</span>
+          </div>
+          <div class="terminal-body">
+            <pre><span class="t-prompt">$</span> <span class="t-cmd">sudo apt update</span>
+<span class="t-prompt">$</span> <span class="t-cmd">sudo apt install python3 python3-pip</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- 설치 확인 -->
+      <h3>설치 확인</h3>
+      <p>설치가 끝나면 터미널(명령 프롬프트)을 열고 아래 명령어를 입력해서 확인합니다.</p>
+
+      <div class="terminal-block">
+        <div class="terminal-header">
+          <div class="t-dot r"></div><div class="t-dot y"></div><div class="t-dot g"></div>
+          <span class="t-title">Terminal</span>
+        </div>
+        <div class="terminal-body">
+          <pre><span class="t-prompt">$</span> <span class="t-cmd">python --version</span>
+<span class="t-hi">Python 3.12.3</span>
+
+<span class="t-prompt">$</span> <span class="t-cmd">python3 --version</span>   <span class="t-out"># macOS / Linux는 python3</span>
+<span class="t-hi">Python 3.12.3</span></pre>
+        </div>
+      </div>
+
+      <div class="check-box">
+        <span class="check-icon">✅</span>
+        <div class="check-text"><strong>버전 번호가 출력되면 성공</strong>입니다! 3.10 이상이면 이 강의를 따라하는 데 문제 없습니다. "명령어를 찾을 수 없습니다" 오류가 나면 아래 팁 박스를 확인하세요.</div>
+      </div>
+
+      <div class="warn-box">
+        <div class="box-label">⚠ Windows에서 오류가 날 때</div>
+        <p><code>python</code>이 안 되면 <code>py</code>를 대신 써보세요. 그래도 안 되면 Python 설치 시 "Add to PATH"를 빠뜨린 것입니다. 제어판 → 앱 → Python → 수정에서 PATH를 추가할 수 있습니다.</p>
+      </div>
+
+      <!-- 3. VS Code 설치 -->
+      <h2><span class="n">3.</span>VS Code 설치 및 설정</h2>
+
+      <p><strong>code.visualstudio.com</strong> 에 접속해서 본인 OS에 맞는 버전을 다운로드하고 설치합니다. 설치 과정은 "다음" 버튼만 계속 누르면 됩니다.</p>
+
+      <h3>Python 확장 설치</h3>
+      <p>VS Code 자체는 파이썬을 모릅니다. 파이썬 지원을 추가하는 <strong>확장(Extension)</strong>을 설치해야 합니다.</p>
+
+      <div class="step-list">
+        <div class="step-item">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="step-title">확장 탭 열기</div>
+            <p>VS Code 왼쪽 사이드바에서 네모 4개 아이콘(Extensions)을 클릭하거나, 단축키 <code>Ctrl+Shift+X</code> (macOS: <code>Cmd+Shift+X</code>)를 누릅니다.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="step-title">Python 검색 후 설치</div>
+            <p>검색창에 <em>"Python"</em>을 입력합니다. Microsoft가 만든 <strong>Python</strong> 확장(파란 배지)을 찾아 <em>Install</em> 버튼을 클릭합니다.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="step-title">인터프리터 선택</div>
+            <p>파일을 열면 우측 하단에 파이썬 버전이 표시됩니다. 클릭해서 방금 설치한 Python 3.12를 선택합니다. 또는 <code>Ctrl+Shift+P</code> → <em>"Python: Select Interpreter"</em>로 선택할 수 있습니다.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="tip-box">
+        <div class="box-label">💡 추천 추가 확장</div>
+        <p>당장은 필요 없지만, 나중에 설치하면 편한 확장들입니다.<br>
+        <strong>Pylance</strong> — 더 강력한 자동완성과 타입 검사<br>
+        <strong>indent-rainbow</strong> — 들여쓰기 단계를 색으로 구분해서 읽기 편함<br>
+        <strong>Korean Language Pack</strong> — VS Code 메뉴를 한국어로</p>
+      </div>
+
+      <!-- 4. 첫 코드 실행 -->
+      <h2><span class="n">4.</span>첫 코드 실행하기</h2>
+
+      <p>드디어 코드를 직접 실행해볼 차례입니다. 두 가지 방법 모두 알아두면 편리합니다.</p>
+
+      <h3>방법 A — VS Code에서 파일로 실행</h3>
+
+      <div class="step-list">
+        <div class="step-item">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="step-title">새 파일 만들기</div>
+            <p>VS Code에서 <code>Ctrl+N</code> (macOS: <code>Cmd+N</code>)으로 새 파일을 만들고, <code>Ctrl+S</code>로 <code>hello.py</code>로 저장합니다. <strong>.py</strong>가 파이썬 파일 확장자입니다.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="step-title">코드 입력</div>
+            <p>아래 코드를 그대로 입력합니다.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-block-header">
+          <span class="cb-lang">python — hello.py</span>
+          <button class="cb-copy" onclick="copyCode(this)">복사</button>
+        </div>
+        <div class="code-block-body">
+          <div class="ln-col"><span>1</span><span>2</span></div>
+          <div class="code-pre-col"><pre><span class="fn">print</span><span class="pn">(</span><span class="str">"Hello, Python!"</span><span class="pn">)</span>
+<span class="fn">print</span><span class="pn">(</span><span class="str">"나의 첫 번째 파이썬 코드"</span><span class="pn">)</span></pre></div>
+        </div>
+      </div>
+
+      <div class="step-list">
+        <div class="step-item">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="step-title">실행</div>
+            <p>우측 상단의 ▶ 버튼을 클릭하거나, 단축키 <code>Ctrl+F5</code>를 누릅니다. 하단 터미널에 결과가 출력됩니다.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="output-block" style="border-top: 1px solid var(--border2);">
+        <div class="out-label">실행 결과</div>
+        <pre><span class="out-g">Hello, Python!</span>
+<span class="out-g">나의 첫 번째 파이썬 코드</span></pre>
+      </div>
+
+      <h3>방법 B — 터미널(REPL)에서 바로 실행</h3>
+      <p>파일 없이 터미널에서 한 줄씩 바로 실행하는 방법입니다. 빠르게 테스트할 때 유용합니다.</p>
+
+      <div class="terminal-block">
+        <div class="terminal-header">
+          <div class="t-dot r"></div><div class="t-dot y"></div><div class="t-dot g"></div>
+          <span class="t-title">Terminal — Python REPL</span>
+        </div>
+        <div class="terminal-body">
+          <pre><span class="t-prompt">$</span> <span class="t-cmd">python</span>          <span class="t-out"># 파이썬 실행</span>
+<span class="t-out">Python 3.12.3 ...</span>
+<span class="t-out">>>></span> <span class="t-cmd">print("Hello!")</span>
+<span class="t-hi">Hello!</span>
+<span class="t-out">>>></span> <span class="t-cmd">1 + 2</span>
+<span class="t-hi">3</span>
+<span class="t-out">>>></span> <span class="t-cmd">exit()</span>          <span class="t-out"># 종료</span></pre>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <div class="box-label">📌 REPL이란?</div>
+        <p>Read-Eval-Print Loop의 약자입니다. 코드를 입력하면(Read) 즉시 실행하고(Eval) 결과를 보여주는(Print) 것을 반복(Loop)합니다. 작은 코드를 빠르게 테스트할 때 유용합니다. <code>>>></code>가 입력 대기 표시입니다.</p>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- 따라하기 -->
+      <div class="try-section">
+        <div class="try-header">
+          <span style="font-size:14px">⌨</span>
+          <span class="try-title">직접 해보기</span>
+        </div>
+        <div class="try-body">
+          <p>설치가 완료됐다면 아래 순서대로 직접 해보세요.</p>
+          <div class="try-step">
+            <span class="try-step-n">01.</span>
+            <span class="try-step-t">터미널에서 <code>python --version</code>을 입력해서 버전이 출력되는지 확인합니다.</span>
+          </div>
+          <div class="try-step">
+            <span class="try-step-n">02.</span>
+            <span class="try-step-t">VS Code를 열고 <code>hello.py</code> 파일을 만들어서 <code>print("Hello, Python!")</code>을 입력하고 실행합니다.</span>
+          </div>
+          <div class="try-step">
+            <span class="try-step-n">03.</span>
+            <span class="try-step-t">터미널에서 <code>python</code>을 입력해 REPL을 열고, <code>1 + 2</code>를 입력해서 <code>3</code>이 출력되는지 확인합니다.</span>
+          </div>
+          <div class="try-step">
+            <span class="try-step-n">도전.</span>
+            <span class="try-step-t"><code>hello.py</code>에 내 이름과 나이를 출력하는 코드를 추가해보세요. print()는 다음 챕터에서 자세히 배우지만, 지금 한 번 써보는 것도 좋습니다!</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 핵심 요약 -->
+      <div class="summary-box">
+        <div class="summary-label">▸ 핵심 요약</div>
+        <div class="summary-grid">
+          <span class="sg-key">Python 설치</span>
+          <span class="sg-val">python.org/downloads → 설치 시 <strong>"Add to PATH" 체크</strong> 필수</span>
+
+          <span class="sg-key">VS Code 설치</span>
+          <span class="sg-val">code.visualstudio.com → Python 확장 설치 → 인터프리터 선택</span>
+
+          <span class="sg-key">설치 확인</span>
+          <span class="sg-val">터미널에서 <code>python --version</code> → 버전 번호 출력되면 성공</span>
+
+          <span class="sg-key">파일 실행</span>
+          <span class="sg-val"><code>.py</code> 파일 저장 → VS Code 우측 ▶ 버튼 또는 <code>Ctrl+F5</code></span>
+
+          <span class="sg-key">REPL 실행</span>
+          <span class="sg-val">터미널에서 <code>python</code> 입력 → <code>>>></code> 프롬프트에서 바로 코드 실행</span>
+        </div>
+      </div>
+
+      <!-- 격려 메시지 -->
+      <div class="cheer-box">
+        <span class="cheer-icon">⚙️</span>
+        <div class="cheer-text">
+          <strong>환경 설정, 완료!</strong><br>
+          개발환경 설치는 처음엔 낯설게 느껴지지만, 한 번만 하면 됩니다.
+          이제 코드를 실행할 수 있는 준비가 갖춰졌습니다.
+          다음 챕터부터 본격적으로 파이썬 코드를 작성하기 시작합니다. 드디어 시작이에요!
+        </div>
+      </div>
+
+      <!-- 챕터 네비게이션 -->
+      <div class="chap-nav">
+        <a href="01-what-is-python.html" class="chap-nav-btn">
+          <span class="cnb-dir">← 이전 챕터</span>
+          <span class="cnb-title"><span>01.</span> 파이썬이란?</span>
+        </a>
+        <a href="03-print.html" class="chap-nav-btn next">
+          <span class="cnb-dir">다음 챕터 →</span>
+          <span class="cnb-title"><span>03.</span> print()란?</span>
+        </a>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+  const isMobile = () => window.innerWidth <= 720;
+  const overlay  = document.getElementById('sidebarOverlay');
+
+  function toggleSidebar() {
+    document.body.classList.toggle('sidebar-closed');
+    if (isMobile()) overlay.classList.toggle('visible', !document.body.classList.contains('sidebar-closed'));
+    localStorage.setItem('sp-sidebar', document.body.classList.contains('sidebar-closed') ? 'closed' : 'open');
+  }
+  function closeSidebar() {
+    document.body.classList.add('sidebar-closed');
+    overlay.classList.remove('visible');
+    localStorage.setItem('sp-sidebar', 'closed');
+  }
+  function toggleGroup(id) { document.getElementById(id).classList.toggle('open'); }
+  function copyCode(btn) {
+    const text = btn.closest('.code-block').querySelector('pre').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '복사됨 ✓'; btn.style.color = 'var(--accent)';
+      setTimeout(() => { btn.textContent = '복사'; btn.style.color = ''; }, 2000);
+    });
+  }
+  function switchTab(os) {
+    document.querySelectorAll('.os-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.os-panel').forEach(p => p.classList.remove('active'));
+    document.querySelector(`.os-tab[onclick*="${os}"]`).classList.add('active');
+    document.getElementById(`tab-${os}`).classList.add('active');
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    if (isMobile()) document.body.classList.add('sidebar-closed');
+    else if (localStorage.getItem('sp-sidebar') === 'closed') document.body.classList.add('sidebar-closed');
+  });
+  window.addEventListener('resize', () => { if (!isMobile()) overlay.classList.remove('visible'); });
+</script>
+</body>
+</html>

@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>01. 파이썬이란? — 브론즈 | 슈퍼파이썬</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+
+    /* ══════════════════════════════════════════════════
+       🎨 COLOR SYSTEM — 여기서 변수만 바꾸면 전체 색상 변경
+       ══════════════════════════════════════════════════
+       ── 현재: 브론즈 (다크 블랙 + 민트 그린) ──
+
+       ⚪ 실버:      --accent:#4FC3F7; --bg:#0B0F18; --bg-side:#080C14;
+       🟡 골드:      --accent:#FFD700; --bg:#0C0C00; --bg-side:#090900;
+       🟠 골드+:     --accent:#FF6B00; --bg:#080808; --bg-side:#060606;
+       🩵 플래티넘:  --accent:#00B4D8; --bg:#F0F4F8; --bg-side:#E8EDF4;
+                     --text:#1A2332;   --text2:#4A5568; --text3:#9AA5B4;
+                     --bg-card:#E8EDF4; --bg-code:#DDE4EC; --border:#C8D4E0;
+       💎 다이아몬드: --accent:#06B6D4; --bg:#07020F; --bg-side:#050009;
+       🔴 루비:      --accent:#E0115F; --bg:#0A0000; --bg-side:#080000;
+    ══════════════════════════════════════════════════ */
+
+    :root {
+      /* ── 배경 ── */
+      --bg:          #111111;
+      --bg-nav:      #0A0A0A;
+      --bg-side:     #0E0E0E;
+      --bg-card:     #181818;
+      --bg-code:     #1A1A1A;
+      --bg-tip:      #131A13;
+      --bg-warn:     #1A1410;
+      --bg-info:     #101520;
+
+      /* ── 강조색 ── */
+      --accent:      #00CC70;
+      --accent-dim:  #007A42;
+      --accent-bg:   rgba(0,204,112,0.07);
+      --accent2:     #C8A000;
+
+      /* ── 텍스트 ── */
+      --text:        #D8D8D8;
+      --text-head:   #EFEFEF;
+      --text2:       #888888;
+      --text3:       #444444;
+
+      /* ── 테두리 ── */
+      --border:      #222222;
+      --border2:     #2E2E2E;
+
+      /* ── 코드 신택스 ── */
+      --sy-kw:       #C792EA;
+      --sy-fn:       #82AAFF;
+      --sy-str:      #C3E88D;
+      --sy-cm:       #546E7A;
+      --sy-num:      #F78C6C;
+      --sy-pn:       #89DDFF;
+      --sy-ln-t:     #555555;
+
+      /* ── 레이아웃 ── */
+      --sidebar-w:   248px;
+      --content-max: 720px;
+      --header-h:    48px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 15px; line-height: 1.8; overflow-x: hidden;
+    }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent-dim); }
+
+    /* ━━━ TOP HEADER ━━━ */
+    .top-header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      height: var(--header-h);
+      background: var(--bg-nav); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 16px; gap: 0;
+    }
+    .header-open-btn {
+      display: none; align-items: center; justify-content: center;
+      width: 28px; height: 28px; flex-shrink: 0; margin-right: 12px;
+      background: var(--bg-card); border: 1px solid var(--border2); border-radius: 4px;
+      cursor: pointer; color: var(--text2); font-size: 12px;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .header-open-btn:hover { background: var(--accent-bg); color: var(--accent); border-color: var(--accent); }
+    body.sidebar-closed .header-open-btn { display: flex; }
+
+    .header-left {
+      display: flex; align-items: center; gap: 10px;
+      flex: 1; min-width: 0;
+      font-family: 'JetBrains Mono', monospace; font-size: 12px; overflow: hidden;
+    }
+    .header-logo { color: var(--accent); text-decoration: none; font-weight: 700; white-space: nowrap; }
+    .header-sep  { color: var(--text3); flex-shrink: 0; }
+    .header-grade { color: var(--text2); white-space: nowrap; }
+    .header-chap  { color: var(--text-head); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .header-center {
+      font-family: 'JetBrains Mono', monospace; font-size: 11px;
+      color: var(--text3); display: flex; align-items: center; gap: 8px;
+      flex-shrink: 0; padding: 0 16px;
+    }
+    .progress-mini { width: 80px; height: 3px; background: var(--border2); border-radius: 2px; overflow: hidden; }
+    .progress-mini-fill { height: 100%; background: var(--accent); width: 2.08%; border-radius: 2px; } /* 1/48 */
+
+    .header-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .nav-btn {
+      font-family: 'JetBrains Mono', monospace; font-size: 11px;
+      color: var(--text2); background: transparent; border: 1px solid var(--border2);
+      padding: 4px 12px; text-decoration: none;
+      transition: border-color 0.15s, color 0.15s; white-space: nowrap;
+    }
+    .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .nav-btn.primary { color: var(--bg-nav); background: var(--accent); border-color: var(--accent); font-weight: 700; }
+    .nav-btn.primary:hover { filter: brightness(1.1); }
+    .nav-btn.disabled { opacity: 0.3; pointer-events: none; }
+
+    /* ━━━ LAYOUT ━━━ */
+    .layout { display: flex; padding-top: var(--header-h); min-height: 100vh; }
+
+    /* ━━━ SIDEBAR ━━━ */
+    .sidebar {
+      width: var(--sidebar-w); flex-shrink: 0;
+      position: fixed; top: var(--header-h); bottom: 0; left: 0;
+      background: var(--bg-side); border-right: 1px solid var(--border);
+      overflow-y: auto; overflow-x: hidden;
+      transition: transform 0.22s ease; z-index: 150; padding-top: 8px;
+    }
+    body.sidebar-closed .sidebar { transform: translateX(calc(-1 * var(--sidebar-w))); }
+    body.sidebar-closed .content { margin-left: 0; }
+
+    /* 사이드바 상단 오른쪽 닫기 버튼 */
+    .sidebar-toggle {
+      position: absolute; top: 10px; right: 10px;
+      width: 28px; height: 28px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--bg-card); border: 1px solid var(--border2); border-radius: 4px;
+      cursor: pointer; color: var(--text2); font-size: 12px;
+      transition: background 0.15s, color 0.15s, border-color 0.15s; z-index: 10;
+    }
+    .sidebar-toggle:hover { background: var(--accent-bg); color: var(--accent); border-color: var(--accent); }
+    body.sidebar-closed .sidebar-toggle { display: none; }
+
+    /* 진행률 */
+    .sidebar-progress {
+      margin: 44px 12px 12px; padding: 12px 14px;
+      background: var(--bg-card); border: 1px solid var(--border);
+    }
+    .sp-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); margin-bottom: 6px; letter-spacing: 0.08em; }
+    .sp-bar { height: 4px; background: var(--border2); border-radius: 2px; overflow: hidden; margin-bottom: 5px; }
+    .sp-fill { height: 100%; background: var(--accent); width: 2.08%; border-radius: 2px; }
+    .sp-text { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text2); }
+    .sp-text span { color: var(--accent); }
+
+    /* 섹션 그룹 */
+    .sb-group { border-bottom: 1px solid var(--border); }
+    .sb-group-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 9px 14px 9px 12px; cursor: pointer; user-select: none;
+      transition: background 0.12s; gap: 8px;
+    }
+    .sb-group-header:hover { background: rgba(255,255,255,0.03); }
+    .sb-group-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px; font-weight: 700; letter-spacing: 0.06em;
+      color: var(--text2); text-transform: uppercase; flex: 1;
+    }
+    .sb-group.current .sb-group-title { color: var(--accent); }
+    .sb-group-arrow {
+      font-size: 9px; color: var(--text3); transition: transform 0.2s; flex-shrink: 0;
+    }
+    .sb-group.open .sb-group-arrow { transform: rotate(90deg); color: var(--accent); }
+    .sb-group.current .sb-group-arrow { color: var(--accent); }
+
+    .sb-items { overflow: hidden; max-height: 0; transition: max-height 0.28s ease; }
+    .sb-group.open .sb-items { max-height: 1000px; }
+
+    .sb-item {
+      display: flex; align-items: baseline; gap: 8px;
+      padding: 6px 14px 6px 20px; font-size: 13px; color: var(--text2);
+      text-decoration: none; border-left: 2px solid transparent;
+      transition: background 0.1s, color 0.1s, border-color 0.1s; line-height: 1.45;
+    }
+    .sb-item:hover { background: rgba(255,255,255,0.03); color: var(--text); }
+    .sb-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--accent-bg); font-weight: 500; }
+    .sb-item.done   { color: var(--text3); }
+    .sb-icon { font-size: 9px; flex-shrink: 0; font-family: 'JetBrains Mono', monospace; width: 10px; text-align: center; color: var(--text3); }
+    .sb-item.active .sb-icon { color: var(--accent); }
+    .sb-item.done   .sb-icon { color: var(--accent-dim); }
+    .sb-num { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); flex-shrink: 0; min-width: 22px; }
+
+    /* ━━━ CONTENT ━━━ */
+    .content {
+      margin-left: var(--sidebar-w); flex: 1; min-width: 0;
+      padding: 48px 52px 96px; transition: margin-left 0.22s ease;
+    }
+    .content-inner { max-width: var(--content-max);margin:0 auto; }
+
+    /* ━━━ CHAPTER HEADER ━━━ */
+    .chap-meta {
+      font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text3);
+      margin-bottom: 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    }
+    .badge {
+      font-size: 10px; padding: 2px 8px;
+      background: var(--accent-bg); color: var(--accent);
+      border: 1px solid rgba(0,204,112,0.25); letter-spacing: 0.06em;
+    }
+    .chap-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(22px, 3.5vw, 30px); font-weight: 700;
+      color: var(--text-head); line-height: 1.25; margin-bottom: 8px;
+    }
+    .chap-title .hl { color: var(--accent); }
+    .chap-subtitle { font-size: 15px; color: var(--text2); margin-bottom: 32px; line-height: 1.65; }
+
+    /* 학습 목표 */
+    .goal-box {
+      border: 1px solid var(--border2); border-left: 3px solid var(--accent);
+      background: var(--bg-card); padding: 16px 20px; margin-bottom: 44px;
+    }
+    .goal-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--accent); letter-spacing: 0.1em; margin-bottom: 12px; }
+    .goal-list { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+    .goal-list li { font-size: 14px; color: var(--text2); display: flex; align-items: baseline; gap: 10px; line-height: 1.65; }
+    .goal-list li::before { content: '▸'; color: var(--accent); font-size: 10px; flex-shrink: 0; font-family: 'JetBrains Mono', monospace; }
+
+    /* ━━━ CONTENT ELEMENTS ━━━ */
+    .section-divider { height: 1px; background: var(--border); margin: 44px 0; }
+
+    h2 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 17px; font-weight: 700; color: var(--text-head);
+      margin: 44px 0 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border);
+    }
+    h2:first-child { margin-top: 0; }
+    h2 .n { color: var(--text3); font-weight: 400; margin-right: 6px; }
+    h3 { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: var(--accent); margin: 28px 0 10px; }
+
+    p { color: var(--text); margin-bottom: 16px; line-height: 1.9; font-size: 15px; }
+    p:last-child { margin-bottom: 0; }
+
+    code {
+      font-family: 'JetBrains Mono', monospace; font-size: 13px;
+      background: var(--bg-code); color: var(--accent);
+      padding: 1px 6px; border: 1px solid var(--border2); border-radius: 2px;
+    }
+    strong { color: var(--text-head); font-weight: 700; }
+    em     { color: var(--accent); font-style: normal; font-weight: 500; }
+
+    /* 비교 카드 */
+    .compare-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px 0;
+    }
+    .compare-card {
+      background: var(--bg-card); border: 1px solid var(--border2); padding: 16px 18px;
+    }
+    .compare-card .cc-label {
+      font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em;
+      color: var(--text3); margin-bottom: 8px;
+    }
+    .compare-card.good .cc-label { color: var(--accent); }
+    .compare-card.bad  .cc-label { color: var(--accent2); }
+    .compare-card p { font-size: 14px; color: var(--text2); margin-bottom: 0; line-height: 1.7; }
+
+    /* 분야 카드 그리드 */
+    .field-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0;
+    }
+    .field-card {
+      background: var(--bg-card); border: 1px solid var(--border2);
+      padding: 14px 16px;
+      transition: border-color 0.15s;
+    }
+    .field-card:hover { border-color: var(--accent); }
+    .field-icon { font-size: 20px; margin-bottom: 8px; }
+    .field-name { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; color: var(--text-head); margin-bottom: 4px; }
+    .field-desc { font-size: 12px; color: var(--text3); line-height: 1.6; }
+
+    /* ━━━ CODE BLOCK ━━━ */
+    .code-block { background: var(--bg-code); border: 1px solid var(--border2); margin: 20px 0; overflow: hidden; }
+    .code-block-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 7px 14px; background: #141414; border-bottom: 1px solid var(--border);
+    }
+    .cb-lang { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text3); }
+    .cb-copy { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); background: transparent; border: none; cursor: pointer; transition: color 0.15s; padding: 0; }
+    .cb-copy:hover { color: var(--accent); }
+    .code-block-body { display: flex; overflow-x: auto; padding: 12px 0; }
+    .ln-col { min-width: 40px; padding: 0 10px; text-align: right; border-right: 1px solid var(--border); user-select: none; flex-shrink: 0; }
+    .ln-col span { display: block; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.7; color: var(--sy-ln-t); }
+    .code-pre-col { padding: 0 18px; flex: 1; }
+    .code-pre-col pre { font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.7; color: var(--text); white-space: pre; margin: 0; }
+    .kw { color: var(--sy-kw); } .fn { color: var(--sy-fn); } .str { color: var(--sy-str); }
+    .cm { color: var(--sy-cm); } .num { color: var(--sy-num); } .pn { color: var(--sy-pn); }
+
+    .output-block { background: #0D0D0D; border: 1px solid var(--border); border-top: none; padding: 10px 18px; }
+    .out-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); letter-spacing: 0.08em; margin-bottom: 6px; }
+    .output-block pre { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #AAAAAA; line-height: 1.7; margin: 0; white-space: pre; }
+    .out-g { color: var(--accent); }
+
+    /* ━━━ TIP / WARN / INFO BOXES ━━━ */
+    .tip-box, .warn-box, .info-box { padding: 14px 18px; margin: 20px 0; border-left: 3px solid; }
+    .tip-box  { background: var(--bg-tip);  border-color: var(--accent); }
+    .warn-box { background: var(--bg-warn); border-color: var(--accent2); }
+    .info-box { background: var(--bg-info); border-color: #4FC3F7; }
+    .box-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em; margin-bottom: 8px; font-weight: 700; }
+    .tip-box  .box-label { color: var(--accent); }
+    .warn-box .box-label { color: var(--accent2); }
+    .info-box .box-label { color: #4FC3F7; }
+    .tip-box p, .warn-box p, .info-box p { font-size: 14px; color: var(--text2); margin-bottom: 0; line-height: 1.8; }
+
+    /* ━━━ TRY SECTION ━━━ */
+    .try-section { border: 1px solid var(--border2); background: var(--bg-card); margin: 36px 0; }
+    .try-header { padding: 11px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+    .try-title { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; color: var(--accent); }
+    .try-body { padding: 18px 20px; }
+    .try-body p { font-size: 14px; margin-bottom: 16px; color: var(--text2); }
+    .try-step { display: flex; gap: 12px; margin-bottom: 10px; align-items: baseline; }
+    .try-step-n { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent); flex-shrink: 0; min-width: 26px; }
+    .try-step-t { font-size: 14px; color: var(--text2); line-height: 1.75; }
+
+    /* ━━━ SUMMARY ━━━ */
+    .summary-box { border: 1px solid var(--border2); border-top: 2px solid var(--accent); background: var(--bg-card); padding: 20px 22px; margin: 44px 0 32px; }
+    .summary-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--accent); letter-spacing: 0.1em; margin-bottom: 16px; }
+    .summary-grid { display: grid; grid-template-columns: 150px 1fr; gap: 10px 18px; }
+    .sg-key { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text3); padding-top: 2px; }
+    .sg-val { font-size: 14px; color: var(--text2); line-height: 1.65; }
+
+    /* ━━━ CHEER ━━━ */
+    .cheer-box { border: 1px solid var(--border); background: var(--bg); padding: 18px 22px; margin-bottom: 44px; display: flex; gap: 14px; align-items: flex-start; }
+    .cheer-icon { font-size: 18px; flex-shrink: 0; line-height: 1.5; }
+    .cheer-text { font-size: 14px; color: var(--text2); line-height: 1.85; }
+    .cheer-text strong { color: var(--text-head); }
+
+    /* ━━━ CHAPTER NAV ━━━ */
+    .chap-nav { display: flex; justify-content: space-between; padding-top: 32px; border-top: 1px solid var(--border); gap: 12px; flex-wrap: wrap; }
+    .chap-nav-btn { display: flex; flex-direction: column; gap: 4px; text-decoration: none; padding: 14px 18px; border: 1px solid var(--border2); background: var(--bg-card); flex: 1; max-width: 300px; transition: border-color 0.15s; }
+    .chap-nav-btn:hover { border-color: var(--accent); }
+    .chap-nav-btn.next { text-align: right; }
+    .cnb-dir { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); letter-spacing: 0.07em; }
+    .cnb-title { font-size: 13px; color: var(--text2); line-height: 1.45; }
+    .cnb-title span { color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+
+    /* ━━━ RESPONSIVE ━━━ */
+    .sidebar-overlay { display: none; position: fixed; inset: 0; top: var(--header-h); z-index: 140; background: rgba(0,0,0,0.65); }
+    @media (max-width: 720px) {
+      .sidebar-overlay.visible { display: block; }
+      .content { margin-left: 0; padding: 28px 20px 72px; }
+      .header-center { display: none; }
+      .summary-grid { grid-template-columns: 1fr; gap: 6px; }
+      .field-grid { grid-template-columns: 1fr 1fr; }
+      .compare-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 480px) {
+      .header-grade { display: none; }
+      .chap-nav-btn { max-width: 100%; }
+      .header-right .nav-btn:not(.primary) { display: none; }
+      .field-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ━━━ TOP HEADER ━━━ -->
+<header class="top-header">
+  <button class="header-open-btn" onclick="toggleSidebar()" title="사이드바 열기" aria-label="사이드바 열기">▶</button>
+  <div class="header-left">
+    <a href="../index.html" class="header-logo">SUPERPYTHON</a>
+    <span class="header-sep">/</span>
+    <span class="header-grade">🟤 BRONZE</span>
+    <span class="header-sep">/</span>
+    <span class="header-chap">01. 파이썬이란?</span>
+  </div>
+  <div class="header-center">
+    <span>01 / 48</span>
+    <div class="progress-mini"><div class="progress-mini-fill"></div></div>
+    <span>2%</span>
+  </div>
+  <div class="header-right">
+    <a href="index.html" class="nav-btn">← 목록</a>
+    <a href="02-setup.html" class="nav-btn primary">다음 →</a>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<div class="layout">
+
+  <!-- ━━━ SIDEBAR ━━━ -->
+  <aside class="sidebar" id="sidebar">
+    <button class="sidebar-toggle" onclick="toggleSidebar()" title="사이드바 닫기" aria-label="사이드바 닫기">◀</button>
+
+    <div class="sidebar-progress">
+      <div class="sp-label">BRONZE 진행률</div>
+      <div class="sp-bar"><div class="sp-fill"></div></div>
+      <div class="sp-text"><span>1</span> / 48 챕터 완료</div>
+    </div>
+
+    <!-- 환경 설정 -->
+    <div class="sb-group open current" id="grp-env">
+      <div class="sb-group-header" onclick="toggleGroup('grp-env')">
+        <span class="sb-group-title">환경 설정</span>
+        <span class="sb-group-arrow">▶</span>
+      </div>
+      <div class="sb-items">
+        <a href="01-what-is-python.html" class="sb-item active">
+          <span class="sb-icon">→</span><span class="sb-num">01</span>파이썬이란?
+        </a>
+        <a href="02-setup.html" class="sb-item">
+          <span class="sb-icon"> </span><span class="sb-num">02</span>개발환경 설치
+        </a>
+      </div>
+    </div>
+
+    <!-- 기초 문법 1 -->
+    <div class="sb-group" id="grp-basic1">
+      <div class="sb-group-header" onclick="toggleGroup('grp-basic1')">
+        <span class="sb-group-title">기초 문법 1</span>
+        <span class="sb-group-arrow">▶</span>
+      </div>
+      <div class="sb-items">
+        <a href="03-print.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">03</span>print()란?</a>
+        <a href="04-quiz-print.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">04</span>연습문제</a>
+        <a href="05-variables.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">05</span>변수와 데이터 타입</a>
+        <a href="06-operators.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">06</span>연산자</a>
+        <a href="07-quiz-variables-operators.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">07</span>연습문제</a>
+        <a href="08-string.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">08</span>문자열 String</a>
+        <a href="09-quiz-string.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">09</span>연습문제</a>
+        <a href="10-fstring.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">10</span>f-string 완전정리</a>
+        <a href="11-quiz-fstring.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">11</span>연습문제</a>
+        <a href="12-mini-project-01.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">12</span>🎮 미니 프로젝트 ①</a>
+      </div>
+    </div>
+
+    <!-- 기초 문법 2 -->
+    <div class="sb-group" id="grp-basic2">
+      <div class="sb-group-header" onclick="toggleGroup('grp-basic2')">
+        <span class="sb-group-title">기초 문법 2</span>
+        <span class="sb-group-arrow">▶</span>
+      </div>
+      <div class="sb-items">
+        <a href="13-list.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">13</span>리스트</a>
+        <a href="14-quiz-list.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">14</span>연습문제</a>
+        <a href="15-input.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">15</span>input() 함수</a>
+        <a href="16-quiz-input.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">16</span>연습문제</a>
+        <a href="17-mini-project-02.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">17</span>🎮 미니 프로젝트 ②</a>
+      </div>
+    </div>
+
+    <!-- 흐름 제어 -->
+    <div class="sb-group" id="grp-flow">
+      <div class="sb-group-header" onclick="toggleGroup('grp-flow')">
+        <span class="sb-group-title">흐름 제어</span>
+        <span class="sb-group-arrow">▶</span>
+      </div>
+      <div class="sb-items">
+        <a href="18-if.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">18</span>조건문 (if)</a>
+        <a href="19-quiz-if.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">19</span>연습문제</a>
+        <a href="20-mini-project-03.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">20</span>🎮 미니 프로젝트 ③</a>
+        <a href="21-for-range.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">21</span>for문과 range()</a>
+        <a href="22-quiz-for.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">22</span>연습문제</a>
+        <a href="23-while.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">23</span>while문</a>
+        <a href="24-quiz-while.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">24</span>연습문제</a>
+        <a href="25-mini-project-04.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">25</span>🎮 미니 프로젝트 ④</a>
+      </div>
+    </div>
+
+    <!-- 에러 & 디버깅 -->
+    <div class="sb-group" id="grp-error">
+      <div class="sb-group-header" onclick="toggleGroup('grp-error')">
+        <span class="sb-group-title">에러 & 디버깅</span>
+        <span class="sb-group-arrow">▶</span>
+      </div>
+      <div class="sb-items">
+        <a href="26-error-types.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">26</span>에러 읽는 법</a>
+        <a href="27-debugging.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">27</span>기초 디버깅 실습</a>
+        <a href="28-quiz-debugging.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">28</span>연습문제</a>
+      </div>
+    </div>
+
+    <!-- 함수 -->
+    <div class="sb-group" id="grp-func">
+      <div class="sb-group-header" onclick="toggleGroup('grp-func')">
+        <span class="sb-group-title">함수</span>
+        <span class="sb-group-arrow">▶</span>
+      </div>
+      <div class="sb-items">
+        <a href="29-function-basic.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">29</span>함수 기초</a>
+        <a href="30-quiz-function-basic.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">30</span>연습문제</a>
+        <a href="31-mini-project-05.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">31</span>🎮 미니 프로젝트 ⑤</a>
+        <a href="32-function-advanced.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">32</span>함수 심화</a>
+        <a href="33-quiz-function-advanced.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">33</span>연습문제</a>
+        <a href="34-module.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">34</span>모듈</a>
+        <a href="35-quiz-module.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">35</span>연습문제</a>
+        <a href="36-mini-project-06.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">36</span>🎮 미니 프로젝트 ⑥</a>
+      </div>
+    </div>
+
+    <!-- 자료구조 -->
+    <div class="sb-group" id="grp-ds">
+      <div class="sb-group-header" onclick="toggleGroup('grp-ds')">
+        <span class="sb-group-title">자료구조</span>
+        <span class="sb-group-arrow">▶</span>
+      </div>
+      <div class="sb-items">
+        <a href="37-dictionary.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">37</span>딕셔너리</a>
+        <a href="38-quiz-dictionary.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">38</span>연습문제</a>
+        <a href="39-tuple-set.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">39</span>튜플과 셋</a>
+        <a href="40-quiz-tuple-set.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">40</span>연습문제</a>
+        <a href="41-mini-project-07.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">41</span>🎮 미니 프로젝트 ⑦</a>
+      </div>
+    </div>
+
+    <!-- 파일 & 예외처리 -->
+    <div class="sb-group" id="grp-file">
+      <div class="sb-group-header" onclick="toggleGroup('grp-file')">
+        <span class="sb-group-title">파일 & 예외처리</span>
+        <span class="sb-group-arrow">▶</span>
+      </div>
+      <div class="sb-items">
+        <a href="42-file-io.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">42</span>파일 입출력</a>
+        <a href="43-quiz-file-io.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">43</span>연습문제</a>
+        <a href="44-exception-basic.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">44</span>예외처리 기초</a>
+        <a href="45-quiz-exception.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">45</span>연습문제</a>
+        <a href="46-mini-project-08.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">46</span>🎮 미니 프로젝트 ⑧</a>
+      </div>
+    </div>
+
+    <!-- 마무리 -->
+    <div class="sb-group" id="grp-end">
+      <div class="sb-group-header" onclick="toggleGroup('grp-end')">
+        <span class="sb-group-title">마무리</span>
+        <span class="sb-group-arrow">▶</span>
+      </div>
+      <div class="sb-items">
+        <a href="47-final-project.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">47</span>★ 최종 프로젝트</a>
+        <a href="48-next-step.html" class="sb-item"><span class="sb-icon"> </span><span class="sb-num">48</span>다음 단계 미리보기</a>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- ━━━ CONTENT ━━━ -->
+  <main class="content" id="mainContent">
+    <div class="content-inner">
+
+      <div class="chap-meta">
+        <span class="badge">LESSON</span>
+        <span>환경 설정</span>
+        <span style="color:var(--text3)">·</span>
+        <span>챕터 01 / 48</span>
+      </div>
+      <h1 class="chap-title">파이썬이란 <span class="hl">무엇</span>인가?</h1>
+      <p class="chap-subtitle">코딩을 배우기 전에, 우리가 배울 언어가 어떤 언어인지 먼저 알아봅시다</p>
+
+      <div class="goal-box">
+        <div class="goal-label">▸ 이 챕터를 마치면</div>
+        <ul class="goal-list">
+          <li>파이썬이 무엇인지, 왜 만들어졌는지 설명할 수 있다</li>
+          <li>파이썬이 다른 언어에 비해 어떤 특징을 가지는지 이해한다</li>
+          <li>파이썬이 실제로 어떤 분야에서 쓰이는지 알 수 있다</li>
+        </ul>
+      </div>
+
+      <!-- 1. 프로그래밍 언어란? -->
+      <h2><span class="n">1.</span>프로그래밍 언어란?</h2>
+
+      <p>
+        컴퓨터는 사실 0과 1밖에 모릅니다. 하지만 사람이 직접 0과 1로 명령을 내리기란 너무 어렵습니다.
+        그래서 사람이 이해하기 쉬운 말로 명령을 쓰면, 컴퓨터가 알아들을 수 있도록 번역해주는 중간 언어가 필요합니다.
+        그것이 바로 <strong>프로그래밍 언어</strong>입니다.
+      </p>
+      <p>
+        한국어로 "안녕"이라고 말하고, 영어로 "Hello"라고 말하듯이 — 컴퓨터에게는 파이썬으로 <em>"화면에 안녕이라고 출력해줘"</em>라고 말합니다.
+      </p>
+
+      <div class="tip-box">
+        <div class="box-label">💡 비유로 이해하기</div>
+        <p>컴퓨터는 외국인 직원이고, 프로그래밍 언어는 그 직원과 소통하기 위한 언어입니다. 파이썬은 그중에서도 배우기 가장 쉬운 언어 중 하나입니다.</p>
+      </div>
+
+      <!-- 2. 파이썬은 어떤 언어? -->
+      <h2><span class="n">2.</span>파이썬은 어떤 언어인가요?</h2>
+
+      <p>
+        파이썬(Python)은 1991년 네덜란드 프로그래머 <strong>귀도 반 로섬(Guido van Rossum)</strong>이 만든 프로그래밍 언어입니다.
+        이름은 좋아하던 영국 코미디 프로그램 "Monty Python"에서 따왔습니다. 뱀과는 관계없어요.
+      </p>
+      <p>
+        파이썬의 설계 철학은 단순합니다 — <em>"읽기 쉽고, 쓰기 쉬워야 한다."</em>
+        코드를 처음 보는 사람도 뭘 하는 건지 대략 이해할 수 있을 정도로 직관적으로 만들어졌습니다.
+      </p>
+
+      <h3>다른 언어와 비교해보면</h3>
+      <p>같은 작업을 C언어와 파이썬으로 각각 작성하면 차이가 확 느껴집니다.</p>
+
+      <div class="compare-grid">
+        <div class="compare-card bad">
+          <div class="cc-label">C 언어 — "Hello, World!" 출력</div>
+          <p><code style="color:var(--text2);background:transparent;border:none;font-size:12px;">#include &lt;stdio.h&gt;<br>int main() {'{'}  printf("Hello!"); return 0; {'}'}</code></p>
+        </div>
+        <div class="compare-card good">
+          <div class="cc-label">파이썬 — "Hello, World!" 출력</div>
+          <p><code style="color:var(--accent);background:transparent;border:none;">print("Hello!")</code></p>
+        </div>
+      </div>
+
+      <p>파이썬은 한 줄이면 됩니다. 이것이 파이썬을 입문 언어로 배우는 이유입니다.</p>
+
+      <!-- 3. 파이썬의 특징 -->
+      <h2><span class="n">3.</span>파이썬의 주요 특징</h2>
+
+      <h3>읽기 쉬운 문법</h3>
+      <p>
+        파이썬 코드는 영어 문장을 읽는 것처럼 자연스럽습니다.
+        중괄호(<code>{}</code>)나 세미콜론(<code>;</code>) 같은 기호가 거의 없고, <strong>들여쓰기</strong>로 코드 구조를 표현합니다.
+      </p>
+
+      <div class="code-block">
+        <div class="code-block-header">
+          <span class="cb-lang">python</span>
+          <button class="cb-copy" onclick="copyCode(this)">복사</button>
+        </div>
+        <div class="code-block-body">
+          <div class="ln-col"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+          <div class="code-pre-col"><pre><span class="cm"># 파이썬 코드는 거의 영어 문장처럼 읽힙니다</span>
+score <span class="pn">=</span> <span class="num">85</span>
+
+<span class="kw">if</span> score <span class="pn">>=</span> <span class="num">90</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"A 학점"</span><span class="pn">)</span>
+<span class="kw">else</span><span class="pn">:</span>
+    <span class="fn">print</span><span class="pn">(</span><span class="str">"B 학점"</span><span class="pn">)</span></pre></div>
+        </div>
+      </div>
+      <div class="output-block">
+        <div class="out-label">실행 결과</div>
+        <pre><span class="out-g">B 학점</span></pre>
+      </div>
+
+      <p>코딩을 전혀 모르는 사람도 위 코드를 보면 "점수가 90 이상이면 A, 아니면 B"라는 뜻임을 짐작할 수 있습니다.</p>
+
+      <h3>강력한 표준 라이브러리</h3>
+      <p>
+        파이썬은 <strong>"배터리 포함(Batteries Included)"</strong> 철학을 가집니다.
+        복잡한 작업도 이미 만들어진 도구(라이브러리)를 가져다 쓰면 됩니다.
+        날짜 계산, 파일 처리, 네트워크 통신 — 전부 기본으로 탑재되어 있습니다.
+      </p>
+
+      <h3>인터프리터 언어</h3>
+      <p>
+        C나 Java는 코드를 먼저 <em>컴파일(변환)</em>해야 실행됩니다. 파이썬은 코드를 작성하는 즉시 실행할 수 있는 <strong>인터프리터 언어</strong>입니다.
+        작성 → 실행 → 결과 확인의 사이클이 매우 빠릅니다.
+      </p>
+
+      <!-- 4. 파이썬이 쓰이는 분야 -->
+      <h2><span class="n">4.</span>파이썬이 쓰이는 분야</h2>
+
+      <p>파이썬은 특정 분야에 국한되지 않고 거의 모든 영역에서 활용됩니다.</p>
+
+      <div class="field-grid">
+        <div class="field-card">
+          <div class="field-icon">🤖</div>
+          <div class="field-name">AI / 머신러닝</div>
+          <div class="field-desc">ChatGPT, 이미지 인식, 추천 알고리즘. 현재 AI 분야의 표준 언어.</div>
+        </div>
+        <div class="field-card">
+          <div class="field-icon">📊</div>
+          <div class="field-name">데이터 분석</div>
+          <div class="field-desc">엑셀 대신 파이썬으로. 수백만 행 데이터도 몇 줄로 분석.</div>
+        </div>
+        <div class="field-card">
+          <div class="field-icon">🌐</div>
+          <div class="field-name">웹 개발</div>
+          <div class="field-desc">Instagram, YouTube 백엔드도 파이썬. Django, FastAPI 등 활용.</div>
+        </div>
+        <div class="field-card">
+          <div class="field-icon">🔧</div>
+          <div class="field-name">자동화</div>
+          <div class="field-desc">반복 작업을 스크립트로. 파일 정리, 이메일 발송, 크롤링.</div>
+        </div>
+        <div class="field-card">
+          <div class="field-icon">🎮</div>
+          <div class="field-name">게임 개발</div>
+          <div class="field-desc">Pygame으로 2D 게임 제작. 슈퍼파이썬 루비 과정에서 배웁니다.</div>
+        </div>
+        <div class="field-card">
+          <div class="field-icon">🔬</div>
+          <div class="field-name">과학 / 연구</div>
+          <div class="field-desc">NASA, CERN도 파이썬 사용. 수학, 물리, 생물 연구 필수 도구.</div>
+        </div>
+      </div>
+
+      <!-- 5. 파이썬의 현재 위치 -->
+      <h2><span class="n">5.</span>파이썬은 얼마나 인기 있나요?</h2>
+
+      <p>
+        파이썬은 2024년 기준 <strong>TIOBE 프로그래밍 언어 인기 순위 1위</strong>를 기록하고 있습니다.
+        Stack Overflow 개발자 설문에서도 "가장 배우고 싶은 언어" 1위를 수년째 유지 중입니다.
+      </p>
+
+      <div class="info-box">
+        <div class="box-label">📌 파이썬을 배우면</div>
+        <p>
+          구글, 메타, 넷플릭스, 카카오, 네이버 등 대부분의 IT 기업에서 파이썬 개발자를 채용합니다.
+          데이터 분석가, AI 엔지니어, 백엔드 개발자, 자동화 엔지니어 — 다양한 커리어로 이어집니다.
+        </p>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- 따라하기 -->
+      <div class="try-section">
+        <div class="try-header">
+          <span style="font-size:14px">⌨</span>
+          <span class="try-title">잠깐 생각해보기</span>
+        </div>
+        <div class="try-body">
+          <p>아직 코드를 작성하기 전이니, 가볍게 생각해볼 질문들입니다.</p>
+          <div class="try-step">
+            <span class="try-step-n">Q1.</span>
+            <span class="try-step-t">내가 파이썬으로 만들고 싶은 것은 무엇인가요? (게임? 자동화 도구? 데이터 분석?)</span>
+          </div>
+          <div class="try-step">
+            <span class="try-step-n">Q2.</span>
+            <span class="try-step-t">위의 분야 카드 중 가장 흥미로운 분야는 어디인가요? 나중에 그 분야를 목표로 학습 방향을 잡아봅시다.</span>
+          </div>
+          <div class="try-step">
+            <span class="try-step-n">Q3.</span>
+            <span class="try-step-t">다음 챕터에서 파이썬 개발환경을 설치합니다. PC 또는 노트북이 준비되어 있나요?</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 핵심 요약 -->
+      <div class="summary-box">
+        <div class="summary-label">▸ 핵심 요약</div>
+        <div class="summary-grid">
+          <span class="sg-key">파이썬이란</span>
+          <span class="sg-val">1991년 만들어진 프로그래밍 언어. 읽기 쉽고 쓰기 쉬운 것이 핵심 철학.</span>
+
+          <span class="sg-key">가장 큰 특징</span>
+          <span class="sg-val">문법이 간결하고 직관적. 한 줄로도 의미있는 작업이 가능.</span>
+
+          <span class="sg-key">주요 활용 분야</span>
+          <span class="sg-val">AI / 머신러닝, 데이터 분석, 웹 개발, 자동화, 게임 개발, 과학 연구</span>
+
+          <span class="sg-key">현재 위치</span>
+          <span class="sg-val">세계 프로그래밍 언어 인기 순위 1위. 가장 빠르게 성장하는 언어.</span>
+
+          <span class="sg-key">다음 목표</span>
+          <span class="sg-val">개발환경 설치 → 첫 코드 실행 → 브론즈 완주</span>
+        </div>
+      </div>
+
+      <!-- 격려 메시지 -->
+      <div class="cheer-box">
+        <span class="cheer-icon">🚀</span>
+        <div class="cheer-text">
+          <strong>좋은 선택을 하셨습니다!</strong><br>
+          파이썬은 배우기 쉬우면서도 강력합니다. 지금 이 첫 챕터를 읽고 있다는 것 자체가 시작입니다.
+          다음 챕터에서 개발환경을 설치하면 드디어 코드를 직접 실행해볼 수 있습니다. 준비되셨나요?
+        </div>
+      </div>
+
+      <!-- 챕터 네비게이션 -->
+      <div class="chap-nav">
+        <a href="index.html" class="chap-nav-btn">
+          <span class="cnb-dir">← 브론즈 목록</span>
+          <span class="cnb-title"><span>🟤</span> 브론즈 메인으로</span>
+        </a>
+        <a href="02-setup.html" class="chap-nav-btn next">
+          <span class="cnb-dir">다음 챕터 →</span>
+          <span class="cnb-title"><span>02.</span> 개발환경 설치</span>
+        </a>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+  const isMobile = () => window.innerWidth <= 720;
+  const overlay  = document.getElementById('sidebarOverlay');
+
+  function toggleSidebar() {
+    document.body.classList.toggle('sidebar-closed');
+    if (isMobile()) overlay.classList.toggle('visible', !document.body.classList.contains('sidebar-closed'));
+    localStorage.setItem('sp-sidebar', document.body.classList.contains('sidebar-closed') ? 'closed' : 'open');
+  }
+  function closeSidebar() {
+    document.body.classList.add('sidebar-closed');
+    overlay.classList.remove('visible');
+    localStorage.setItem('sp-sidebar', 'closed');
+  }
+  function toggleGroup(id) {
+    document.getElementById(id).classList.toggle('open');
+  }
+  function copyCode(btn) {
+    const text = btn.closest('.code-block').querySelector('pre').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '복사됨 ✓'; btn.style.color = 'var(--accent)';
+      setTimeout(() => { btn.textContent = '복사'; btn.style.color = ''; }, 2000);
+    });
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    if (isMobile()) {
+      document.body.classList.add('sidebar-closed');
+    } else {
+      if (localStorage.getItem('sp-sidebar') === 'closed') document.body.classList.add('sidebar-closed');
+    }
+  });
+  window.addEventListener('resize', () => { if (!isMobile()) overlay.classList.remove('visible'); });
+</script>
+</body>
+</html>
